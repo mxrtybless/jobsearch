@@ -9,8 +9,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDto {
+public class WorkExperienceInfoDto {
     private Integer id;
-    private String name;
-    private Integer parentId;
+
+    private Integer resumeId;
+
+    private Integer years;
+
+    private String companyName;
+    private String position;
+    private String responsibilities;
 }
