@@ -2,6 +2,7 @@ package kg.attractor.jobsearch.service;
 
 import kg.attractor.jobsearch.dto.UserCreateDto;
 import kg.attractor.jobsearch.dto.UserDto;
+import kg.attractor.jobsearch.model.AccountType;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,14 @@ public class UserService {
     public UserDto getUserById(Integer id) {
         User user = getUserModelById(id);
         return toDto(user);
+    }
+
+    public List<UserDto> searchApplicants(String query) {
+        return searchUsersByAccountType(query, AccountType.APPLICANT);
+    }
+
+    public List<UserDto> searchEmployers(String query) {
+        return searchUsersByAccountType(query, AccountType.EMPLOYER);
     }
 
     public UserDto createUser(UserCreateDto dto) {
@@ -53,6 +62,28 @@ public class UserService {
     public User getUserModelById(Integer id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
+    }
+
+    private List<UserDto> searchUsersByAccountType(String query, AccountType accountType) {
+        String normalizedQuery = query == null ? "" : query.toLowerCase();
+
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user.getAccountType() == accountType)
+                .filter(user -> containsIgnoreCase(user.getName(), normalizedQuery)
+                        || containsIgnoreCase(user.getSurname(), normalizedQuery)
+                        || containsIgnoreCase(user.getEmail(), normalizedQuery)
+                        || containsIgnoreCase(user.getPhoneNumber(), normalizedQuery))
+                .map(this::toDto)
+                .toList();
+    }
+
+    private boolean containsIgnoreCase(String value, String query) {
+        if (value == null) {
+            return false;
+        }
+
+        return value.toLowerCase().contains(query);
     }
 
     private void validateUserCreateDto(UserCreateDto dto) {
