@@ -24,32 +24,93 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<List<UserDto>> getUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+        return ResponseEntity.ok(
+                userService.getAllUsers()
+        );
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Integer id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<UserDto> getUserById(
+            @PathVariable Integer id
+    ) {
+        return ResponseEntity.ok(
+                userService.getUserById(id)
+        );
+    }
+
+    @GetMapping("/users/search/by-name")
+    public ResponseEntity<List<UserDto>> findUsersByName(
+            @RequestParam String name
+    ) {
+        return ResponseEntity.ok(
+                userService.findUsersByName(name)
+        );
+    }
+
+    @GetMapping("/users/search/by-phone")
+    public ResponseEntity<List<UserDto>> findUsersByPhoneNumber(
+            @RequestParam String phoneNumber
+    ) {
+        return ResponseEntity.ok(
+                userService.findUsersByPhoneNumber(phoneNumber)
+        );
+    }
+
+    @GetMapping("/users/search/by-email")
+    public ResponseEntity<UserDto> findUserByEmail(
+            @RequestParam String email
+    ) {
+        return ResponseEntity.ok(
+                userService.findUserByEmail(email)
+        );
+    }
+
+    @GetMapping("/users/exists")
+    public ResponseEntity<Boolean> existsByEmail(
+            @RequestParam String email
+    ) {
+        return ResponseEntity.ok(
+                userService.existsByEmail(email)
+        );
     }
 
     @GetMapping("/applicants/search")
-    public ResponseEntity<List<UserDto>> searchApplicants(@RequestParam(defaultValue = "") String query) {
-        return ResponseEntity.ok(userService.searchApplicants(query));
+    public ResponseEntity<List<UserDto>> searchApplicants(
+            @RequestParam(defaultValue = "") String query
+    ) {
+        return ResponseEntity.ok(
+                userService.searchApplicants(query)
+        );
     }
 
     @GetMapping("/employers/search")
-    public ResponseEntity<List<UserDto>> searchEmployers(@RequestParam(defaultValue = "") String query) {
-        return ResponseEntity.ok(userService.searchEmployers(query));
+    public ResponseEntity<List<UserDto>> searchEmployers(
+            @RequestParam(defaultValue = "") String query
+    ) {
+        return ResponseEntity.ok(
+                userService.searchEmployers(query)
+        );
     }
 
     @PostMapping("/users")
-    public ResponseEntity<UserDto> createUser(@RequestBody UserCreateDto dto) {
+    public ResponseEntity<UserDto> createUser(
+            @RequestBody UserCreateDto dto
+    ) {
         UserDto user = userService.createUser(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(user);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleBadRequest(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    public ResponseEntity<Map<String, String>> handleBadRequest(
+            IllegalArgumentException exception
+    ) {
+        return ResponseEntity.badRequest()
+                .body(Map.of(
+                        "error",
+                        exception.getMessage()
+                ));
     }
 }

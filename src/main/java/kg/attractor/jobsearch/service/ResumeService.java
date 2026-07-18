@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -33,56 +32,64 @@ public class ResumeService {
     private final CategoryService categoryService;
 
     public List<ResumeDto> getActiveResumes() {
-        return resumeRepository.findAll()
+        return resumeRepository.findAllActive()
                 .stream()
-                .filter(Resume::isPublished)
-                .sorted(Comparator.comparing(Resume::getUpdateTime).reversed())
                 .map(this::toDto)
                 .toList();
     }
 
-    public List<ResumeDto> getResumesByApplicant(Integer applicantId) {
-        User applicant = userService.getUserModelById(applicantId);
+    public List<ResumeDto> getResumesByApplicant(
+            Integer applicantId
+    ) {
+        User applicant =
+                userService.getUserModelById(applicantId);
 
         if (!applicant.isApplicant()) {
-            throw new IllegalArgumentException("Only applicant can have resumes.");
+            throw new IllegalArgumentException(
+                    "Only applicant can have resumes."
+            );
         }
 
-        return resumeRepository.findAll()
+        return resumeRepository.findByApplicantId(applicantId)
                 .stream()
-                .filter(resume -> resume.getApplicantId().equals(applicantId))
-                .sorted(Comparator.comparing(Resume::getUpdateTime).reversed())
                 .map(this::toDto)
                 .toList();
     }
 
-    public List<ResumeDto> getActiveResumesByCategory(Integer categoryId) {
+    public List<ResumeDto> getActiveResumesByCategory(
+            Integer categoryId
+    ) {
         categoryService.getCategoryModelById(categoryId);
 
-        return resumeRepository.findAll()
+        return resumeRepository.findActiveByCategoryId(categoryId)
                 .stream()
-                .filter(Resume::isPublished)
-                .filter(resume -> resume.getCategoryId().equals(categoryId))
-                .sorted(Comparator.comparing(Resume::getUpdateTime).reversed())
                 .map(this::toDto)
                 .toList();
     }
 
     public ResumeDto getResumeById(Integer id) {
         Resume resume = getResumeModelById(id);
+
         return toDto(resume);
     }
 
     public ResumeDto createResume(ResumeCreateDto dto) {
         validateCreateDto(dto);
 
-        User applicant = userService.getUserModelById(dto.getApplicantId());
+        User applicant =
+                userService.getUserModelById(
+                        dto.getApplicantId()
+                );
 
         if (!applicant.isApplicant()) {
-            throw new IllegalArgumentException("Only applicant can create resumes.");
+            throw new IllegalArgumentException(
+                    "Only applicant can create resumes."
+            );
         }
 
-        categoryService.getCategoryModelById(dto.getCategoryId());
+        categoryService.getCategoryModelById(
+                dto.getCategoryId()
+        );
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -96,25 +103,47 @@ public class ResumeService {
                 .updateTime(now)
                 .build();
 
-        Resume savedResume = resumeRepository.save(resume);
+        Resume savedResume =
+                resumeRepository.save(resume);
 
-        saveContacts(savedResume.getId(), dto.getContacts());
-        saveEducations(savedResume.getId(), dto.getEducations());
-        saveWorkExperiences(savedResume.getId(), dto.getWorkExperiences());
+        saveContacts(
+                savedResume.getId(),
+                dto.getContacts()
+        );
+
+        saveEducations(
+                savedResume.getId(),
+                dto.getEducations()
+        );
+
+        saveWorkExperiences(
+                savedResume.getId(),
+                dto.getWorkExperiences()
+        );
 
         return toDto(savedResume);
     }
 
-    public ResumeDto updateResume(Integer resumeId, ResumeUpdateDto dto) {
+    public ResumeDto updateResume(
+            Integer resumeId,
+            ResumeUpdateDto dto
+    ) {
         validateUpdateDto(dto);
 
-        Resume resume = getResumeModelById(resumeId);
+        Resume resume =
+                getResumeModelById(resumeId);
 
-        if (!resume.getApplicantId().equals(dto.getApplicantId())) {
-            throw new IllegalArgumentException("Only resume owner can edit this resume.");
+        if (!resume.getApplicantId()
+                .equals(dto.getApplicantId())) {
+
+            throw new IllegalArgumentException(
+                    "Only resume owner can edit this resume."
+            );
         }
 
-        categoryService.getCategoryModelById(dto.getCategoryId());
+        categoryService.getCategoryModelById(
+                dto.getCategoryId()
+        );
 
         resume.setName(dto.getName().trim());
         resume.setCategoryId(dto.getCategoryId());
@@ -122,28 +151,50 @@ public class ResumeService {
         resume.setIsActive(dto.getIsActive());
         resume.setUpdateTime(LocalDateTime.now());
 
-        Resume savedResume = resumeRepository.save(resume);
+        Resume savedResume =
+                resumeRepository.save(resume);
 
         contactInfoRepository.deleteByResumeId(resumeId);
         educationInfoRepository.deleteByResumeId(resumeId);
         workExperienceInfoRepository.deleteByResumeId(resumeId);
 
-        saveContacts(resumeId, dto.getContacts());
-        saveEducations(resumeId, dto.getEducations());
-        saveWorkExperiences(resumeId, dto.getWorkExperiences());
+        saveContacts(
+                resumeId,
+                dto.getContacts()
+        );
+
+        saveEducations(
+                resumeId,
+                dto.getEducations()
+        );
+
+        saveWorkExperiences(
+                resumeId,
+                dto.getWorkExperiences()
+        );
 
         return toDto(savedResume);
     }
 
-    public void deleteResume(Integer resumeId, Integer applicantId) {
+    public void deleteResume(
+            Integer resumeId,
+            Integer applicantId
+    ) {
         if (applicantId == null) {
-            throw new IllegalArgumentException("Applicant id is required.");
+            throw new IllegalArgumentException(
+                    "Applicant id is required."
+            );
         }
 
-        Resume resume = getResumeModelById(resumeId);
+        Resume resume =
+                getResumeModelById(resumeId);
 
-        if (!resume.getApplicantId().equals(applicantId)) {
-            throw new IllegalArgumentException("Only resume owner can delete this resume.");
+        if (!resume.getApplicantId()
+                .equals(applicantId)) {
+
+            throw new IllegalArgumentException(
+                    "Only resume owner can delete this resume."
+            );
         }
 
         contactInfoRepository.deleteByResumeId(resumeId);
@@ -154,60 +205,109 @@ public class ResumeService {
 
     public Resume getResumeModelById(Integer id) {
         return resumeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Resume not found."));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Resume not found."
+                        )
+                );
     }
 
-    private void saveContacts(Integer resumeId, List<ContactInfoDto> contacts) {
+    private void saveContacts(
+            Integer resumeId,
+            List<ContactInfoDto> contacts
+    ) {
         if (contacts == null) {
             return;
         }
 
-        List<ContactInfo> contactInfos = contacts.stream()
-                .map(contact -> ContactInfo.builder()
-                        .resumeId(resumeId)
-                        .typeId(contact.getTypeId())
-                        .value(contact.getValue())
-                        .build())
-                .toList();
+        List<ContactInfo> contactInfos =
+                contacts.stream()
+                        .map(contact ->
+                                ContactInfo.builder()
+                                        .resumeId(resumeId)
+                                        .typeId(
+                                                contact.getTypeId()
+                                        )
+                                        .value(
+                                                contact.getValue()
+                                        )
+                                        .build()
+                        )
+                        .toList();
 
         contactInfoRepository.saveAll(contactInfos);
     }
 
-    private void saveEducations(Integer resumeId, List<EducationInfoDto> educations) {
+    private void saveEducations(
+            Integer resumeId,
+            List<EducationInfoDto> educations
+    ) {
         if (educations == null) {
             return;
         }
 
-        List<EducationInfo> educationInfos = educations.stream()
-                .map(education -> EducationInfo.builder()
-                        .resumeId(resumeId)
-                        .institution(education.getInstitution())
-                        .program(education.getProgram())
-                        .startDate(education.getStartDate())
-                        .endDate(education.getEndDate())
-                        .degree(education.getDegree())
-                        .build())
-                .toList();
+        List<EducationInfo> educationInfos =
+                educations.stream()
+                        .map(education ->
+                                EducationInfo.builder()
+                                        .resumeId(resumeId)
+                                        .institution(
+                                                education.getInstitution()
+                                        )
+                                        .program(
+                                                education.getProgram()
+                                        )
+                                        .startDate(
+                                                education.getStartDate()
+                                        )
+                                        .endDate(
+                                                education.getEndDate()
+                                        )
+                                        .degree(
+                                                education.getDegree()
+                                        )
+                                        .build()
+                        )
+                        .toList();
 
         educationInfoRepository.saveAll(educationInfos);
     }
 
-    private void saveWorkExperiences(Integer resumeId, List<WorkExperienceInfoDto> workExperiences) {
+    private void saveWorkExperiences(
+            Integer resumeId,
+            List<WorkExperienceInfoDto> workExperiences
+    ) {
         if (workExperiences == null) {
             return;
         }
 
-        List<WorkExperienceInfo> workExperienceInfos = workExperiences.stream()
-                .map(workExperience -> WorkExperienceInfo.builder()
-                        .resumeId(resumeId)
-                        .years(workExperience.getYears())
-                        .companyName(workExperience.getCompanyName())
-                        .position(workExperience.getPosition())
-                        .responsibilities(workExperience.getResponsibilities())
-                        .build())
-                .toList();
+        List<WorkExperienceInfo> workExperienceInfos =
+                workExperiences.stream()
+                        .map(workExperience ->
+                                WorkExperienceInfo.builder()
+                                        .resumeId(resumeId)
+                                        .years(
+                                                workExperience.getYears()
+                                        )
+                                        .companyName(
+                                                workExperience
+                                                        .getCompanyName()
+                                        )
+                                        .position(
+                                                workExperience
+                                                        .getPosition()
+                                        )
+                                        .responsibilities(
+                                                workExperience
+                                                        .getResponsibilities()
+                                        )
+                                        .build()
+                        )
+                        .toList();
 
-        workExperienceInfoRepository.saveAll(workExperienceInfos);
+        workExperienceInfoRepository.saveAll(
+                workExperienceInfos
+        );
     }
 
     private ResumeDto toDto(Resume resume) {
@@ -216,103 +316,172 @@ public class ResumeService {
                 .applicantId(resume.getApplicantId())
                 .name(resume.getName())
                 .categoryId(resume.getCategoryId())
-                .categoryName(categoryService.getCategoryName(resume.getCategoryId()))
+                .categoryName(
+                        categoryService.getCategoryName(
+                                resume.getCategoryId()
+                        )
+                )
                 .salary(resume.getSalary())
                 .isActive(resume.getIsActive())
                 .createdDate(resume.getCreatedDate())
                 .updateTime(resume.getUpdateTime())
-                .contacts(getContactDtos(resume.getId()))
-                .educations(getEducationDtos(resume.getId()))
-                .workExperiences(getWorkExperienceDtos(resume.getId()))
+                .contacts(
+                        getContactDtos(resume.getId())
+                )
+                .educations(
+                        getEducationDtos(resume.getId())
+                )
+                .workExperiences(
+                        getWorkExperienceDtos(resume.getId())
+                )
                 .build();
     }
 
-    private List<ContactInfoDto> getContactDtos(Integer resumeId) {
-        return contactInfoRepository.findByResumeId(resumeId)
+    private List<ContactInfoDto> getContactDtos(
+            Integer resumeId
+    ) {
+        return contactInfoRepository
+                .findByResumeId(resumeId)
                 .stream()
-                .map(contact -> ContactInfoDto.builder()
-                        .id(contact.getId())
-                        .resumeId(contact.getResumeId())
-                        .typeId(contact.getTypeId())
-                        .value(contact.getValue())
-                        .build())
+                .map(contact ->
+                        ContactInfoDto.builder()
+                                .id(contact.getId())
+                                .resumeId(contact.getResumeId())
+                                .typeId(contact.getTypeId())
+                                .value(contact.getValue())
+                                .build()
+                )
                 .toList();
     }
 
-    private List<EducationInfoDto> getEducationDtos(Integer resumeId) {
-        return educationInfoRepository.findByResumeId(resumeId)
+    private List<EducationInfoDto> getEducationDtos(
+            Integer resumeId
+    ) {
+        return educationInfoRepository
+                .findByResumeId(resumeId)
                 .stream()
-                .map(education -> EducationInfoDto.builder()
-                        .id(education.getId())
-                        .resumeId(education.getResumeId())
-                        .institution(education.getInstitution())
-                        .program(education.getProgram())
-                        .startDate(education.getStartDate())
-                        .endDate(education.getEndDate())
-                        .degree(education.getDegree())
-                        .build())
+                .map(education ->
+                        EducationInfoDto.builder()
+                                .id(education.getId())
+                                .resumeId(
+                                        education.getResumeId()
+                                )
+                                .institution(
+                                        education.getInstitution()
+                                )
+                                .program(
+                                        education.getProgram()
+                                )
+                                .startDate(
+                                        education.getStartDate()
+                                )
+                                .endDate(
+                                        education.getEndDate()
+                                )
+                                .degree(
+                                        education.getDegree()
+                                )
+                                .build()
+                )
                 .toList();
     }
 
-    private List<WorkExperienceInfoDto> getWorkExperienceDtos(Integer resumeId) {
-        return workExperienceInfoRepository.findByResumeId(resumeId)
+    private List<WorkExperienceInfoDto>
+    getWorkExperienceDtos(Integer resumeId) {
+        return workExperienceInfoRepository
+                .findByResumeId(resumeId)
                 .stream()
-                .map(workExperience -> WorkExperienceInfoDto.builder()
-                        .id(workExperience.getId())
-                        .resumeId(workExperience.getResumeId())
-                        .years(workExperience.getYears())
-                        .companyName(workExperience.getCompanyName())
-                        .position(workExperience.getPosition())
-                        .responsibilities(workExperience.getResponsibilities())
-                        .build())
+                .map(workExperience ->
+                        WorkExperienceInfoDto.builder()
+                                .id(workExperience.getId())
+                                .resumeId(
+                                        workExperience.getResumeId()
+                                )
+                                .years(
+                                        workExperience.getYears()
+                                )
+                                .companyName(
+                                        workExperience.getCompanyName()
+                                )
+                                .position(
+                                        workExperience.getPosition()
+                                )
+                                .responsibilities(
+                                        workExperience
+                                                .getResponsibilities()
+                                )
+                                .build()
+                )
                 .toList();
     }
 
     private void validateCreateDto(ResumeCreateDto dto) {
         if (dto == null) {
-            throw new IllegalArgumentException("Request body is required.");
+            throw new IllegalArgumentException(
+                    "Request body is required."
+            );
         }
 
         if (dto.getApplicantId() == null) {
-            throw new IllegalArgumentException("Applicant id is required.");
+            throw new IllegalArgumentException(
+                    "Applicant id is required."
+            );
         }
 
         if (isBlank(dto.getName())) {
-            throw new IllegalArgumentException("Resume name is required.");
+            throw new IllegalArgumentException(
+                    "Resume name is required."
+            );
         }
 
         if (dto.getCategoryId() == null) {
-            throw new IllegalArgumentException("Category is required.");
+            throw new IllegalArgumentException(
+                    "Category is required."
+            );
         }
 
         if (dto.getSalary() == null) {
-            throw new IllegalArgumentException("Salary is required.");
+            throw new IllegalArgumentException(
+                    "Salary is required."
+            );
         }
     }
 
     private void validateUpdateDto(ResumeUpdateDto dto) {
         if (dto == null) {
-            throw new IllegalArgumentException("Request body is required.");
+            throw new IllegalArgumentException(
+                    "Request body is required."
+            );
         }
 
         if (dto.getApplicantId() == null) {
-            throw new IllegalArgumentException("Applicant id is required.");
+            throw new IllegalArgumentException(
+                    "Applicant id is required."
+            );
         }
 
         if (isBlank(dto.getName())) {
-            throw new IllegalArgumentException("Resume name is required.");
+            throw new IllegalArgumentException(
+                    "Resume name is required."
+            );
         }
 
         if (dto.getCategoryId() == null) {
-            throw new IllegalArgumentException("Category is required.");
+            throw new IllegalArgumentException(
+                    "Category is required."
+            );
         }
 
         if (dto.getSalary() == null) {
-            throw new IllegalArgumentException("Salary is required.");
+            throw new IllegalArgumentException(
+                    "Salary is required."
+            );
         }
 
         if (dto.getIsActive() == null) {
-            throw new IllegalArgumentException("Activity status is required.");
+            throw new IllegalArgumentException(
+                    "Activity status is required."
+            );
         }
     }
 
