@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private static final String defaultAvatar = "default-avatar.png";
+    private static final String DEFAULT_AVATAR = "default-avatar.png";
 
     private final UserRepository userRepository;
 
@@ -29,6 +29,49 @@ public class UserService {
         return toDto(user);
     }
 
+    public List<UserDto> findUsersByName(String name) {
+        if (isBlank(name)) {
+            throw new IllegalArgumentException("Name is required.");
+        }
+
+        return userRepository.findByName(name.trim())
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    public List<UserDto> findUsersByPhoneNumber(String phoneNumber) {
+        if (isBlank(phoneNumber)) {
+            throw new IllegalArgumentException("Phone number is required.");
+        }
+
+        return userRepository.findByPhoneNumber(phoneNumber.trim())
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    public UserDto findUserByEmail(String email) {
+        if (isBlank(email)) {
+            throw new IllegalArgumentException("Email is required.");
+        }
+
+        User user = userRepository.findByEmail(email.trim())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found.")
+                );
+
+        return toDto(user);
+    }
+
+    public boolean existsByEmail(String email) {
+        if (isBlank(email)) {
+            throw new IllegalArgumentException("Email is required.");
+        }
+
+        return userRepository.existsByEmail(email.trim());
+    }
+
     public List<UserDto> searchApplicants(String query) {
         return searchUsersByAccountType(query, AccountType.APPLICANT);
     }
@@ -40,40 +83,70 @@ public class UserService {
     public UserDto createUser(UserCreateDto dto) {
         validateUserCreateDto(dto);
 
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("User with this email already exists.");
+        String email = dto.getEmail().trim();
+
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException(
+                    "User with this email already exists."
+            );
         }
 
         User user = User.builder()
                 .name(dto.getName().trim())
                 .surname(dto.getSurname().trim())
                 .age(dto.getAge())
-                .email(dto.getEmail().trim())
+                .email(email)
                 .password(dto.getPassword())
                 .phoneNumber(dto.getPhoneNumber().trim())
-                .avatar(defaultAvatar)
+                .avatar(DEFAULT_AVATAR)
                 .accountType(dto.getAccountType())
                 .build();
 
         User savedUser = userRepository.save(user);
+
         return toDto(savedUser);
     }
 
     public User getUserModelById(Integer id) {
+        if (id == null) {
+            throw new IllegalArgumentException("User id is required.");
+        }
+
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found.")
+                );
     }
 
-    private List<UserDto> searchUsersByAccountType(String query, AccountType accountType) {
-        String normalizedQuery = query == null ? "" : query.toLowerCase();
+    private List<UserDto> searchUsersByAccountType(
+            String query,
+            AccountType accountType
+    ) {
+        String normalizedQuery = query == null
+                ? ""
+                : query.trim().toLowerCase();
 
         return userRepository.findAll()
                 .stream()
                 .filter(user -> user.getAccountType() == accountType)
-                .filter(user -> containsIgnoreCase(user.getName(), normalizedQuery)
-                        || containsIgnoreCase(user.getSurname(), normalizedQuery)
-                        || containsIgnoreCase(user.getEmail(), normalizedQuery)
-                        || containsIgnoreCase(user.getPhoneNumber(), normalizedQuery))
+                .filter(user ->
+                        containsIgnoreCase(
+                                user.getName(),
+                                normalizedQuery
+                        )
+                                || containsIgnoreCase(
+                                user.getSurname(),
+                                normalizedQuery
+                        )
+                                || containsIgnoreCase(
+                                user.getEmail(),
+                                normalizedQuery
+                        )
+                                || containsIgnoreCase(
+                                user.getPhoneNumber(),
+                                normalizedQuery
+                        )
+                )
                 .map(this::toDto)
                 .toList();
     }
@@ -88,7 +161,9 @@ public class UserService {
 
     private void validateUserCreateDto(UserCreateDto dto) {
         if (dto == null) {
-            throw new IllegalArgumentException("Request body is required.");
+            throw new IllegalArgumentException(
+                    "Request body is required."
+            );
         }
 
         if (isBlank(dto.getName())) {
@@ -100,7 +175,9 @@ public class UserService {
         }
 
         if (dto.getAge() == null || dto.getAge() < 14) {
-            throw new IllegalArgumentException("Age must be at least 14.");
+            throw new IllegalArgumentException(
+                    "Age must be at least 14."
+            );
         }
 
         if (isBlank(dto.getEmail())) {
@@ -108,15 +185,21 @@ public class UserService {
         }
 
         if (isBlank(dto.getPassword())) {
-            throw new IllegalArgumentException("Password is required.");
+            throw new IllegalArgumentException(
+                    "Password is required."
+            );
         }
 
         if (isBlank(dto.getPhoneNumber())) {
-            throw new IllegalArgumentException("Phone number is required.");
+            throw new IllegalArgumentException(
+                    "Phone number is required."
+            );
         }
 
         if (dto.getAccountType() == null) {
-            throw new IllegalArgumentException("Account type is required.");
+            throw new IllegalArgumentException(
+                    "Account type is required."
+            );
         }
     }
 
