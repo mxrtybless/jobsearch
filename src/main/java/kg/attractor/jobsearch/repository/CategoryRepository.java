@@ -1,35 +1,52 @@
 package kg.attractor.jobsearch.repository;
 
+import kg.attractor.jobsearch.dao.mappers.CategoryMapper;
 import kg.attractor.jobsearch.model.Category;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class CategoryRepository {
-    private final Map<Integer, Category> categories = new LinkedHashMap<>();
-
-    public CategoryRepository() {
-        save(new Category(1, "IT", null));
-        save(new Category(2, "Marketing", null));
-        save(new Category(3, "Sales", null));
-        save(new Category(4, "Design", null));
-        save(new Category(5, "Finance", null));
-    }
+    private final JdbcTemplate jdbcTemplate;
 
     public List<Category> findAll() {
-        return new ArrayList<>(categories.values());
+        String sql = """
+                SELECT id,
+                       name,
+                       parent_id
+                FROM categories
+                ORDER BY id
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                new CategoryMapper()
+        );
     }
 
     public Optional<Category> findById(Integer id) {
-        return Optional.ofNullable(categories.get(id));
-    }
+        String sql = """
+                SELECT id,
+                       name,
+                       parent_id
+                FROM categories
+                WHERE id = ?
+                """;
 
-    private void save(Category category) {
-        categories.put(category.getId(), category);
+        List<Category> categories = jdbcTemplate.query(
+                sql,
+                new CategoryMapper(),
+                id
+        );
+
+        return Optional.ofNullable(
+                DataAccessUtils.singleResult(categories)
+        );
     }
 }
