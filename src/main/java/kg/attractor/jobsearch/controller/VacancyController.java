@@ -26,53 +26,115 @@ public class VacancyController {
     private final VacancyService vacancyService;
 
     @GetMapping("/vacancies")
-    public ResponseEntity<List<VacancyDto>> getActiveVacancies() {
-        return ResponseEntity.ok(vacancyService.getActiveVacancies());
+    public ResponseEntity<List<VacancyDto>>
+    getActiveVacancies() {
+
+        return ResponseEntity.ok(
+                vacancyService.getActiveVacancies()
+        );
     }
 
     @GetMapping("/vacancies/{id}")
-    public ResponseEntity<VacancyDto> getVacancyById(@PathVariable Integer id) {
-        return ResponseEntity.ok(vacancyService.getVacancyById(id));
+    public ResponseEntity<VacancyDto> getVacancyById(
+            @PathVariable Integer id
+    ) {
+        return ResponseEntity.ok(
+                vacancyService.getVacancyById(id)
+        );
     }
 
     @GetMapping("/vacancies/employer/{employerId}")
-    public ResponseEntity<List<VacancyDto>> getVacanciesByEmployer(@PathVariable Integer employerId) {
-        return ResponseEntity.ok(vacancyService.getVacanciesByEmployer(employerId));
+    public ResponseEntity<List<VacancyDto>>
+    getVacanciesByEmployer(
+            @PathVariable Integer employerId
+    ) {
+        return ResponseEntity.ok(
+                vacancyService.getVacanciesByEmployer(
+                        employerId
+                )
+        );
+    }
+
+    @GetMapping(
+            "/vacancies/responded/applicant/{applicantId}"
+    )
+    public ResponseEntity<List<VacancyDto>>
+    getVacanciesRespondedByApplicant(
+            @PathVariable Integer applicantId
+    ) {
+        return ResponseEntity.ok(
+                vacancyService
+                        .getVacanciesRespondedByApplicant(
+                                applicantId
+                        )
+        );
     }
 
     @GetMapping("/vacancies/search")
-    public ResponseEntity<List<VacancyDto>> searchVacancies(@RequestParam String query) {
-        return ResponseEntity.ok(vacancyService.searchActiveVacanciesByName(query));
+    public ResponseEntity<List<VacancyDto>>
+    searchVacancies(
+            @RequestParam String query
+    ) {
+        return ResponseEntity.ok(
+                vacancyService
+                        .searchActiveVacanciesByName(query)
+        );
     }
 
     @GetMapping("/vacancies/category/{categoryId}")
-    public ResponseEntity<List<VacancyDto>> getVacanciesByCategory(@PathVariable Integer categoryId) {
-        return ResponseEntity.ok(vacancyService.getActiveVacanciesByCategory(categoryId));
+    public ResponseEntity<List<VacancyDto>>
+    getVacanciesByCategory(
+            @PathVariable Integer categoryId
+    ) {
+        return ResponseEntity.ok(
+                vacancyService
+                        .getActiveVacanciesByCategory(
+                                categoryId
+                        )
+        );
     }
 
     @PostMapping("/vacancies")
-    public ResponseEntity<VacancyDto> createVacancy(@RequestBody VacancyCreateDto dto) {
-        VacancyDto vacancy = vacancyService.createVacancy(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(vacancy);
+    public ResponseEntity<VacancyDto> createVacancy(
+            @RequestBody VacancyCreateDto dto
+    ) {
+        VacancyDto vacancy =
+                vacancyService.createVacancy(dto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(vacancy);
     }
 
     @PutMapping("/vacancies/{id}")
-    public ResponseEntity<VacancyDto> updateVacancy(@PathVariable Integer id,
-                                                    @RequestBody VacancyUpdateDto dto) {
-
-        return ResponseEntity.ok(vacancyService.updateVacancy(id, dto));
+    public ResponseEntity<VacancyDto> updateVacancy(
+            @PathVariable Integer id,
+            @RequestBody VacancyUpdateDto dto
+    ) {
+        return ResponseEntity.ok(
+                vacancyService.updateVacancy(id, dto)
+        );
     }
 
     @DeleteMapping("/vacancies/{id}")
-    public ResponseEntity<Void> deleteVacancy(@PathVariable Integer id,
-                                              @RequestParam Integer authorId) {
-
+    public ResponseEntity<Void> deleteVacancy(
+            @PathVariable Integer id,
+            @RequestParam Integer authorId
+    ) {
         vacancyService.deleteVacancy(id, authorId);
+
         return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleBadRequest(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    public ResponseEntity<Map<String, String>>
+    handleBadRequest(
+            IllegalArgumentException exception
+    ) {
+        return ResponseEntity.badRequest()
+                .body(Map.of(
+                        "error",
+                        exception.getMessage()
+                ));
     }
 }

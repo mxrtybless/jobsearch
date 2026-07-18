@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -21,73 +20,107 @@ public class VacancyService {
     private final CategoryService categoryService;
 
     public List<VacancyDto> getActiveVacancies() {
-        return vacancyRepository.findAll()
+        return vacancyRepository.findAllActive()
                 .stream()
-                .filter(Vacancy::isPublished)
-                .sorted(Comparator.comparing(Vacancy::getUpdateTime).reversed())
                 .map(this::toDto)
                 .toList();
     }
 
-    public List<VacancyDto> getVacanciesByEmployer(Integer employerId) {
-        User employer = userService.getUserModelById(employerId);
+    public List<VacancyDto> getVacanciesByEmployer(
+            Integer employerId
+    ) {
+        User employer =
+                userService.getUserModelById(employerId);
 
         if (!employer.isEmployer()) {
-            throw new IllegalArgumentException("Only employer can have vacancies.");
+            throw new IllegalArgumentException(
+                    "Only employer can have vacancies."
+            );
         }
 
-        return vacancyRepository.findAll()
+        return vacancyRepository.findByAuthorId(employerId)
                 .stream()
-                .filter(vacancy -> vacancy.getAuthorId().equals(employerId))
-                .sorted(Comparator.comparing(Vacancy::getUpdateTime).reversed())
+                .map(this::toDto)
+                .toList();
+    }
+
+    public List<VacancyDto> getVacanciesRespondedByApplicant(
+            Integer applicantId
+    ) {
+        User applicant =
+                userService.getUserModelById(applicantId);
+
+        if (!applicant.isApplicant()) {
+            throw new IllegalArgumentException(
+                    "Only applicant can respond to vacancies."
+            );
+        }
+
+        return vacancyRepository
+                .findRespondedByApplicantId(applicantId)
+                .stream()
                 .map(this::toDto)
                 .toList();
     }
 
     public VacancyDto getVacancyById(Integer id) {
         Vacancy vacancy = getVacancyModelById(id);
+
         return toDto(vacancy);
     }
 
-    public List<VacancyDto> searchActiveVacanciesByName(String query) {
-        String normalizedQuery = query == null ? "" : query.toLowerCase();
+    public List<VacancyDto> searchActiveVacanciesByName(
+            String query
+    ) {
+        String normalizedQuery =
+                query == null ? "" : query.trim();
 
-        return vacancyRepository.findAll()
+        return vacancyRepository
+                .findActiveByName(normalizedQuery)
                 .stream()
-                .filter(Vacancy::isPublished)
-                .filter(vacancy -> vacancy.getName().toLowerCase().contains(normalizedQuery))
-                .sorted(Comparator.comparing(Vacancy::getUpdateTime).reversed())
                 .map(this::toDto)
                 .toList();
     }
 
-    public List<VacancyDto> getActiveVacanciesByCategory(Integer categoryId) {
+    public List<VacancyDto> getActiveVacanciesByCategory(
+            Integer categoryId
+    ) {
         categoryService.getCategoryModelById(categoryId);
 
-        return vacancyRepository.findAll()
+        return vacancyRepository
+                .findActiveByCategoryId(categoryId)
                 .stream()
-                .filter(Vacancy::isPublished)
-                .filter(vacancy -> vacancy.getCategoryId().equals(categoryId))
-                .sorted(Comparator.comparing(Vacancy::getUpdateTime).reversed())
                 .map(this::toDto)
                 .toList();
     }
 
-    public VacancyDto createVacancy(VacancyCreateDto dto) {
+    public VacancyDto createVacancy(
+            VacancyCreateDto dto
+    ) {
         validateCreateDto(dto);
-        User employer = userService.getUserModelById(dto.getAuthorId());
+
+        User employer =
+                userService.getUserModelById(
+                        dto.getAuthorId()
+                );
 
         if (!employer.isEmployer()) {
-            throw new IllegalArgumentException("Only employer can create vacancies.");
+            throw new IllegalArgumentException(
+                    "Only employer can create vacancies."
+            );
         }
 
-        categoryService.getCategoryModelById(dto.getCategoryId());
+        categoryService.getCategoryModelById(
+                dto.getCategoryId()
+        );
 
         LocalDateTime now = LocalDateTime.now();
 
         Vacancy vacancy = Vacancy.builder()
                 .name(dto.getName().trim())
-                .description(dto.getDescription().trim())
+                .description(
+                        dto.getDescription().trim()
+                )
                 .categoryId(dto.getCategoryId())
                 .salary(dto.getSalary())
                 .expFrom(dto.getExpFrom())
@@ -98,23 +131,37 @@ public class VacancyService {
                 .updateTime(now)
                 .build();
 
-        Vacancy savedVacancy = vacancyRepository.save(vacancy);
+        Vacancy savedVacancy =
+                vacancyRepository.save(vacancy);
+
         return toDto(savedVacancy);
     }
 
-    public VacancyDto updateVacancy(Integer vacancyId, VacancyUpdateDto dto) {
+    public VacancyDto updateVacancy(
+            Integer vacancyId,
+            VacancyUpdateDto dto
+    ) {
         validateUpdateDto(dto);
 
-        Vacancy vacancy = getVacancyModelById(vacancyId);
+        Vacancy vacancy =
+                getVacancyModelById(vacancyId);
 
-        if (!vacancy.getAuthorId().equals(dto.getAuthorId())) {
-            throw new IllegalArgumentException("Only vacancy author can edit this vacancy.");
+        if (!vacancy.getAuthorId()
+                .equals(dto.getAuthorId())) {
+
+            throw new IllegalArgumentException(
+                    "Only vacancy author can edit this vacancy."
+            );
         }
 
-        categoryService.getCategoryModelById(dto.getCategoryId());
+        categoryService.getCategoryModelById(
+                dto.getCategoryId()
+        );
 
         vacancy.setName(dto.getName().trim());
-        vacancy.setDescription(dto.getDescription().trim());
+        vacancy.setDescription(
+                dto.getDescription().trim()
+        );
         vacancy.setCategoryId(dto.getCategoryId());
         vacancy.setSalary(dto.getSalary());
         vacancy.setExpFrom(dto.getExpFrom());
@@ -122,19 +169,29 @@ public class VacancyService {
         vacancy.setIsActive(dto.getIsActive());
         vacancy.setUpdateTime(LocalDateTime.now());
 
-        Vacancy savedVacancy = vacancyRepository.save(vacancy);
+        Vacancy savedVacancy =
+                vacancyRepository.save(vacancy);
+
         return toDto(savedVacancy);
     }
 
-    public void deleteVacancy(Integer vacancyId, Integer authorId) {
+    public void deleteVacancy(
+            Integer vacancyId,
+            Integer authorId
+    ) {
         if (authorId == null) {
-            throw new IllegalArgumentException("Author id is required.");
+            throw new IllegalArgumentException(
+                    "Author id is required."
+            );
         }
 
-        Vacancy vacancy = getVacancyModelById(vacancyId);
+        Vacancy vacancy =
+                getVacancyModelById(vacancyId);
 
         if (!vacancy.getAuthorId().equals(authorId)) {
-            throw new IllegalArgumentException("Only vacancy author can delete this vacancy.");
+            throw new IllegalArgumentException(
+                    "Only vacancy author can delete this vacancy."
+            );
         }
 
         vacancyRepository.deleteById(vacancyId);
@@ -142,78 +199,128 @@ public class VacancyService {
 
     public Vacancy getVacancyModelById(Integer id) {
         return vacancyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Vacancy not found."));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Vacancy not found."
+                        )
+                );
     }
 
-    private void validateCreateDto(VacancyCreateDto dto) {
+    private void validateCreateDto(
+            VacancyCreateDto dto
+    ) {
         if (dto == null) {
-            throw new IllegalArgumentException("Request body is required.");
+            throw new IllegalArgumentException(
+                    "Request body is required."
+            );
         }
 
         if (isBlank(dto.getName())) {
-            throw new IllegalArgumentException("Vacancy name is required.");
+            throw new IllegalArgumentException(
+                    "Vacancy name is required."
+            );
         }
 
         if (isBlank(dto.getDescription())) {
-            throw new IllegalArgumentException("Description is required.");
+            throw new IllegalArgumentException(
+                    "Description is required."
+            );
         }
 
         if (dto.getCategoryId() == null) {
-            throw new IllegalArgumentException("Category is required.");
+            throw new IllegalArgumentException(
+                    "Category is required."
+            );
         }
 
         if (dto.getSalary() == null) {
-            throw new IllegalArgumentException("Salary is required.");
+            throw new IllegalArgumentException(
+                    "Salary is required."
+            );
         }
 
-        if (dto.getExpFrom() == null || dto.getExpFrom() < 0) {
-            throw new IllegalArgumentException("Experience from must be zero or greater.");
+        if (dto.getExpFrom() == null
+                || dto.getExpFrom() < 0) {
+
+            throw new IllegalArgumentException(
+                    "Experience from must be zero or greater."
+            );
         }
 
-        if (dto.getExpTo() == null || dto.getExpTo() < dto.getExpFrom()) {
-            throw new IllegalArgumentException("Experience to must be greater than experience from.");
+        if (dto.getExpTo() == null
+                || dto.getExpTo() < dto.getExpFrom()) {
+
+            throw new IllegalArgumentException(
+                    "Experience to must be greater than experience from."
+            );
         }
 
         if (dto.getAuthorId() == null) {
-            throw new IllegalArgumentException("Author id is required.");
+            throw new IllegalArgumentException(
+                    "Author id is required."
+            );
         }
     }
 
-    private void validateUpdateDto(VacancyUpdateDto dto) {
+    private void validateUpdateDto(
+            VacancyUpdateDto dto
+    ) {
         if (dto == null) {
-            throw new IllegalArgumentException("Request body is required.");
+            throw new IllegalArgumentException(
+                    "Request body is required."
+            );
         }
 
         if (isBlank(dto.getName())) {
-            throw new IllegalArgumentException("Vacancy name is required.");
+            throw new IllegalArgumentException(
+                    "Vacancy name is required."
+            );
         }
 
         if (isBlank(dto.getDescription())) {
-            throw new IllegalArgumentException("Description is required.");
+            throw new IllegalArgumentException(
+                    "Description is required."
+            );
         }
 
         if (dto.getCategoryId() == null) {
-            throw new IllegalArgumentException("Category is required.");
+            throw new IllegalArgumentException(
+                    "Category is required."
+            );
         }
 
         if (dto.getSalary() == null) {
-            throw new IllegalArgumentException("Salary is required.");
+            throw new IllegalArgumentException(
+                    "Salary is required."
+            );
         }
 
-        if (dto.getExpFrom() == null || dto.getExpFrom() < 0) {
-            throw new IllegalArgumentException("Experience from must be zero or greater.");
+        if (dto.getExpFrom() == null
+                || dto.getExpFrom() < 0) {
+
+            throw new IllegalArgumentException(
+                    "Experience from must be zero or greater."
+            );
         }
 
-        if (dto.getExpTo() == null || dto.getExpTo() < dto.getExpFrom()) {
-            throw new IllegalArgumentException("Experience to must be greater than experience from.");
+        if (dto.getExpTo() == null
+                || dto.getExpTo() < dto.getExpFrom()) {
+
+            throw new IllegalArgumentException(
+                    "Experience to must be greater than experience from."
+            );
         }
 
         if (dto.getIsActive() == null) {
-            throw new IllegalArgumentException("Activity status is required.");
+            throw new IllegalArgumentException(
+                    "Activity status is required."
+            );
         }
 
         if (dto.getAuthorId() == null) {
-            throw new IllegalArgumentException("Author id is required.");
+            throw new IllegalArgumentException(
+                    "Author id is required."
+            );
         }
     }
 
@@ -227,7 +334,11 @@ public class VacancyService {
                 .name(vacancy.getName())
                 .description(vacancy.getDescription())
                 .categoryId(vacancy.getCategoryId())
-                .categoryName(categoryService.getCategoryName(vacancy.getCategoryId()))
+                .categoryName(
+                        categoryService.getCategoryName(
+                                vacancy.getCategoryId()
+                        )
+                )
                 .salary(vacancy.getSalary())
                 .expFrom(vacancy.getExpFrom())
                 .expTo(vacancy.getExpTo())
