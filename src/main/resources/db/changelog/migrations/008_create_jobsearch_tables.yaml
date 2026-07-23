@@ -1,0 +1,449 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-create-jobsearch-tables
+      author: mxrty
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            tableName: customer
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(45)
+              - column:
+                  name: password
+                  type: varchar(45)
+
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: surname
+                  type: varchar(100)
+              - column:
+                  name: age
+                  type: int
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone_number
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: avatar
+                  type: varchar(255)
+              - column:
+                  name: account_type
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: categories
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: parent_id
+                  type: int
+
+        - addForeignKeyConstraint:
+            baseTableName: categories
+            baseColumnNames: parent_id
+            referencedTableName: categories
+            referencedColumnNames: id
+            constraintName: fk_categories_parent
+
+        - createTable:
+            tableName: contact_types
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+        - createTable:
+            tableName: resumes
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: applicant_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: salary
+                  type: decimal(12,2)
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: update_time
+                  type: timestamp
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: resumes
+            baseColumnNames: applicant_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_resumes_applicant
+
+        - addForeignKeyConstraint:
+            baseTableName: resumes
+            baseColumnNames: category_id
+            referencedTableName: categories
+            referencedColumnNames: id
+            constraintName: fk_resumes_category
+
+        - createTable:
+            tableName: vacancies
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(2000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: salary
+                  type: decimal(12,2)
+              - column:
+                  name: exp_from
+                  type: int
+              - column:
+                  name: exp_to
+                  type: int
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: author_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: update_time
+                  type: timestamp
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: vacancies
+            baseColumnNames: category_id
+            referencedTableName: categories
+            referencedColumnNames: id
+            constraintName: fk_vacancies_category
+
+        - addForeignKeyConstraint:
+            baseTableName: vacancies
+            baseColumnNames: author_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_vacancies_author
+
+        - createTable:
+            tableName: contacts_info
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: resume_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: contacts_info
+            baseColumnNames: type_id
+            referencedTableName: contact_types
+            referencedColumnNames: id
+            constraintName: fk_contacts_info_type
+
+        - addForeignKeyConstraint:
+            baseTableName: contacts_info
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_contacts_info_resume
+            onDelete: CASCADE
+
+        - createTable:
+            tableName: education_info
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: resume_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: institution
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: program
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: date
+              - column:
+                  name: degree
+                  type: varchar(100)
+
+        - addForeignKeyConstraint:
+            baseTableName: education_info
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_education_info_resume
+            onDelete: CASCADE
+
+        - createTable:
+            tableName: work_experience_info
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: resume_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: years
+                  type: int
+              - column:
+                  name: company_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: position
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: responsibilities
+                  type: varchar(2000)
+
+        - addForeignKeyConstraint:
+            baseTableName: work_experience_info
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_work_experience_info_resume
+            onDelete: CASCADE
+
+        - createTable:
+            tableName: responded_applicants
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: resume_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: vacancy_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: confirmation
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: responded_applicants
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_responded_applicants_resume
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: responded_applicants
+            baseColumnNames: vacancy_id
+            referencedTableName: vacancies
+            referencedColumnNames: id
+            constraintName: fk_responded_applicants_vacancy
+            onDelete: CASCADE
+
+        - addUniqueConstraint:
+            tableName: responded_applicants
+            columnNames: resume_id, vacancy_id
+            constraintName: uq_responded_applicants_resume_vacancy
+
+        - createTable:
+            tableName: messages
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: responded_applicant_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: content
+                  type: varchar(2000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: timestamp
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: messages
+            baseColumnNames: responded_applicant_id
+            referencedTableName: responded_applicants
+            referencedColumnNames: id
+            constraintName: fk_messages_responded_applicant
+            onDelete: CASCADE

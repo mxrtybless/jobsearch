@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-insert-jobsearch-test-data
+      author: mxrty
+      changes:
+        - sqlFile:
+            path: data.sql
+            relativeToChangelogFile: false
+            encoding: UTF-8
+            splitStatements: true
+            stripComments: true

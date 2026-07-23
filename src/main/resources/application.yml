@@ -8,6 +8,13 @@ spring:
     password: qwerty
     driver-class-name: org.h2.Driver
 
+  liquibase:
+    change-log: classpath:/db/changelog/master.yaml
+
   sql:
     init:
-      mode: always
+      mode: never
+
+  h2:
+    console:
+      enabled: true

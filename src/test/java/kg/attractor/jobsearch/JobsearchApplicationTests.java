@@ -1,4 +1,4 @@
-package kg.attractor.jobsearch.;
+package kg.attractor.jobsearch;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

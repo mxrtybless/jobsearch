@@ -1,176 +1,3 @@
-DROP TABLE IF EXISTS messages;
-DROP TABLE IF EXISTS responded_applicants;
-DROP TABLE IF EXISTS work_experience_info;
-DROP TABLE IF EXISTS education_info;
-DROP TABLE IF EXISTS contacts_info;
-DROP TABLE IF EXISTS contact_types;
-DROP TABLE IF EXISTS vacancies;
-DROP TABLE IF EXISTS resumes;
-DROP TABLE IF EXISTS categories;
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS customer;
-
-
-CREATE TABLE customer
-(
-    id       INT AUTO_INCREMENT PRIMARY KEY,
-    name     VARCHAR(45),
-    password VARCHAR(45)
-);
-
-
-CREATE TABLE users
-(
-    id           INT AUTO_INCREMENT PRIMARY KEY,
-    name         VARCHAR(100) NOT NULL,
-    surname      VARCHAR(100),
-    age          INT,
-    email        VARCHAR(255) NOT NULL UNIQUE,
-    password     VARCHAR(255) NOT NULL,
-    phone_number VARCHAR(50)  NOT NULL,
-    avatar       VARCHAR(255),
-    account_type VARCHAR(20)  NOT NULL
-);
-
-
-CREATE TABLE categories
-(
-    id        INT AUTO_INCREMENT PRIMARY KEY,
-    name      VARCHAR(100) NOT NULL,
-    parent_id INT,
-
-    FOREIGN KEY (parent_id)
-        REFERENCES categories (id)
-);
-
-
-CREATE TABLE resumes
-(
-    id           INT AUTO_INCREMENT PRIMARY KEY,
-    applicant_id INT            NOT NULL,
-    name         VARCHAR(150)   NOT NULL,
-    category_id  INT            NOT NULL,
-    salary       DECIMAL(12, 2),
-    is_active    BOOLEAN        NOT NULL,
-    created_date TIMESTAMP      NOT NULL,
-    update_time  TIMESTAMP      NOT NULL,
-
-    FOREIGN KEY (applicant_id)
-        REFERENCES users (id),
-
-    FOREIGN KEY (category_id)
-        REFERENCES categories (id)
-);
-
-
-CREATE TABLE vacancies
-(
-    id           INT AUTO_INCREMENT PRIMARY KEY,
-    name         VARCHAR(150)   NOT NULL,
-    description  TEXT           NOT NULL,
-    category_id  INT            NOT NULL,
-    salary       DECIMAL(12, 2),
-    exp_from     INT,
-    exp_to       INT,
-    is_active    BOOLEAN        NOT NULL,
-    author_id    INT            NOT NULL,
-    created_date TIMESTAMP      NOT NULL,
-    update_time  TIMESTAMP      NOT NULL,
-
-    FOREIGN KEY (category_id)
-        REFERENCES categories (id),
-
-    FOREIGN KEY (author_id)
-        REFERENCES users (id)
-);
-
-
-CREATE TABLE contact_types
-(
-    id   INT AUTO_INCREMENT PRIMARY KEY,
-    type VARCHAR(50) NOT NULL
-);
-
-
-CREATE TABLE contacts_info
-(
-    id        INT AUTO_INCREMENT PRIMARY KEY,
-    type_id   INT          NOT NULL,
-    resume_id INT          NOT NULL,
-    "value"   VARCHAR(255) NOT NULL,
-
-    FOREIGN KEY (type_id)
-        REFERENCES contact_types (id),
-
-    FOREIGN KEY (resume_id)
-        REFERENCES resumes (id)
-        ON DELETE CASCADE
-);
-
-
-CREATE TABLE education_info
-(
-    id          INT AUTO_INCREMENT PRIMARY KEY,
-    resume_id   INT          NOT NULL,
-    institution VARCHAR(255) NOT NULL,
-    program     VARCHAR(255) NOT NULL,
-    start_date  DATE         NOT NULL,
-    end_date    DATE,
-    degree      VARCHAR(100),
-
-    FOREIGN KEY (resume_id)
-        REFERENCES resumes (id)
-        ON DELETE CASCADE
-);
-
-
-CREATE TABLE work_experience_info
-(
-    id               INT AUTO_INCREMENT PRIMARY KEY,
-    resume_id        INT          NOT NULL,
-    years            INT,
-    company_name     VARCHAR(255) NOT NULL,
-    position         VARCHAR(255) NOT NULL,
-    responsibilities TEXT,
-
-    FOREIGN KEY (resume_id)
-        REFERENCES resumes (id)
-        ON DELETE CASCADE
-);
-
-
-CREATE TABLE responded_applicants
-(
-    id           INT AUTO_INCREMENT PRIMARY KEY,
-    resume_id    INT     NOT NULL,
-    vacancy_id   INT     NOT NULL,
-    confirmation BOOLEAN NOT NULL,
-
-    FOREIGN KEY (resume_id)
-        REFERENCES resumes (id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (vacancy_id)
-        REFERENCES vacancies (id)
-        ON DELETE CASCADE,
-
-    UNIQUE (resume_id, vacancy_id)
-);
-
-
-CREATE TABLE messages
-(
-    id                      INT AUTO_INCREMENT PRIMARY KEY,
-    responded_applicant_id INT       NOT NULL,
-    content                 TEXT      NOT NULL,
-    "timestamp"             TIMESTAMP NOT NULL,
-
-    FOREIGN KEY (responded_applicant_id)
-        REFERENCES responded_applicants (id)
-        ON DELETE CASCADE
-);
-
-
 INSERT INTO customer
 (
     name,
@@ -351,7 +178,7 @@ INSERT INTO contacts_info
 (
     type_id,
     resume_id,
-    "value"
+    "VALUE"
 )
 VALUES
     (
@@ -452,7 +279,7 @@ INSERT INTO messages
 (
     responded_applicant_id,
     content,
-    "timestamp"
+    "TIMESTAMP"
 )
 VALUES
     (
