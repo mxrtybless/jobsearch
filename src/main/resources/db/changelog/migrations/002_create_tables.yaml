@@ -1,0 +1,93 @@
+﻿databaseChangeLog:
+  - changeSet:
+      id: 002-1
+      author: Aleksey Podstavin
+      changes:
+        - createTable:
+            tableName: director
+            columns:
+              - column:
+                  name: id
+                  type: long
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: fullName
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 002-2
+      author: Aleksey Podstavin
+      changes:
+        - createTable:
+            tableName: movie
+            columns:
+              - column:
+                  name: id
+                  type: long
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: release_year
+                  type: int
+              - column:
+                  name: description
+                  type: varchar(255)
+              - column:
+                  name: director_id
+                  type: long
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_director_id
+                    references: director(id)
+  - changeSet:
+      id: 002-3
+      author: Aleksey Podstavin
+      changes:
+        - createTable:
+            tableName: cast_member
+            columns:
+              - column:
+                  name: id
+                  type: long
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: fullName
+                  type: varchar(255)
+  - changeSet:
+      id: 002-4
+      author: Aleksey Podstavin
+      changes:
+        - createTable:
+            tableName: movie_cast_member
+            columns:
+              - column:
+                  name: movie_id
+                  type: long
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_movie_cast_member_movie
+                    references: movie(id)
+              - column:
+                  name: cast_member_id
+                  type: long
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_movie_cast_member_cast_member
+                    references: cast_member(id)
+              - column:
+                  name: role
+                  type: varchar(255)

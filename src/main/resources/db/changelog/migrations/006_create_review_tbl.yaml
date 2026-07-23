@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006
+      author: Aleksey Podstavin
+      changes:
+        - createTable:
+            tableName: review
+            columns:
+              - column:
+                  name: id
+                  type: long
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: rating
+                  type: int
+              - column:
+                  name: comment
+                  type: varchar(255)
+              - column:
+                  name: reviewer
+                  type: varchar(45)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_reviewer
+                    references: customers(email)
+              - column:
+                  name: movie_id
+                  type: long
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_movie_id
+                    references: movie(id)
