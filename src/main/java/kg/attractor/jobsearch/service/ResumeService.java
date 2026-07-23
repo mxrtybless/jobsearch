@@ -1,26 +1,30 @@
 package kg.attractor.jobsearch.service;
 
-import kg.attractor.jobsearch.model.Resume;
+import kg.attractor.jobsearch.dto.ResumeDto;
 
 import java.util.List;
 
 public interface ResumeService {
-    void createResume(Resume resume);
+    Integer createResume(
+            ResumeDto resumeDto
+    );
 
     void editResume(
             Integer id,
-            Resume resume
+            ResumeDto resumeDto
     );
 
     void deleteResume(Integer id);
 
-    List<Resume> findAllActive();
+    ResumeDto findById(Integer id);
 
-    List<Resume> findByCategoryId(
+    List<ResumeDto> findAllActive();
+
+    List<ResumeDto> findByCategoryId(
             Integer categoryId
     );
 
-    List<Resume> findByApplicantId(
+    List<ResumeDto> findByApplicantId(
             Integer applicantId
     );
 }

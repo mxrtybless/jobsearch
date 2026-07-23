@@ -1,6 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
-import kg.attractor.jobsearch.model.Resume;
+import kg.attractor.jobsearch.dto.ResumeDto;
 import kg.attractor.jobsearch.service.ResumeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,24 +23,27 @@ public class ResumeController {
     private final ResumeService resumeService;
 
     @PostMapping("create")
-    public ResponseEntity<Void> createResume(
-            @RequestBody Resume resume
+    public ResponseEntity<Integer> createResume(
+            @RequestBody ResumeDto resumeDto
     ) {
-        resumeService.createResume(resume);
+        Integer resumeId =
+                resumeService.createResume(
+                        resumeDto
+                );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .build();
+                .body(resumeId);
     }
 
     @PutMapping("edit/{id}")
     public ResponseEntity<Void> editResume(
             @PathVariable Integer id,
-            @RequestBody Resume resume
+            @RequestBody ResumeDto resumeDto
     ) {
         resumeService.editResume(
                 id,
-                resume
+                resumeDto
         );
 
         return ResponseEntity.ok().build();
@@ -57,8 +60,18 @@ public class ResumeController {
                 .build();
     }
 
+    @GetMapping("search/id/{id}")
+    public ResponseEntity<ResumeDto>
+    findResumeById(
+            @PathVariable Integer id
+    ) {
+        return ResponseEntity.ok(
+                resumeService.findById(id)
+        );
+    }
+
     @GetMapping("search/all")
-    public ResponseEntity<List<Resume>>
+    public ResponseEntity<List<ResumeDto>>
     searchAllResumes() {
         return ResponseEntity.ok(
                 resumeService.findAllActive()
@@ -68,7 +81,7 @@ public class ResumeController {
     @GetMapping(
             "search/category/{categoryId}"
     )
-    public ResponseEntity<List<Resume>>
+    public ResponseEntity<List<ResumeDto>>
     searchResumesByCategory(
             @PathVariable Integer categoryId
     ) {
@@ -82,7 +95,7 @@ public class ResumeController {
     @GetMapping(
             "search/applicant/{applicantId}"
     )
-    public ResponseEntity<List<Resume>>
+    public ResponseEntity<List<ResumeDto>>
     searchResumesByApplicant(
             @PathVariable Integer applicantId
     ) {
