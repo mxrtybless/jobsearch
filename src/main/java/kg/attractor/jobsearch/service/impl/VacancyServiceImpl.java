@@ -17,7 +17,7 @@ public class VacancyServiceImpl
     private final VacancyDao vacancyDao;
 
     @Override
-    public void createVacancy(
+    public Integer createVacancy(
             Vacancy vacancy
     ) {
         LocalDateTime now =
@@ -27,7 +27,7 @@ public class VacancyServiceImpl
         vacancy.setCreatedDate(now);
         vacancy.setUpdateTime(now);
 
-        vacancyDao.save(vacancy);
+        return vacancyDao.save(vacancy);
     }
 
     @Override
@@ -78,7 +78,16 @@ public class VacancyServiceImpl
 
     @Override
     public void deleteVacancy(Integer id) {
+        vacancyDao.findById(id)
+                .orElseThrow();
+
         vacancyDao.deleteById(id);
+    }
+
+    @Override
+    public Vacancy findById(Integer id) {
+        return vacancyDao.findById(id)
+                .orElseThrow();
     }
 
     @Override
@@ -97,6 +106,15 @@ public class VacancyServiceImpl
     ) {
         return vacancyDao.findByCategoryId(
                 categoryId
+        );
+    }
+
+    @Override
+    public List<Vacancy> findByAuthorId(
+            Integer authorId
+    ) {
+        return vacancyDao.findByAuthorId(
+                authorId
         );
     }
 

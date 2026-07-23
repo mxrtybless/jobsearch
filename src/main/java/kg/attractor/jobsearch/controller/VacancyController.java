@@ -23,14 +23,17 @@ public class VacancyController {
     private final VacancyService vacancyService;
 
     @PostMapping("create")
-    public ResponseEntity<Void> createVacancy(
+    public ResponseEntity<Integer> createVacancy(
             @RequestBody Vacancy vacancy
     ) {
-        vacancyService.createVacancy(vacancy);
+        Integer vacancyId =
+                vacancyService.createVacancy(
+                        vacancy
+                );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .build();
+                .body(vacancyId);
     }
 
     @PutMapping("edit/{id}")
@@ -55,6 +58,16 @@ public class VacancyController {
         return ResponseEntity
                 .noContent()
                 .build();
+    }
+
+    @GetMapping("search/id/{id}")
+    public ResponseEntity<Vacancy>
+    findVacancyById(
+            @PathVariable Integer id
+    ) {
+        return ResponseEntity.ok(
+                vacancyService.findById(id)
+        );
     }
 
     @GetMapping("search/all")
@@ -83,6 +96,20 @@ public class VacancyController {
         return ResponseEntity.ok(
                 vacancyService.findByCategoryId(
                         categoryId
+                )
+        );
+    }
+
+    @GetMapping(
+            "search/employer/{authorId}"
+    )
+    public ResponseEntity<List<Vacancy>>
+    searchVacanciesByEmployer(
+            @PathVariable Integer authorId
+    ) {
+        return ResponseEntity.ok(
+                vacancyService.findByAuthorId(
+                        authorId
                 )
         );
     }

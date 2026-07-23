@@ -115,15 +115,16 @@ public class VacancyDao {
                 WHERE id = ?
                 """;
 
-        return Optional.ofNullable(
+        Vacancy vacancy =
                 DataAccessUtils.singleResult(
                         jdbcTemplate.query(
                                 sql,
                                 new VacancyMapper(),
                                 id
                         )
-                )
-        );
+                );
+
+        return Optional.ofNullable(vacancy);
     }
 
     public List<Vacancy> findAll() {
@@ -168,6 +169,23 @@ public class VacancyDao {
                 sql,
                 new VacancyMapper(),
                 categoryId
+        );
+    }
+
+    public List<Vacancy> findByAuthorId(
+            Integer authorId
+    ) {
+        String sql = """
+                SELECT *
+                FROM vacancies
+                WHERE author_id = ?
+                ORDER BY update_time DESC
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                new VacancyMapper(),
+                authorId
         );
     }
 
@@ -227,6 +245,9 @@ public class VacancyDao {
                 WHERE id = ?
                 """;
 
-        jdbcTemplate.update(sql, id);
+        jdbcTemplate.update(
+                sql,
+                id
+        );
     }
 }
