@@ -8,12 +8,14 @@ import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.service.ImageService;
 import kg.attractor.jobsearch.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl
@@ -30,9 +32,19 @@ public class UserServiceImpl
     public void register(
             UserCreateDto userCreateDto
     ) {
+        log.info(
+                "Registering user with email: {}",
+                userCreateDto.getEmail()
+        );
+
         if (userDao.existsByEmail(
                 userCreateDto.getEmail()
         )) {
+            log.warn(
+                    "Registration failed. Email already exists: {}",
+                    userCreateDto.getEmail()
+            );
+
             throw new IllegalArgumentException(
                     "User with this email already exists"
             );
@@ -53,11 +65,21 @@ public class UserServiceImpl
                 )
                 .build();
 
-        userDao.save(user);
+        Integer userId = userDao.save(user);
+
+        log.info(
+                "User registered successfully with id: {}",
+                userId
+        );
     }
 
     @Override
     public User findProfileById(Integer id) {
+        log.debug(
+                "Searching user profile by id: {}",
+                id
+        );
+
         return profileDao.findById(id)
                 .orElseThrow();
     }
@@ -67,6 +89,11 @@ public class UserServiceImpl
             Integer id,
             ProfileUpdateDto profileUpdateDto
     ) {
+        log.info(
+                "Editing user profile with id: {}",
+                id
+        );
+
         User user = profileDao.findById(id)
                 .orElseThrow();
 
@@ -80,6 +107,11 @@ public class UserServiceImpl
                 && userDao.existsByEmail(
                 newEmail
         )) {
+
+            log.warn(
+                    "Profile update failed. Email already exists: {}",
+                    newEmail
+            );
 
             throw new IllegalArgumentException(
                     "User with this email already exists"
@@ -130,10 +162,19 @@ public class UserServiceImpl
         }
 
         profileDao.update(user);
+
+        log.info(
+                "User profile updated successfully. User id: {}",
+                id
+        );
     }
 
     @Override
     public List<User> findByName(String name) {
+        log.debug(
+                "Searching users by name"
+        );
+
         return userDao.findByName(name);
     }
 
@@ -141,6 +182,10 @@ public class UserServiceImpl
     public List<User> findByPhoneNumber(
             String phoneNumber
     ) {
+        log.debug(
+                "Searching users by phone number"
+        );
+
         return userDao.findByPhoneNumber(
                 phoneNumber
         );
@@ -150,11 +195,21 @@ public class UserServiceImpl
     public Optional<User> findByEmail(
             String email
     ) {
+        log.debug(
+                "Searching user by email: {}",
+                email
+        );
+
         return userDao.findByEmail(email);
     }
 
     @Override
     public boolean existsByEmail(String email) {
+        log.debug(
+                "Checking user existence by email: {}",
+                email
+        );
+
         return userDao.existsByEmail(email);
     }
 
@@ -162,6 +217,10 @@ public class UserServiceImpl
     public List<User> searchApplicants(
             String query
     ) {
+        log.debug(
+                "Searching applicants"
+        );
+
         return userDao.findApplicants(query);
     }
 
@@ -169,6 +228,10 @@ public class UserServiceImpl
     public List<User> searchEmployers(
             String query
     ) {
+        log.debug(
+                "Searching employers"
+        );
+
         return userDao.findEmployers(query);
     }
 
@@ -177,6 +240,11 @@ public class UserServiceImpl
             Integer userId,
             MultipartFile file
     ) {
+        log.info(
+                "Uploading avatar for user id: {}",
+                userId
+        );
+
         profileDao.findById(userId)
                 .orElseThrow();
 
@@ -186,6 +254,11 @@ public class UserServiceImpl
         userDao.updateAvatar(
                 userId,
                 filename
+        );
+
+        log.info(
+                "Avatar uploaded successfully for user id: {}",
+                userId
         );
 
         return filename;

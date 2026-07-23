@@ -9,11 +9,13 @@ import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
 import kg.attractor.jobsearch.service.ResumeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResumeServiceImpl
@@ -31,6 +33,12 @@ public class ResumeServiceImpl
     public Integer createResume(
             ResumeDto resumeDto
     ) {
+        log.info(
+                "Creating resume '{}' for applicant id: {}",
+                resumeDto.getName(),
+                resumeDto.getApplicantId()
+        );
+
         LocalDateTime now =
                 LocalDateTime.now();
 
@@ -61,6 +69,11 @@ public class ResumeServiceImpl
                 resumeDto.getWorkExperienceInfo()
         );
 
+        log.info(
+                "Resume created successfully with id: {}",
+                resumeId
+        );
+
         return resumeId;
     }
 
@@ -69,6 +82,11 @@ public class ResumeServiceImpl
             Integer id,
             ResumeDto resumeDto
     ) {
+        log.info(
+                "Editing resume with id: {}",
+                id
+        );
+
         Resume savedResume =
                 resumeDao.findById(id)
                         .orElseThrow();
@@ -121,20 +139,43 @@ public class ResumeServiceImpl
                             .getWorkExperienceInfo()
             );
         }
+
+        log.info(
+                "Resume updated successfully with id: {}",
+                id
+        );
     }
 
     @Override
     public void deleteResume(Integer id) {
+        log.warn(
+                "Deleting resume with id: {}",
+                id
+        );
+
+        resumeDao.findById(id)
+                .orElseThrow();
+
         educationInfoDao.deleteByResumeId(id);
 
         workExperienceInfoDao
                 .deleteByResumeId(id);
 
         resumeDao.deleteById(id);
+
+        log.info(
+                "Resume deleted successfully with id: {}",
+                id
+        );
     }
 
     @Override
     public ResumeDto findById(Integer id) {
+        log.debug(
+                "Searching resume by id: {}",
+                id
+        );
+
         Resume resume =
                 resumeDao.findById(id)
                         .orElseThrow();
@@ -144,6 +185,10 @@ public class ResumeServiceImpl
 
     @Override
     public List<ResumeDto> findAllActive() {
+        log.debug(
+                "Searching all active resumes"
+        );
+
         return resumeDao.findAllActive()
                 .stream()
                 .map(this::convertToDto)
@@ -154,6 +199,11 @@ public class ResumeServiceImpl
     public List<ResumeDto> findByCategoryId(
             Integer categoryId
     ) {
+        log.debug(
+                "Searching resumes by category id: {}",
+                categoryId
+        );
+
         return resumeDao
                 .findByCategoryId(categoryId)
                 .stream()
@@ -165,6 +215,11 @@ public class ResumeServiceImpl
     public List<ResumeDto> findByApplicantId(
             Integer applicantId
     ) {
+        log.debug(
+                "Searching resumes by applicant id: {}",
+                applicantId
+        );
+
         return resumeDao
                 .findByApplicantId(applicantId)
                 .stream()

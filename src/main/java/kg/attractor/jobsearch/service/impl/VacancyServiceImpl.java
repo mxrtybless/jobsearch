@@ -4,11 +4,13 @@ import kg.attractor.jobsearch.dao.VacancyDao;
 import kg.attractor.jobsearch.model.Vacancy;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VacancyServiceImpl
@@ -20,6 +22,12 @@ public class VacancyServiceImpl
     public Integer createVacancy(
             Vacancy vacancy
     ) {
+        log.info(
+                "Creating vacancy '{}' for employer id: {}",
+                vacancy.getName(),
+                vacancy.getAuthorId()
+        );
+
         LocalDateTime now =
                 LocalDateTime.now();
 
@@ -27,7 +35,15 @@ public class VacancyServiceImpl
         vacancy.setCreatedDate(now);
         vacancy.setUpdateTime(now);
 
-        return vacancyDao.save(vacancy);
+        Integer vacancyId =
+                vacancyDao.save(vacancy);
+
+        log.info(
+                "Vacancy created successfully with id: {}",
+                vacancyId
+        );
+
+        return vacancyId;
     }
 
     @Override
@@ -35,6 +51,11 @@ public class VacancyServiceImpl
             Integer id,
             Vacancy vacancy
     ) {
+        log.info(
+                "Editing vacancy with id: {}",
+                id
+        );
+
         Vacancy savedVacancy =
                 vacancyDao.findById(id)
                         .orElseThrow();
@@ -74,29 +95,57 @@ public class VacancyServiceImpl
         );
 
         vacancyDao.update(savedVacancy);
+
+        log.info(
+                "Vacancy updated successfully with id: {}",
+                id
+        );
     }
 
     @Override
     public void deleteVacancy(Integer id) {
+        log.warn(
+                "Deleting vacancy with id: {}",
+                id
+        );
+
         vacancyDao.findById(id)
                 .orElseThrow();
 
         vacancyDao.deleteById(id);
+
+        log.info(
+                "Vacancy deleted successfully with id: {}",
+                id
+        );
     }
 
     @Override
     public Vacancy findById(Integer id) {
+        log.debug(
+                "Searching vacancy by id: {}",
+                id
+        );
+
         return vacancyDao.findById(id)
                 .orElseThrow();
     }
 
     @Override
     public List<Vacancy> findAll() {
+        log.debug(
+                "Searching all vacancies"
+        );
+
         return vacancyDao.findAll();
     }
 
     @Override
     public List<Vacancy> findAllActive() {
+        log.debug(
+                "Searching all active vacancies"
+        );
+
         return vacancyDao.findAllActive();
     }
 
@@ -104,6 +153,11 @@ public class VacancyServiceImpl
     public List<Vacancy> findByCategoryId(
             Integer categoryId
     ) {
+        log.debug(
+                "Searching vacancies by category id: {}",
+                categoryId
+        );
+
         return vacancyDao.findByCategoryId(
                 categoryId
         );
@@ -113,6 +167,11 @@ public class VacancyServiceImpl
     public List<Vacancy> findByAuthorId(
             Integer authorId
     ) {
+        log.debug(
+                "Searching vacancies by employer id: {}",
+                authorId
+        );
+
         return vacancyDao.findByAuthorId(
                 authorId
         );
@@ -123,6 +182,11 @@ public class VacancyServiceImpl
     findRespondedByApplicantId(
             Integer applicantId
     ) {
+        log.debug(
+                "Searching responded vacancies for applicant id: {}",
+                applicantId
+        );
+
         return vacancyDao
                 .findRespondedByApplicantId(
                         applicantId
