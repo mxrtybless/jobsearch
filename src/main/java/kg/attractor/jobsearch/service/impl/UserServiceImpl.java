@@ -1,6 +1,8 @@
 package kg.attractor.jobsearch.service.impl;
 
+import kg.attractor.jobsearch.dao.ProfileDao;
 import kg.attractor.jobsearch.dao.UserDao;
+import kg.attractor.jobsearch.dto.ProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserCreateDto;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.service.ImageService;
@@ -21,6 +23,7 @@ public class UserServiceImpl
             "default-avatar.png";
 
     private final UserDao userDao;
+    private final ProfileDao profileDao;
     private final ImageService imageService;
 
     @Override
@@ -51,6 +54,82 @@ public class UserServiceImpl
                 .build();
 
         userDao.save(user);
+    }
+
+    @Override
+    public User findProfileById(Integer id) {
+        return profileDao.findById(id)
+                .orElseThrow();
+    }
+
+    @Override
+    public void editProfile(
+            Integer id,
+            ProfileUpdateDto profileUpdateDto
+    ) {
+        User user = profileDao.findById(id)
+                .orElseThrow();
+
+        String newEmail =
+                profileUpdateDto.getEmail();
+
+        if (newEmail != null
+                && !newEmail.equalsIgnoreCase(
+                user.getEmail()
+        )
+                && userDao.existsByEmail(
+                newEmail
+        )) {
+
+            throw new IllegalArgumentException(
+                    "User with this email already exists"
+            );
+        }
+
+        if (profileUpdateDto.getName()
+                != null) {
+            user.setName(
+                    profileUpdateDto.getName()
+            );
+        }
+
+        if (profileUpdateDto.getSurname()
+                != null) {
+            user.setSurname(
+                    profileUpdateDto.getSurname()
+            );
+        }
+
+        if (profileUpdateDto.getAge()
+                != null) {
+            user.setAge(
+                    profileUpdateDto.getAge()
+            );
+        }
+
+        if (profileUpdateDto.getEmail()
+                != null) {
+            user.setEmail(
+                    profileUpdateDto.getEmail()
+            );
+        }
+
+        if (profileUpdateDto.getPassword()
+                != null) {
+            user.setPassword(
+                    profileUpdateDto.getPassword()
+            );
+        }
+
+        if (profileUpdateDto.getPhoneNumber()
+                != null) {
+            user.setPhoneNumber(
+                    profileUpdateDto
+                            .getPhoneNumber()
+            );
+        }
+
+        profileDao.update(user);
     }
 
     @Override
@@ -98,6 +177,9 @@ public class UserServiceImpl
             Integer userId,
             MultipartFile file
     ) {
+        profileDao.findById(userId)
+                .orElseThrow();
+
         String filename =
                 imageService.upload(file);
 

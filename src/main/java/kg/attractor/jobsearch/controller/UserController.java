@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
+import kg.attractor.jobsearch.dto.ProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserCreateDto;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.service.UserService;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,6 +36,29 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .build();
+    }
+
+    @GetMapping("profile/{id}")
+    public ResponseEntity<User> findProfile(
+            @PathVariable Integer id
+    ) {
+        return ResponseEntity.ok(
+                userService.findProfileById(id)
+        );
+    }
+
+    @PutMapping("edit/{id}")
+    public ResponseEntity<Void> editProfile(
+            @PathVariable Integer id,
+            @RequestBody
+            ProfileUpdateDto profileUpdateDto
+    ) {
+        userService.editProfile(
+                id,
+                profileUpdateDto
+        );
+
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("search/name")

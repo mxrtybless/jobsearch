@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.service;
 
+import kg.attractor.jobsearch.dto.ProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserCreateDto;
 import kg.attractor.jobsearch.model.User;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +10,13 @@ import java.util.Optional;
 
 public interface UserService {
     void register(UserCreateDto userCreateDto);
+
+    User findProfileById(Integer id);
+
+    void editProfile(
+            Integer id,
+            ProfileUpdateDto profileUpdateDto
+    );
 
     List<User> findByName(String name);
 
