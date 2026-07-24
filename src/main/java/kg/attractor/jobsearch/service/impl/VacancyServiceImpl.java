@@ -1,6 +1,13 @@
 package kg.attractor.jobsearch.service.impl;
 
+import kg.attractor.jobsearch.dao.ProfileDao;
 import kg.attractor.jobsearch.dao.VacancyDao;
+import kg.attractor.jobsearch.exception.InvalidAccountTypeException;
+import kg.attractor.jobsearch.exception.InvalidExperienceRangeException;
+import kg.attractor.jobsearch.exception.UserNotFoundException;
+import kg.attractor.jobsearch.exception.VacancyNotFoundException;
+import kg.attractor.jobsearch.model.AccountType;
+import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.Vacancy;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +24,7 @@ public class VacancyServiceImpl
         implements VacancyService {
 
     private final VacancyDao vacancyDao;
+    private final ProfileDao profileDao;
 
     @Override
     public Integer createVacancy(
@@ -27,6 +35,12 @@ public class VacancyServiceImpl
                 vacancy.getName(),
                 vacancy.getAuthorId()
         );
+
+        validateEmployer(
+                vacancy.getAuthorId()
+        );
+
+        validateExperienceRange(vacancy);
 
         LocalDateTime now =
                 LocalDateTime.now();
@@ -58,7 +72,26 @@ public class VacancyServiceImpl
 
         Vacancy savedVacancy =
                 vacancyDao.findById(id)
-                        .orElseThrow();
+                        .orElseThrow(() ->
+                                new VacancyNotFoundException(
+                                        id
+                                )
+                        );
+
+        if (!savedVacancy.getAuthorId()
+                .equals(
+                        vacancy.getAuthorId()
+                )) {
+            throw new IllegalArgumentException(
+                    "Vacancy author id cannot be changed"
+            );
+        }
+
+        validateEmployer(
+                savedVacancy.getAuthorId()
+        );
+
+        validateExperienceRange(vacancy);
 
         savedVacancy.setName(
                 vacancy.getName()
@@ -110,7 +143,11 @@ public class VacancyServiceImpl
         );
 
         vacancyDao.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new VacancyNotFoundException(
+                                id
+                        )
+                );
 
         vacancyDao.deleteById(id);
 
@@ -128,7 +165,11 @@ public class VacancyServiceImpl
         );
 
         return vacancyDao.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new VacancyNotFoundException(
+                                id
+                        )
+                );
     }
 
     @Override
@@ -172,6 +213,8 @@ public class VacancyServiceImpl
                 authorId
         );
 
+        validateEmployer(authorId);
+
         return vacancyDao.findByAuthorId(
                 authorId
         );
@@ -187,9 +230,59 @@ public class VacancyServiceImpl
                 applicantId
         );
 
+        User applicant =
+                profileDao.findById(applicantId)
+                        .orElseThrow(() ->
+                                new UserNotFoundException(
+                                        applicantId
+                                )
+                        );
+
+        if (applicant.getAccountType()
+                != AccountType.APPLICANT) {
+
+            throw new InvalidAccountTypeException(
+                    applicantId,
+                    AccountType.APPLICANT
+            );
+        }
+
         return vacancyDao
                 .findRespondedByApplicantId(
                         applicantId
                 );
+    }
+
+    private void validateEmployer(
+            Integer employerId
+    ) {
+        User employer =
+                profileDao.findById(employerId)
+                        .orElseThrow(() ->
+                                new UserNotFoundException(
+                                        employerId
+                                )
+                        );
+
+        if (employer.getAccountType()
+                != AccountType.EMPLOYER) {
+
+            throw new InvalidAccountTypeException(
+                    employerId,
+                    AccountType.EMPLOYER
+            );
+        }
+    }
+
+    private void validateExperienceRange(
+            Vacancy vacancy
+    ) {
+        if (vacancy.getExpFrom() != null
+                && vacancy.getExpTo() != null
+                && vacancy.getExpFrom()
+                > vacancy.getExpTo()) {
+
+            throw new InvalidExperienceRangeException();
+        }
     }
 }
