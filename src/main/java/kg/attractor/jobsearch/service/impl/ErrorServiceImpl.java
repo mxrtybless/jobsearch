@@ -6,27 +6,54 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
-public class ErrorServiceImpl implements ErrorService {
+public class ErrorServiceImpl
+        implements ErrorService {
 
     @Override
-    public ErrorResponseBody makeResponse(BindingResult result) {
-        Map<String, List<String>> reasons = new HashMap<>();
+    public ErrorResponseBody makeResponse(
+            BindingResult result
+    ) {
+        Map<String, List<String>> reasons =
+                new LinkedHashMap<>();
 
-        result.getFieldErrors().stream()
-                .filter(e -> e.getDefaultMessage() != null)
-                .forEach(e -> {
-                    List<String> errors = new ArrayList<>();
-                    errors.add(e.getDefaultMessage());
+        result.getFieldErrors()
+                .stream()
+                .filter(error ->
+                        error.getDefaultMessage()
+                                != null
+                )
+                .forEach(error ->
+                        reasons.computeIfAbsent(
+                                        error.getField(),
+                                        key ->
+                                                new ArrayList<>()
+                                )
+                                .add(
+                                        error.getDefaultMessage()
+                                )
+                );
 
-                    if (!reasons.containsKey(e.getField())) {
-                        reasons.put(e.getField(), errors);
-                    }
-                });
+        result.getGlobalErrors()
+                .stream()
+                .filter(error ->
+                        error.getDefaultMessage()
+                                != null
+                )
+                .forEach(error ->
+                        reasons.computeIfAbsent(
+                                        error.getObjectName(),
+                                        key ->
+                                                new ArrayList<>()
+                                )
+                                .add(
+                                        error.getDefaultMessage()
+                                )
+                );
 
         return ErrorResponseBody.builder()
                 .title("Validation error")
@@ -35,11 +62,25 @@ public class ErrorServiceImpl implements ErrorService {
     }
 
     @Override
-    public ErrorResponseBody makeResponse(Exception e) {
-        String errMessage = e.getMessage();
+    public ErrorResponseBody makeResponse(
+            Exception exception
+    ) {
+        String message =
+                exception.getMessage();
+
+        if (message == null
+                || message.isBlank()) {
+            message = "Request processing error";
+        }
+
         return ErrorResponseBody.builder()
-                .title(errMessage)
-                .reasons(Map.of("Exceptions", List.of(errMessage)))
+                .title(message)
+                .reasons(
+                        Map.of(
+                                "error",
+                                List.of(message)
+                        )
+                )
                 .build();
     }
 }
