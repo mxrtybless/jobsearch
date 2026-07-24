@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.validation.Valid;
 import kg.attractor.jobsearch.model.Vacancy;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,9 @@ public class VacancyController {
 
     @PostMapping("create")
     public ResponseEntity<Integer> createVacancy(
-            @RequestBody Vacancy vacancy
+            @Valid
+            @RequestBody
+            Vacancy vacancy
     ) {
         Integer vacancyId =
                 vacancyService.createVacancy(
@@ -39,14 +42,18 @@ public class VacancyController {
     @PutMapping("edit/{id}")
     public ResponseEntity<Void> editVacancy(
             @PathVariable Integer id,
-            @RequestBody Vacancy vacancy
+            @Valid
+            @RequestBody
+            Vacancy vacancy
     ) {
         vacancyService.editVacancy(
                 id,
                 vacancy
         );
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .ok()
+                .build();
     }
 
     @DeleteMapping("delete/{id}")
