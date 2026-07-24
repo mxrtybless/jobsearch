@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.ProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserCreateDto;
 import kg.attractor.jobsearch.model.User;
@@ -24,10 +25,12 @@ import java.util.List;
 @RequestMapping("users")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
     @PostMapping("register")
     public ResponseEntity<Void> register(
+            @Valid
             @RequestBody
             UserCreateDto userCreateDto
     ) {
@@ -50,6 +53,7 @@ public class UserController {
     @PutMapping("edit/{id}")
     public ResponseEntity<Void> editProfile(
             @PathVariable Integer id,
+            @Valid
             @RequestBody
             ProfileUpdateDto profileUpdateDto
     ) {
@@ -58,7 +62,9 @@ public class UserController {
                 profileUpdateDto
         );
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .ok()
+                .build();
     }
 
     @GetMapping("search/name")
