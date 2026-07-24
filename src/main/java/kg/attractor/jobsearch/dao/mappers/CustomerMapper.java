@@ -6,13 +6,29 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class CustomerMapper implements RowMapper<Customer> {
+public class CustomerMapper
+        implements RowMapper<Customer> {
+
     @Override
-    public Customer mapRow(ResultSet rs, int rowNum) throws SQLException {
+    public Customer mapRow(
+            ResultSet resultSet,
+            int rowNum
+    ) throws SQLException {
+
         Customer customer = new Customer();
-        customer.setId(rs.getInt("id"));
-        customer.setUsername(rs.getString("name"));
-        customer.setPassword(rs.getString("password"));
+
+        customer.setEmail(
+                resultSet.getString("email")
+        );
+
+        customer.setUsername(
+                resultSet.getString("username")
+        );
+
+        customer.setPassword(
+                resultSet.getString("password")
+        );
+
         return customer;
     }
 }

@@ -7,59 +7,91 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class CustomerDao {
+
     private final JdbcTemplate jdbcTemplate;
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    private final NamedParameterJdbcTemplate
+            namedParameterJdbcTemplate;
 
     public List<Customer> findAll() {
-        String sql = "select * from customer;";
-        return jdbcTemplate.query(sql, new CustomerMapper());
+        String sql = """
+                SELECT email,
+                       username,
+                       password
+                FROM customers
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                new CustomerMapper()
+        );
     }
 
-    public Optional<Customer> findById(Integer id) {
-        String sql = "select * from customer " +
-                "where id = ?";
-        return Optional.ofNullable(
+    public Optional<Customer> findById(
+            String email
+    ) {
+        String sql = """
+                SELECT email,
+                       username,
+                       password
+                FROM customers
+                WHERE email = ?
+                """;
+
+        Customer customer =
                 DataAccessUtils.singleResult(
-                        jdbcTemplate.query(sql, new CustomerMapper(), id)
-                )
-        );
+                        jdbcTemplate.query(
+                                sql,
+                                new CustomerMapper(),
+                                email
+                        )
+                );
+
+        return Optional.ofNullable(customer);
     }
 
     public void save(Customer customer) {
-        String sql = "insert into customer (name, password) " +
-                "values(:name, :password)";
+        String sql = """
+                INSERT INTO customers
+                (
+                    email,
+                    username,
+                    password
+                )
+                VALUES
+                (
+                    :email,
+                    :username,
+                    :password
+                )
+                """;
+
+        MapSqlParameterSource parameters =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "email",
+                                customer.getEmail()
+                        )
+                        .addValue(
+                                "username",
+                                customer.getUsername()
+                        )
+                        .addValue(
+                                "password",
+                                customer.getPassword()
+                        );
+
         namedParameterJdbcTemplate.update(
                 sql,
-                new MapSqlParameterSource()
-                        .addValue("name", customer.getUsername())
-                        .addValue("password", customer.getPassword())
+                parameters
         );
-    }
-
-    public Integer saveAndReturnId(Customer customer) {
-        String sql = "insert into customer (name, password) " +
-                "values(?, ?)";
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, customer.getUsername());
-            ps.setString(2, customer.getPassword());
-            return ps;
-        }, keyHolder);
-
-        return Objects.requireNonNull(keyHolder.getKey()).intValue();
     }
 }
