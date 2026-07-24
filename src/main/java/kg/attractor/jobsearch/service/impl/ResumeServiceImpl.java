@@ -1,11 +1,18 @@
 package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dao.EducationInfoDao;
+import kg.attractor.jobsearch.dao.ProfileDao;
 import kg.attractor.jobsearch.dao.ResumeDao;
 import kg.attractor.jobsearch.dao.WorkExperienceInfoDao;
 import kg.attractor.jobsearch.dto.ResumeDto;
+import kg.attractor.jobsearch.exception.InvalidAccountTypeException;
+import kg.attractor.jobsearch.exception.InvalidEducationPeriodException;
+import kg.attractor.jobsearch.exception.ResumeNotFoundException;
+import kg.attractor.jobsearch.exception.UserNotFoundException;
+import kg.attractor.jobsearch.model.AccountType;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
+import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
 import kg.attractor.jobsearch.service.ResumeService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +29,7 @@ public class ResumeServiceImpl
         implements ResumeService {
 
     private final ResumeDao resumeDao;
+    private final ProfileDao profileDao;
 
     private final EducationInfoDao
             educationInfoDao;
@@ -37,6 +45,14 @@ public class ResumeServiceImpl
                 "Creating resume '{}' for applicant id: {}",
                 resumeDto.getName(),
                 resumeDto.getApplicantId()
+        );
+
+        validateApplicant(
+                resumeDto.getApplicantId()
+        );
+
+        validateEducationPeriods(
+                resumeDto.getEducationInfo()
         );
 
         LocalDateTime now =
@@ -89,7 +105,28 @@ public class ResumeServiceImpl
 
         Resume savedResume =
                 resumeDao.findById(id)
-                        .orElseThrow();
+                        .orElseThrow(() ->
+                                new ResumeNotFoundException(
+                                        id
+                                )
+                        );
+
+        if (!savedResume.getApplicantId()
+                .equals(
+                        resumeDto.getApplicantId()
+                )) {
+            throw new IllegalArgumentException(
+                    "Resume applicant id cannot be changed"
+            );
+        }
+
+        validateApplicant(
+                savedResume.getApplicantId()
+        );
+
+        validateEducationPeriods(
+                resumeDto.getEducationInfo()
+        );
 
         savedResume.setName(
                 resumeDto.getName()
@@ -154,7 +191,11 @@ public class ResumeServiceImpl
         );
 
         resumeDao.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResumeNotFoundException(
+                                id
+                        )
+                );
 
         educationInfoDao.deleteByResumeId(id);
 
@@ -178,7 +219,11 @@ public class ResumeServiceImpl
 
         Resume resume =
                 resumeDao.findById(id)
-                        .orElseThrow();
+                        .orElseThrow(() ->
+                                new ResumeNotFoundException(
+                                        id
+                                )
+                        );
 
         return convertToDto(resume);
     }
@@ -219,6 +264,8 @@ public class ResumeServiceImpl
                 "Searching resumes by applicant id: {}",
                 applicantId
         );
+
+        validateApplicant(applicantId);
 
         return resumeDao
                 .findByApplicantId(applicantId)
@@ -278,6 +325,56 @@ public class ResumeServiceImpl
         );
 
         return resumeDto;
+    }
+
+    private void validateApplicant(
+            Integer applicantId
+    ) {
+        User user = profileDao.findById(
+                        applicantId
+                )
+                .orElseThrow(() ->
+                        new UserNotFoundException(
+                                applicantId
+                        )
+                );
+
+        if (user.getAccountType()
+                != AccountType.APPLICANT) {
+
+            throw new InvalidAccountTypeException(
+                    applicantId,
+                    AccountType.APPLICANT
+            );
+        }
+    }
+
+    private void validateEducationPeriods(
+            List<EducationInfo> educationList
+    ) {
+        if (educationList == null) {
+            return;
+        }
+
+        for (EducationInfo educationInfo
+                : educationList) {
+
+            if (educationInfo.getStartDate()
+                    != null
+                    && educationInfo.getEndDate()
+                    != null
+                    && educationInfo.getEndDate()
+                    .isBefore(
+                            educationInfo
+                                    .getStartDate()
+                    )) {
+
+                throw new InvalidEducationPeriodException(
+                        educationInfo
+                                .getInstitution()
+                );
+            }
+        }
     }
 
     private void saveEducationInfo(

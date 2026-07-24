@@ -4,6 +4,8 @@ import kg.attractor.jobsearch.dao.ProfileDao;
 import kg.attractor.jobsearch.dao.UserDao;
 import kg.attractor.jobsearch.dto.ProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserCreateDto;
+import kg.attractor.jobsearch.exception.EmailAlreadyExistsException;
+import kg.attractor.jobsearch.exception.UserNotFoundException;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.service.ImageService;
 import kg.attractor.jobsearch.service.UserService;
@@ -45,8 +47,8 @@ public class UserServiceImpl
                     userCreateDto.getEmail()
             );
 
-            throw new IllegalArgumentException(
-                    "User with this email already exists"
+            throw new EmailAlreadyExistsException(
+                    userCreateDto.getEmail()
             );
         }
 
@@ -81,7 +83,9 @@ public class UserServiceImpl
         );
 
         return profileDao.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new UserNotFoundException(id)
+                );
     }
 
     @Override
@@ -95,7 +99,9 @@ public class UserServiceImpl
         );
 
         User user = profileDao.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new UserNotFoundException(id)
+                );
 
         String newEmail =
                 profileUpdateDto.getEmail();
@@ -113,8 +119,8 @@ public class UserServiceImpl
                     newEmail
             );
 
-            throw new IllegalArgumentException(
-                    "User with this email already exists"
+            throw new EmailAlreadyExistsException(
+                    newEmail
             );
         }
 
@@ -246,7 +252,11 @@ public class UserServiceImpl
         );
 
         profileDao.findById(userId)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new UserNotFoundException(
+                                userId
+                        )
+                );
 
         String filename =
                 imageService.upload(file);

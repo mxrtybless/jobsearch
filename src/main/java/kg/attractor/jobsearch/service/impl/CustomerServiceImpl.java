@@ -21,7 +21,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         return customers.stream()
                 .map(e -> CustomerDto.builder()
-                        .id(e.getId())
+                        .email(e.getEmail())
                         .name(e.getUsername())
                         .password(e.getPassword())
                         .build()
@@ -30,14 +30,24 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public CustomerDto findById(Integer id) {
-        Customer customer = customerDao.findById(id)
+    public CustomerDto findById(String email) {
+        Customer customer = customerDao.findById(email)
                 .orElseThrow(CustomerNotFoundException::new);
 
         return CustomerDto.builder()
-                .id(customer.getId())
+                .email(customer.getEmail())
                 .name(customer.getUsername())
                 .password(customer.getPassword())
                 .build();
+    }
+
+    @Override
+    public void save(CustomerDto dto) {
+        Customer customer = new Customer();
+        customer.setEmail(dto.getEmail());
+        customer.setUsername(dto.getName());
+        customer.setPassword(dto.getPassword());
+
+        customerDao.save(customer);
     }
 }

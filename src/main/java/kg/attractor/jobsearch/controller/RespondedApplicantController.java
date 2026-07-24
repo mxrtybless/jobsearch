@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.validation.Valid;
 import kg.attractor.jobsearch.model.RespondedApplicant;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.service.RespondedApplicantService;
@@ -24,6 +25,7 @@ public class RespondedApplicantController {
 
     @PostMapping("create")
     public ResponseEntity<Void> createResponse(
+            @Valid
             @RequestBody
             RespondedApplicant respondedApplicant
     ) {

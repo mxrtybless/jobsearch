@@ -7,5 +7,7 @@ import java.util.List;
 public interface CustomerService {
     List<CustomerDto> getCustomerList();
 
-    CustomerDto findById(Integer id);
+    CustomerDto findById(String email);
+
+    void save(CustomerDto dto);
 }

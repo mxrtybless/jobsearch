@@ -1,8 +1,15 @@
 package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dao.RespondedApplicantDao;
+import kg.attractor.jobsearch.dao.ResumeDao;
+import kg.attractor.jobsearch.dao.VacancyDao;
+import kg.attractor.jobsearch.exception.ResponseAlreadyExistsException;
+import kg.attractor.jobsearch.exception.ResumeNotFoundException;
+import kg.attractor.jobsearch.exception.VacancyNotFoundException;
 import kg.attractor.jobsearch.model.RespondedApplicant;
+import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.model.Vacancy;
 import kg.attractor.jobsearch.service.RespondedApplicantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,35 +26,69 @@ public class RespondedApplicantServiceImpl
     private final RespondedApplicantDao
             respondedApplicantDao;
 
+    private final ResumeDao resumeDao;
+    private final VacancyDao vacancyDao;
+
     @Override
     public void createResponse(
             RespondedApplicant respondedApplicant
     ) {
+        Integer resumeId =
+                respondedApplicant.getResumeId();
+
+        Integer vacancyId =
+                respondedApplicant.getVacancyId();
+
         log.info(
                 "Creating response: resume id {}, vacancy id {}",
-                respondedApplicant.getResumeId(),
-                respondedApplicant.getVacancyId()
+                resumeId,
+                vacancyId
         );
+
+        Resume resume =
+                resumeDao.findById(resumeId)
+                        .orElseThrow(() ->
+                                new ResumeNotFoundException(
+                                        resumeId
+                                )
+                        );
+
+        Vacancy vacancy =
+                vacancyDao.findById(vacancyId)
+                        .orElseThrow(() ->
+                                new VacancyNotFoundException(
+                                        vacancyId
+                                )
+                        );
+
+        if (!resume.isPublished()) {
+            throw new IllegalArgumentException(
+                    "Cannot respond with an inactive resume"
+            );
+        }
+
+        if (!vacancy.isPublished()) {
+            throw new IllegalArgumentException(
+                    "Cannot respond to an inactive vacancy"
+            );
+        }
 
         boolean responseExists =
                 respondedApplicantDao.exists(
-                        respondedApplicant
-                                .getResumeId(),
-                        respondedApplicant
-                                .getVacancyId()
+                        resumeId,
+                        vacancyId
                 );
 
         if (responseExists) {
             log.warn(
                     "Response already exists: resume id {}, vacancy id {}",
-                    respondedApplicant
-                            .getResumeId(),
-                    respondedApplicant
-                            .getVacancyId()
+                    resumeId,
+                    vacancyId
             );
 
-            throw new IllegalArgumentException(
-                    "Response already exists"
+            throw new ResponseAlreadyExistsException(
+                    resumeId,
+                    vacancyId
             );
         }
 
@@ -64,8 +105,8 @@ public class RespondedApplicantServiceImpl
 
         log.info(
                 "Response created successfully: resume id {}, vacancy id {}",
-                respondedApplicant.getResumeId(),
-                respondedApplicant.getVacancyId()
+                resumeId,
+                vacancyId
         );
     }
 
@@ -78,6 +119,13 @@ public class RespondedApplicantServiceImpl
                 "Searching applicants for vacancy id: {}",
                 vacancyId
         );
+
+        vacancyDao.findById(vacancyId)
+                .orElseThrow(() ->
+                        new VacancyNotFoundException(
+                                vacancyId
+                        )
+                );
 
         return respondedApplicantDao
                 .findApplicantsByVacancyId(
