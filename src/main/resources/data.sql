@@ -15,7 +15,7 @@ VALUES
         'Asanov',
         22,
         'applicant@attractor.com',
-        'qwerty123',
+        '$2y$10$rGEITnrNBARrzDPTddHfvu/kvEzvgTlJI/QKNT0BGLKsBEFm/kaWC',
         '+996700111222',
         'default-avatar.png',
         'APPLICANT'
@@ -25,7 +25,7 @@ VALUES
         'Company',
         30,
         'employer@attractor.com',
-        'qwerty123',
+        '$2y$10$9lYIDGlN6906dHEARifNPO7EPbkiDxts/FK2DIvTeB0Tk6Vco3IGC',
         '+996555333444',
         'default-avatar.png',
         'EMPLOYER'
