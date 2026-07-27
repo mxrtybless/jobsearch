@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Slf4j
@@ -55,25 +56,37 @@ public class UserServiceImpl
         }
 
         User user = User.builder()
-                .name(userCreateDto.getName())
-                .surname(userCreateDto.getSurname())
-                .age(userCreateDto.getAge())
-                .email(userCreateDto.getEmail())
+                .name(
+                        userCreateDto.getName()
+                )
+                .surname(
+                        userCreateDto.getSurname()
+                )
+                .age(
+                        userCreateDto.getAge()
+                )
+                .email(
+                        userCreateDto.getEmail()
+                )
                 .password(
                         passwordEncoder.encode(
-                                userCreateDto.getPassword()
+                                userCreateDto
+                                        .getPassword()
                         )
                 )
                 .phoneNumber(
-                        userCreateDto.getPhoneNumber()
+                        userCreateDto
+                                .getPhoneNumber()
                 )
                 .avatar(DEFAULT_AVATAR)
                 .accountType(
-                        userCreateDto.getAccountType()
+                        userCreateDto
+                                .getAccountType()
                 )
                 .build();
 
-        Integer userId = userDao.save(user);
+        Integer userId =
+                userDao.save(user);
 
         log.info(
                 "User registered successfully with id: {}",
@@ -82,7 +95,9 @@ public class UserServiceImpl
     }
 
     @Override
-    public User findProfileById(Integer id) {
+    public User findProfileById(
+            Integer id
+    ) {
         log.debug(
                 "Searching user profile by id: {}",
                 id
@@ -96,18 +111,18 @@ public class UserServiceImpl
 
     @Override
     public void editProfile(
-            Integer id,
+            String userEmail,
             ProfileUpdateDto profileUpdateDto
     ) {
-        log.info(
-                "Editing user profile with id: {}",
-                id
-        );
-
-        User user = profileDao.findById(id)
-                .orElseThrow(() ->
-                        new UserNotFoundException(id)
+        User user =
+                findAuthenticatedUser(
+                        userEmail
                 );
+
+        log.info(
+                "Editing profile of user id: {}",
+                user.getId()
+        );
 
         String newEmail =
                 profileUpdateDto.getEmail();
@@ -162,7 +177,8 @@ public class UserServiceImpl
                 != null) {
             user.setPassword(
                     passwordEncoder.encode(
-                            profileUpdateDto.getPassword()
+                            profileUpdateDto
+                                    .getPassword()
                     )
             );
         }
@@ -179,12 +195,14 @@ public class UserServiceImpl
 
         log.info(
                 "User profile updated successfully. User id: {}",
-                id
+                user.getId()
         );
     }
 
     @Override
-    public List<User> findByName(String name) {
+    public List<User> findByName(
+            String name
+    ) {
         log.debug(
                 "Searching users by name"
         );
@@ -218,7 +236,9 @@ public class UserServiceImpl
     }
 
     @Override
-    public boolean existsByEmail(String email) {
+    public boolean existsByEmail(
+            String email
+    ) {
         log.debug(
                 "Checking user existence by email: {}",
                 email
@@ -251,34 +271,47 @@ public class UserServiceImpl
 
     @Override
     public String uploadAvatar(
-            Integer userId,
+            String userEmail,
             MultipartFile file
     ) {
+        User user =
+                findAuthenticatedUser(
+                        userEmail
+                );
+
         log.info(
                 "Uploading avatar for user id: {}",
-                userId
+                user.getId()
         );
-
-        profileDao.findById(userId)
-                .orElseThrow(() ->
-                        new UserNotFoundException(
-                                userId
-                        )
-                );
 
         String filename =
                 imageService.upload(file);
 
         userDao.updateAvatar(
-                userId,
+                user.getId(),
                 filename
         );
 
         log.info(
                 "Avatar uploaded successfully for user id: {}",
-                userId
+                user.getId()
         );
 
         return filename;
+    }
+
+    private User findAuthenticatedUser(
+            String userEmail
+    ) {
+        return userDao.findByEmail(
+                        userEmail
+                )
+                .orElseThrow(() ->
+                        new NoSuchElementException(
+                                "User with email "
+                                        + userEmail
+                                        + " not found"
+                        )
+                );
     }
 }

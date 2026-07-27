@@ -9,12 +9,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    void register(UserCreateDto userCreateDto);
+
+    void register(
+            UserCreateDto userCreateDto
+    );
 
     User findProfileById(Integer id);
 
     void editProfile(
-            Integer id,
+            String userEmail,
             ProfileUpdateDto profileUpdateDto
     );
 
@@ -24,16 +27,22 @@ public interface UserService {
             String phoneNumber
     );
 
-    Optional<User> findByEmail(String email);
+    Optional<User> findByEmail(
+            String email
+    );
 
     boolean existsByEmail(String email);
 
-    List<User> searchApplicants(String query);
+    List<User> searchApplicants(
+            String query
+    );
 
-    List<User> searchEmployers(String query);
+    List<User> searchEmployers(
+            String query
+    );
 
     String uploadAvatar(
-            Integer userId,
+            String userEmail,
             MultipartFile file
     );
 }
