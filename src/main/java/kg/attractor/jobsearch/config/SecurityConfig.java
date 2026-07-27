@@ -21,39 +21,87 @@ import javax.sql.DataSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final PasswordEncoder encoder;
-
+    private final PasswordEncoder passwordEncoder;
     private final DataSource dataSource;
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        String userAdapter = "select email, password, enabled " +
-                "from customers " +
-                "where email = ?";
+    public void configureGlobal(
+            AuthenticationManagerBuilder auth
+    ) throws Exception {
+        String usersByEmailQuery = """
+                SELECT
+                    email AS username,
+                    password,
+                    TRUE AS enabled
+                FROM users
+                WHERE LOWER(email) = LOWER(?)
+                """;
 
-        String roleAdapter = "select u.email, r.role " +
-                "from customers u, " +
-                "     roles r " +
-                "where u.email = ? " +
-                "  and u.role_id = r.id";
+        String authoritiesByEmailQuery = """
+                SELECT
+                    email AS username,
+                    account_type AS authority
+                FROM users
+                WHERE LOWER(email) = LOWER(?)
+                """;
 
-        auth.jdbcAuthentication().dataSource(dataSource)
-                .usersByUsernameQuery(userAdapter)
-                .authoritiesByUsernameQuery(roleAdapter);
+        auth.jdbcAuthentication()
+                .dataSource(dataSource)
+                .passwordEncoder(passwordEncoder)
+                .usersByUsernameQuery(
+                        usersByEmailQuery
+                )
+                .authoritiesByUsernameQuery(
+                        authoritiesByEmailQuery
+                );
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http
+    ) throws Exception {
         http
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(Customizer.withDefaults())
-                .formLogin(AbstractHttpConfigurer::disable)
-                .logout(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/customers/**").hasAuthority("ADMIN")
-                        // .....
-                        .anyRequest().permitAll()
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+                .httpBasic(
+                        Customizer.withDefaults()
+                )
+                .formLogin(
+                        AbstractHttpConfigurer::disable
+                )
+                .logout(
+                        AbstractHttpConfigurer::disable
+                )
+                .csrf(
+                        AbstractHttpConfigurer::disable
+                )
+                .authorizeHttpRequests(authorize ->
+                        authorize
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/users/register"
+                                )
+                                .permitAll()
+
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/vacancies/**"
+                                )
+                                .permitAll()
+
+                                .requestMatchers(
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/v3/api-docs/**",
+                                        "/error"
+                                )
+                                .permitAll()
+
+                                .anyRequest()
+                                .authenticated()
                 );
 
         return http.build();

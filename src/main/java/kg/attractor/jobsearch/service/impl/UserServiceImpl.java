@@ -11,6 +11,7 @@ import kg.attractor.jobsearch.service.ImageService;
 import kg.attractor.jobsearch.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +30,7 @@ public class UserServiceImpl
     private final UserDao userDao;
     private final ProfileDao profileDao;
     private final ImageService imageService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void register(
@@ -57,7 +59,11 @@ public class UserServiceImpl
                 .surname(userCreateDto.getSurname())
                 .age(userCreateDto.getAge())
                 .email(userCreateDto.getEmail())
-                .password(userCreateDto.getPassword())
+                .password(
+                        passwordEncoder.encode(
+                                userCreateDto.getPassword()
+                        )
+                )
                 .phoneNumber(
                         userCreateDto.getPhoneNumber()
                 )
@@ -155,7 +161,9 @@ public class UserServiceImpl
         if (profileUpdateDto.getPassword()
                 != null) {
             user.setPassword(
-                    profileUpdateDto.getPassword()
+                    passwordEncoder.encode(
+                            profileUpdateDto.getPassword()
+                    )
             );
         }
 
