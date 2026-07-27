@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,6 +20,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vacancy {
+
+    @JsonProperty(
+            access = JsonProperty.Access.READ_ONLY
+    )
     private Integer id;
 
     @NotBlank(
@@ -83,15 +88,19 @@ public class Vacancy {
 
     private Boolean isActive;
 
-    @NotNull(
-            message = "Author id must be specified"
-    )
-    @Positive(
-            message = "Author id must be positive"
+    @JsonProperty(
+            access = JsonProperty.Access.READ_ONLY
     )
     private Integer authorId;
 
+    @JsonProperty(
+            access = JsonProperty.Access.READ_ONLY
+    )
     private LocalDateTime createdDate;
+
+    @JsonProperty(
+            access = JsonProperty.Access.READ_ONLY
+    )
     private LocalDateTime updateTime;
 
     public boolean isPublished() {

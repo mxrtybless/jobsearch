@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +35,9 @@ public class UserController {
             @RequestBody
             UserCreateDto userCreateDto
     ) {
-        userService.register(userCreateDto);
+        userService.register(
+                userCreateDto
+        );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -50,15 +53,15 @@ public class UserController {
         );
     }
 
-    @PutMapping("edit/{id}")
+    @PutMapping("edit")
     public ResponseEntity<Void> editProfile(
-            @PathVariable Integer id,
             @Valid
             @RequestBody
-            ProfileUpdateDto profileUpdateDto
+            ProfileUpdateDto profileUpdateDto,
+            Authentication authentication
     ) {
         userService.editProfile(
-                id,
+                authentication.getName(),
                 profileUpdateDto
         );
 
@@ -115,7 +118,9 @@ public class UserController {
     @GetMapping("search/applicants")
     public ResponseEntity<List<User>>
     searchApplicants(
-            @RequestParam(defaultValue = "")
+            @RequestParam(
+                    defaultValue = ""
+            )
             String query
     ) {
         return ResponseEntity.ok(
@@ -128,7 +133,9 @@ public class UserController {
     @GetMapping("search/employers")
     public ResponseEntity<List<User>>
     searchEmployers(
-            @RequestParam(defaultValue = "")
+            @RequestParam(
+                    defaultValue = ""
+            )
             String query
     ) {
         return ResponseEntity.ok(
@@ -139,18 +146,18 @@ public class UserController {
     }
 
     @PostMapping(
-            value = "upload-avatar/{userId}",
+            value = "upload-avatar",
             consumes =
                     MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<String> uploadAvatar(
-            @PathVariable Integer userId,
             @RequestParam("file")
-            MultipartFile file
+            MultipartFile file,
+            Authentication authentication
     ) {
         return ResponseEntity.ok(
                 userService.uploadAvatar(
-                        userId,
+                        authentication.getName(),
                         file
                 )
         );

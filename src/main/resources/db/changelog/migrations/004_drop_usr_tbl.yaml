@@ -1,8 +1,0 @@
-databaseChangeLog:
-  - changeSet:
-      id: 004
-      author: Aleksey Podstavin
-      changes:
-        - dropTable:
-            tableName: customers
-

@@ -5,14 +5,22 @@ import kg.attractor.jobsearch.model.Vacancy;
 import java.util.List;
 
 public interface VacancyService {
-    Integer createVacancy(Vacancy vacancy);
+
+    Integer createVacancy(
+            Vacancy vacancy,
+            String userEmail
+    );
 
     void editVacancy(
             Integer id,
-            Vacancy vacancy
+            Vacancy vacancy,
+            String userEmail
     );
 
-    void deleteVacancy(Integer id);
+    void deleteVacancy(
+            Integer id,
+            String userEmail
+    );
 
     Vacancy findById(Integer id);
 
