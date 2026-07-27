@@ -5,23 +5,6 @@ databaseChangeLog:
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
       changes:
         - createTable:
-            tableName: customer
-            columns:
-              - column:
-                  name: id
-                  type: int
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: name
-                  type: varchar(45)
-              - column:
-                  name: password
-                  type: varchar(45)
-
-        - createTable:
             tableName: users
             columns:
               - column:

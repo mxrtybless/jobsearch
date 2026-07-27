@@ -1,19 +1,3 @@
-INSERT INTO customer
-(
-    name,
-    password
-)
-VALUES
-    (
-        'John Doe',
-        'qwerty'
-    ),
-    (
-        'Jane Doe',
-        '123456'
-    );
-
-
 INSERT INTO users
 (
     name,
