@@ -1,20 +1,16 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.EducationInfoDao;
-import kg.attractor.jobsearch.dao.ProfileDao;
 import kg.attractor.jobsearch.dao.ResumeDao;
-import kg.attractor.jobsearch.dao.WorkExperienceInfoDao;
 import kg.attractor.jobsearch.dto.ResumeDto;
 import kg.attractor.jobsearch.exception.InvalidAccountTypeException;
-import kg.attractor.jobsearch.exception.InvalidEducationPeriodException;
 import kg.attractor.jobsearch.exception.ResumeNotFoundException;
-import kg.attractor.jobsearch.exception.UserNotFoundException;
 import kg.attractor.jobsearch.model.AccountType;
-import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.User;
-import kg.attractor.jobsearch.model.WorkExperienceInfo;
+import kg.attractor.jobsearch.service.EducationInfoService;
 import kg.attractor.jobsearch.service.ResumeService;
+import kg.attractor.jobsearch.service.UserService;
+import kg.attractor.jobsearch.service.WorkExperienceInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,13 +25,14 @@ public class ResumeServiceImpl
         implements ResumeService {
 
     private final ResumeDao resumeDao;
-    private final ProfileDao profileDao;
 
-    private final EducationInfoDao
-            educationInfoDao;
+    private final UserService userService;
 
-    private final WorkExperienceInfoDao
-            workExperienceInfoDao;
+    private final EducationInfoService
+            educationInfoService;
+
+    private final WorkExperienceInfoService
+            workExperienceInfoService;
 
     @Override
     public Integer createResume(
@@ -51,10 +48,6 @@ public class ResumeServiceImpl
                 resumeDto.getApplicantId()
         );
 
-        validateEducationPeriods(
-                resumeDto.getEducationInfo()
-        );
-
         LocalDateTime now =
                 LocalDateTime.now();
 
@@ -62,11 +55,15 @@ public class ResumeServiceImpl
                 .applicantId(
                         resumeDto.getApplicantId()
                 )
-                .name(resumeDto.getName())
+                .name(
+                        resumeDto.getName()
+                )
                 .categoryId(
                         resumeDto.getCategoryId()
                 )
-                .salary(resumeDto.getSalary())
+                .salary(
+                        resumeDto.getSalary()
+                )
                 .isActive(true)
                 .createdDate(now)
                 .updateTime(now)
@@ -75,14 +72,15 @@ public class ResumeServiceImpl
         Integer resumeId =
                 resumeDao.save(resume);
 
-        saveEducationInfo(
+        educationInfoService.saveAll(
                 resumeId,
                 resumeDto.getEducationInfo()
         );
 
-        saveWorkExperienceInfo(
+        workExperienceInfoService.saveAll(
                 resumeId,
-                resumeDto.getWorkExperienceInfo()
+                resumeDto
+                        .getWorkExperienceInfo()
         );
 
         log.info(
@@ -115,6 +113,7 @@ public class ResumeServiceImpl
                 .equals(
                         resumeDto.getApplicantId()
                 )) {
+
             throw new IllegalArgumentException(
                     "Resume applicant id cannot be changed"
             );
@@ -122,10 +121,6 @@ public class ResumeServiceImpl
 
         validateApplicant(
                 savedResume.getApplicantId()
-        );
-
-        validateEducationPeriods(
-                resumeDto.getEducationInfo()
         );
 
         savedResume.setName(
@@ -140,7 +135,9 @@ public class ResumeServiceImpl
                 resumeDto.getSalary()
         );
 
-        if (resumeDto.getIsActive() != null) {
+        if (resumeDto.getIsActive()
+                != null) {
+
             savedResume.setIsActive(
                     resumeDto.getIsActive()
             );
@@ -155,10 +152,7 @@ public class ResumeServiceImpl
         if (resumeDto.getEducationInfo()
                 != null) {
 
-            educationInfoDao
-                    .deleteByResumeId(id);
-
-            saveEducationInfo(
+            educationInfoService.replaceAll(
                     id,
                     resumeDto.getEducationInfo()
             );
@@ -167,14 +161,12 @@ public class ResumeServiceImpl
         if (resumeDto.getWorkExperienceInfo()
                 != null) {
 
-            workExperienceInfoDao
-                    .deleteByResumeId(id);
-
-            saveWorkExperienceInfo(
-                    id,
-                    resumeDto
-                            .getWorkExperienceInfo()
-            );
+            workExperienceInfoService
+                    .replaceAll(
+                            id,
+                            resumeDto
+                                    .getWorkExperienceInfo()
+                    );
         }
 
         log.info(
@@ -197,9 +189,10 @@ public class ResumeServiceImpl
                         )
                 );
 
-        educationInfoDao.deleteByResumeId(id);
+        educationInfoService
+                .deleteByResumeId(id);
 
-        workExperienceInfoDao
+        workExperienceInfoService
                 .deleteByResumeId(id);
 
         resumeDao.deleteById(id);
@@ -280,7 +273,9 @@ public class ResumeServiceImpl
         ResumeDto resumeDto =
                 new ResumeDto();
 
-        resumeDto.setId(resume.getId());
+        resumeDto.setId(
+                resume.getId()
+        );
 
         resumeDto.setApplicantId(
                 resume.getApplicantId()
@@ -311,14 +306,14 @@ public class ResumeServiceImpl
         );
 
         resumeDto.setEducationInfo(
-                educationInfoDao
+                educationInfoService
                         .findByResumeId(
                                 resume.getId()
                         )
         );
 
         resumeDto.setWorkExperienceInfo(
-                workExperienceInfoDao
+                workExperienceInfoService
                         .findByResumeId(
                                 resume.getId()
                         )
@@ -330,13 +325,9 @@ public class ResumeServiceImpl
     private void validateApplicant(
             Integer applicantId
     ) {
-        User user = profileDao.findById(
+        User user =
+                userService.findProfileById(
                         applicantId
-                )
-                .orElseThrow(() ->
-                        new UserNotFoundException(
-                                applicantId
-                        )
                 );
 
         if (user.getAccountType()
@@ -345,78 +336,6 @@ public class ResumeServiceImpl
             throw new InvalidAccountTypeException(
                     applicantId,
                     AccountType.APPLICANT
-            );
-        }
-    }
-
-    private void validateEducationPeriods(
-            List<EducationInfo> educationList
-    ) {
-        if (educationList == null) {
-            return;
-        }
-
-        for (EducationInfo educationInfo
-                : educationList) {
-
-            if (educationInfo.getStartDate()
-                    != null
-                    && educationInfo.getEndDate()
-                    != null
-                    && educationInfo.getEndDate()
-                    .isBefore(
-                            educationInfo
-                                    .getStartDate()
-                    )) {
-
-                throw new InvalidEducationPeriodException(
-                        educationInfo
-                                .getInstitution()
-                );
-            }
-        }
-    }
-
-    private void saveEducationInfo(
-            Integer resumeId,
-            List<EducationInfo> educationList
-    ) {
-        if (educationList == null) {
-            return;
-        }
-
-        for (EducationInfo educationInfo
-                : educationList) {
-
-            educationInfo.setResumeId(
-                    resumeId
-            );
-
-            educationInfoDao.save(
-                    educationInfo
-            );
-        }
-    }
-
-    private void saveWorkExperienceInfo(
-            Integer resumeId,
-            List<WorkExperienceInfo>
-                    workExperienceList
-    ) {
-        if (workExperienceList == null) {
-            return;
-        }
-
-        for (WorkExperienceInfo
-                workExperience
-                : workExperienceList) {
-
-            workExperience.setResumeId(
-                    resumeId
-            );
-
-            workExperienceInfoDao.save(
-                    workExperience
             );
         }
     }

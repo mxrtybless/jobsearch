@@ -6,6 +6,7 @@ import kg.attractor.jobsearch.exception.CustomerNotFoundException;
 import kg.attractor.jobsearch.model.Customer;
 import kg.attractor.jobsearch.service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
+    private final PasswordEncoder encoder;
     private final CustomerDao customerDao;
 
     @Override
@@ -46,7 +48,8 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = new Customer();
         customer.setEmail(dto.getEmail());
         customer.setUsername(dto.getName());
-        customer.setPassword(dto.getPassword());
+        customer.setPassword(encoder.encode(dto.getPassword()));
+        customer.setEnabled(Boolean.TRUE);
 
         customerDao.save(customer);
     }

@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -15,8 +16,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkExperienceInfo {
+
+    @JsonProperty(
+            access = JsonProperty.Access.READ_ONLY
+    )
     private Integer id;
 
+    @JsonProperty(
+            access = JsonProperty.Access.READ_ONLY
+    )
     private Integer resumeId;
 
     @NotNull(

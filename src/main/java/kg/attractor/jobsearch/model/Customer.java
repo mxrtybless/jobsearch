@@ -13,4 +13,6 @@ public class Customer {
     private String email;
     private String username;
     private String password;
+    private Boolean enabled;
+    private Long roleId;
 }

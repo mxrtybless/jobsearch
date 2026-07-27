@@ -1,5 +1,6 @@
 package kg.attractor.jobsearch.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -16,8 +17,15 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EducationInfo {
+
+    @JsonProperty(
+            access = JsonProperty.Access.READ_ONLY
+    )
     private Integer id;
 
+    @JsonProperty(
+            access = JsonProperty.Access.READ_ONLY
+    )
     private Integer resumeId;
 
     @NotBlank(
