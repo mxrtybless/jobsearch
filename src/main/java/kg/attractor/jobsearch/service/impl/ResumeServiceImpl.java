@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -25,7 +26,6 @@ public class ResumeServiceImpl
         implements ResumeService {
 
     private final ResumeDao resumeDao;
-
     private final UserService userService;
 
     private final EducationInfoService
@@ -36,16 +36,18 @@ public class ResumeServiceImpl
 
     @Override
     public Integer createResume(
-            ResumeDto resumeDto
+            ResumeDto resumeDto,
+            String userEmail
     ) {
+        User applicant =
+                findAuthenticatedApplicant(
+                        userEmail
+                );
+
         log.info(
                 "Creating resume '{}' for applicant id: {}",
                 resumeDto.getName(),
-                resumeDto.getApplicantId()
-        );
-
-        validateApplicant(
-                resumeDto.getApplicantId()
+                applicant.getId()
         );
 
         LocalDateTime now =
@@ -53,7 +55,7 @@ public class ResumeServiceImpl
 
         Resume resume = Resume.builder()
                 .applicantId(
-                        resumeDto.getApplicantId()
+                        applicant.getId()
                 )
                 .name(
                         resumeDto.getName()
@@ -94,11 +96,18 @@ public class ResumeServiceImpl
     @Override
     public void editResume(
             Integer id,
-            ResumeDto resumeDto
+            ResumeDto resumeDto,
+            String userEmail
     ) {
+        User applicant =
+                findAuthenticatedApplicant(
+                        userEmail
+                );
+
         log.info(
-                "Editing resume with id: {}",
-                id
+                "Editing resume with id: {} by applicant id: {}",
+                id,
+                applicant.getId()
         );
 
         Resume savedResume =
@@ -109,18 +118,9 @@ public class ResumeServiceImpl
                                 )
                         );
 
-        if (!savedResume.getApplicantId()
-                .equals(
-                        resumeDto.getApplicantId()
-                )) {
-
-            throw new IllegalArgumentException(
-                    "Resume applicant id cannot be changed"
-            );
-        }
-
-        validateApplicant(
-                savedResume.getApplicantId()
+        validateResumeOwner(
+                savedResume,
+                applicant
         );
 
         savedResume.setName(
@@ -137,7 +137,6 @@ public class ResumeServiceImpl
 
         if (resumeDto.getIsActive()
                 != null) {
-
             savedResume.setIsActive(
                     resumeDto.getIsActive()
             );
@@ -151,7 +150,6 @@ public class ResumeServiceImpl
 
         if (resumeDto.getEducationInfo()
                 != null) {
-
             educationInfoService.replaceAll(
                     id,
                     resumeDto.getEducationInfo()
@@ -160,7 +158,6 @@ public class ResumeServiceImpl
 
         if (resumeDto.getWorkExperienceInfo()
                 != null) {
-
             workExperienceInfoService
                     .replaceAll(
                             id,
@@ -176,18 +173,33 @@ public class ResumeServiceImpl
     }
 
     @Override
-    public void deleteResume(Integer id) {
+    public void deleteResume(
+            Integer id,
+            String userEmail
+    ) {
+        User applicant =
+                findAuthenticatedApplicant(
+                        userEmail
+                );
+
         log.warn(
-                "Deleting resume with id: {}",
-                id
+                "Deleting resume with id: {} by applicant id: {}",
+                id,
+                applicant.getId()
         );
 
-        resumeDao.findById(id)
-                .orElseThrow(() ->
-                        new ResumeNotFoundException(
-                                id
-                        )
-                );
+        Resume savedResume =
+                resumeDao.findById(id)
+                        .orElseThrow(() ->
+                                new ResumeNotFoundException(
+                                        id
+                                )
+                        );
+
+        validateResumeOwner(
+                savedResume,
+                applicant
+        );
 
         educationInfoService
                 .deleteByResumeId(id);
@@ -258,7 +270,9 @@ public class ResumeServiceImpl
                 applicantId
         );
 
-        validateApplicant(applicantId);
+        validateApplicantById(
+                applicantId
+        );
 
         return resumeDao
                 .findByApplicantId(applicantId)
@@ -322,7 +336,33 @@ public class ResumeServiceImpl
         return resumeDto;
     }
 
-    private void validateApplicant(
+    private User findAuthenticatedApplicant(
+            String userEmail
+    ) {
+        User user =
+                userService.findByEmail(
+                                userEmail
+                        )
+                        .orElseThrow(() ->
+                                new NoSuchElementException(
+                                        "User with email "
+                                                + userEmail
+                                                + " not found"
+                                )
+                        );
+
+        if (user.getAccountType()
+                != AccountType.APPLICANT) {
+            throw new InvalidAccountTypeException(
+                    user.getId(),
+                    AccountType.APPLICANT
+            );
+        }
+
+        return user;
+    }
+
+    private void validateApplicantById(
             Integer applicantId
     ) {
         User user =
@@ -332,10 +372,21 @@ public class ResumeServiceImpl
 
         if (user.getAccountType()
                 != AccountType.APPLICANT) {
-
             throw new InvalidAccountTypeException(
                     applicantId,
                     AccountType.APPLICANT
+            );
+        }
+    }
+
+    private void validateResumeOwner(
+            Resume resume,
+            User applicant
+    ) {
+        if (!resume.getApplicantId()
+                .equals(applicant.getId())) {
+            throw new IllegalArgumentException(
+                    "You can only change your own resume"
             );
         }
     }

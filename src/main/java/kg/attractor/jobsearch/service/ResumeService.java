@@ -5,16 +5,22 @@ import kg.attractor.jobsearch.dto.ResumeDto;
 import java.util.List;
 
 public interface ResumeService {
+
     Integer createResume(
-            ResumeDto resumeDto
+            ResumeDto resumeDto,
+            String userEmail
     );
 
     void editResume(
             Integer id,
-            ResumeDto resumeDto
+            ResumeDto resumeDto,
+            String userEmail
     );
 
-    void deleteResume(Integer id);
+    void deleteResume(
+            Integer id,
+            String userEmail
+    );
 
     ResumeDto findById(Integer id);
 

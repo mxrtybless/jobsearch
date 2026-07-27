@@ -6,6 +6,7 @@ import kg.attractor.jobsearch.service.ResumeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,17 +22,20 @@ import java.util.List;
 @RequestMapping("resumes")
 @RequiredArgsConstructor
 public class ResumeController {
+
     private final ResumeService resumeService;
 
     @PostMapping("create")
     public ResponseEntity<Integer> createResume(
             @Valid
             @RequestBody
-            ResumeDto resumeDto
+            ResumeDto resumeDto,
+            Authentication authentication
     ) {
         Integer resumeId =
                 resumeService.createResume(
-                        resumeDto
+                        resumeDto,
+                        authentication.getName()
                 );
 
         return ResponseEntity
@@ -44,11 +48,13 @@ public class ResumeController {
             @PathVariable Integer id,
             @Valid
             @RequestBody
-            ResumeDto resumeDto
+            ResumeDto resumeDto,
+            Authentication authentication
     ) {
         resumeService.editResume(
                 id,
-                resumeDto
+                resumeDto,
+                authentication.getName()
         );
 
         return ResponseEntity
@@ -58,9 +64,13 @@ public class ResumeController {
 
     @DeleteMapping("delete/{id}")
     public ResponseEntity<Void> deleteResume(
-            @PathVariable Integer id
+            @PathVariable Integer id,
+            Authentication authentication
     ) {
-        resumeService.deleteResume(id);
+        resumeService.deleteResume(
+                id,
+                authentication.getName()
+        );
 
         return ResponseEntity
                 .noContent()

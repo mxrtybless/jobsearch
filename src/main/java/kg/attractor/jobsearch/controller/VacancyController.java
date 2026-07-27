@@ -6,6 +6,7 @@ import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,17 +22,20 @@ import java.util.List;
 @RequestMapping("vacancies")
 @RequiredArgsConstructor
 public class VacancyController {
+
     private final VacancyService vacancyService;
 
     @PostMapping("create")
     public ResponseEntity<Integer> createVacancy(
             @Valid
             @RequestBody
-            Vacancy vacancy
+            Vacancy vacancy,
+            Authentication authentication
     ) {
         Integer vacancyId =
                 vacancyService.createVacancy(
-                        vacancy
+                        vacancy,
+                        authentication.getName()
                 );
 
         return ResponseEntity
@@ -44,11 +48,13 @@ public class VacancyController {
             @PathVariable Integer id,
             @Valid
             @RequestBody
-            Vacancy vacancy
+            Vacancy vacancy,
+            Authentication authentication
     ) {
         vacancyService.editVacancy(
                 id,
-                vacancy
+                vacancy,
+                authentication.getName()
         );
 
         return ResponseEntity
@@ -58,9 +64,13 @@ public class VacancyController {
 
     @DeleteMapping("delete/{id}")
     public ResponseEntity<Void> deleteVacancy(
-            @PathVariable Integer id
+            @PathVariable Integer id,
+            Authentication authentication
     ) {
-        vacancyService.deleteVacancy(id);
+        vacancyService.deleteVacancy(
+                id,
+                authentication.getName()
+        );
 
         return ResponseEntity
                 .noContent()

@@ -100,6 +100,70 @@ public class SecurityConfig {
                                 )
                                 .permitAll()
 
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/resumes/create"
+                                )
+                                .hasAuthority(
+                                        "APPLICANT"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.PUT,
+                                        "/resumes/edit/**"
+                                )
+                                .hasAuthority(
+                                        "APPLICANT"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.DELETE,
+                                        "/resumes/delete/**"
+                                )
+                                .hasAuthority(
+                                        "APPLICANT"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/vacancies/create"
+                                )
+                                .hasAuthority(
+                                        "EMPLOYER"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.PUT,
+                                        "/vacancies/edit/**"
+                                )
+                                .hasAuthority(
+                                        "EMPLOYER"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.DELETE,
+                                        "/vacancies/delete/**"
+                                )
+                                .hasAuthority(
+                                        "EMPLOYER"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/responses/create"
+                                )
+                                .hasAuthority(
+                                        "APPLICANT"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/responses/search/vacancy/**"
+                                )
+                                .hasAuthority(
+                                        "EMPLOYER"
+                                )
+
                                 .anyRequest()
                                 .authenticated()
                 );

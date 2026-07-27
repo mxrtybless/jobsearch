@@ -27,11 +27,8 @@ public class ResumeDto {
     )
     private Integer id;
 
-    @NotNull(
-            message = "Applicant id must be specified"
-    )
-    @Positive(
-            message = "Applicant id must be positive"
+    @JsonProperty(
+            access = JsonProperty.Access.READ_ONLY
     )
     private Integer applicantId;
 

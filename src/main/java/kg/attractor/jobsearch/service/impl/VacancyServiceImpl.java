@@ -1,14 +1,13 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.ProfileDao;
 import kg.attractor.jobsearch.dao.VacancyDao;
 import kg.attractor.jobsearch.exception.InvalidAccountTypeException;
 import kg.attractor.jobsearch.exception.InvalidExperienceRangeException;
-import kg.attractor.jobsearch.exception.UserNotFoundException;
 import kg.attractor.jobsearch.exception.VacancyNotFoundException;
 import kg.attractor.jobsearch.model.AccountType;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.Vacancy;
+import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -24,26 +24,32 @@ public class VacancyServiceImpl
         implements VacancyService {
 
     private final VacancyDao vacancyDao;
-    private final ProfileDao profileDao;
+    private final UserService userService;
 
     @Override
     public Integer createVacancy(
-            Vacancy vacancy
+            Vacancy vacancy,
+            String userEmail
     ) {
+        User employer =
+                findAuthenticatedEmployer(
+                        userEmail
+                );
+
         log.info(
                 "Creating vacancy '{}' for employer id: {}",
                 vacancy.getName(),
-                vacancy.getAuthorId()
-        );
-
-        validateEmployer(
-                vacancy.getAuthorId()
+                employer.getId()
         );
 
         validateExperienceRange(vacancy);
 
         LocalDateTime now =
                 LocalDateTime.now();
+
+        vacancy.setAuthorId(
+                employer.getId()
+        );
 
         vacancy.setIsActive(true);
         vacancy.setCreatedDate(now);
@@ -63,11 +69,18 @@ public class VacancyServiceImpl
     @Override
     public void editVacancy(
             Integer id,
-            Vacancy vacancy
+            Vacancy vacancy,
+            String userEmail
     ) {
+        User employer =
+                findAuthenticatedEmployer(
+                        userEmail
+                );
+
         log.info(
-                "Editing vacancy with id: {}",
-                id
+                "Editing vacancy with id: {} by employer id: {}",
+                id,
+                employer.getId()
         );
 
         Vacancy savedVacancy =
@@ -78,17 +91,9 @@ public class VacancyServiceImpl
                                 )
                         );
 
-        if (!savedVacancy.getAuthorId()
-                .equals(
-                        vacancy.getAuthorId()
-                )) {
-            throw new IllegalArgumentException(
-                    "Vacancy author id cannot be changed"
-            );
-        }
-
-        validateEmployer(
-                savedVacancy.getAuthorId()
+        validateVacancyOwner(
+                savedVacancy,
+                employer
         );
 
         validateExperienceRange(vacancy);
@@ -136,18 +141,33 @@ public class VacancyServiceImpl
     }
 
     @Override
-    public void deleteVacancy(Integer id) {
+    public void deleteVacancy(
+            Integer id,
+            String userEmail
+    ) {
+        User employer =
+                findAuthenticatedEmployer(
+                        userEmail
+                );
+
         log.warn(
-                "Deleting vacancy with id: {}",
-                id
+                "Deleting vacancy with id: {} by employer id: {}",
+                id,
+                employer.getId()
         );
 
-        vacancyDao.findById(id)
-                .orElseThrow(() ->
-                        new VacancyNotFoundException(
-                                id
-                        )
-                );
+        Vacancy savedVacancy =
+                vacancyDao.findById(id)
+                        .orElseThrow(() ->
+                                new VacancyNotFoundException(
+                                        id
+                                )
+                        );
+
+        validateVacancyOwner(
+                savedVacancy,
+                employer
+        );
 
         vacancyDao.deleteById(id);
 
@@ -213,7 +233,7 @@ public class VacancyServiceImpl
                 authorId
         );
 
-        validateEmployer(authorId);
+        validateEmployerById(authorId);
 
         return vacancyDao.findByAuthorId(
                 authorId
@@ -230,22 +250,9 @@ public class VacancyServiceImpl
                 applicantId
         );
 
-        User applicant =
-                profileDao.findById(applicantId)
-                        .orElseThrow(() ->
-                                new UserNotFoundException(
-                                        applicantId
-                                )
-                        );
-
-        if (applicant.getAccountType()
-                != AccountType.APPLICANT) {
-
-            throw new InvalidAccountTypeException(
-                    applicantId,
-                    AccountType.APPLICANT
-            );
-        }
+        validateApplicantById(
+                applicantId
+        );
 
         return vacancyDao
                 .findRespondedByApplicantId(
@@ -253,23 +260,74 @@ public class VacancyServiceImpl
                 );
     }
 
-    private void validateEmployer(
-            Integer employerId
+    private User findAuthenticatedEmployer(
+            String userEmail
     ) {
-        User employer =
-                profileDao.findById(employerId)
+        User user =
+                userService.findByEmail(
+                                userEmail
+                        )
                         .orElseThrow(() ->
-                                new UserNotFoundException(
-                                        employerId
+                                new NoSuchElementException(
+                                        "User with email "
+                                                + userEmail
+                                                + " not found"
                                 )
                         );
 
+        if (user.getAccountType()
+                != AccountType.EMPLOYER) {
+            throw new InvalidAccountTypeException(
+                    user.getId(),
+                    AccountType.EMPLOYER
+            );
+        }
+
+        return user;
+    }
+
+    private void validateEmployerById(
+            Integer employerId
+    ) {
+        User employer =
+                userService.findProfileById(
+                        employerId
+                );
+
         if (employer.getAccountType()
                 != AccountType.EMPLOYER) {
-
             throw new InvalidAccountTypeException(
                     employerId,
                     AccountType.EMPLOYER
+            );
+        }
+    }
+
+    private void validateApplicantById(
+            Integer applicantId
+    ) {
+        User applicant =
+                userService.findProfileById(
+                        applicantId
+                );
+
+        if (applicant.getAccountType()
+                != AccountType.APPLICANT) {
+            throw new InvalidAccountTypeException(
+                    applicantId,
+                    AccountType.APPLICANT
+            );
+        }
+    }
+
+    private void validateVacancyOwner(
+            Vacancy vacancy,
+            User employer
+    ) {
+        if (!vacancy.getAuthorId()
+                .equals(employer.getId())) {
+            throw new IllegalArgumentException(
+                    "You can only change your own vacancy"
             );
         }
     }
@@ -281,7 +339,6 @@ public class VacancyServiceImpl
                 && vacancy.getExpTo() != null
                 && vacancy.getExpFrom()
                 > vacancy.getExpTo()) {
-
             throw new InvalidExperienceRangeException();
         }
     }
