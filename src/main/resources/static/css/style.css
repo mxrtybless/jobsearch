@@ -19,6 +19,11 @@ body {
     border-radius: 8px;
 }
 
+.form-control,
+.form-select {
+    border-radius: 8px;
+}
+
 .profile-avatar {
     width: 110px;
     height: 110px;
@@ -31,23 +36,59 @@ body {
 .profile-avatar-placeholder {
     width: 110px;
     height: 110px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     border-radius: 50%;
+
     background-color: #0d6efd;
     color: #ffffff;
+
     font-size: 42px;
     font-weight: 700;
 }
 
-.form-control,
-.form-select {
-    border-radius: 8px;
-}
-
 .modal-content {
     border: 0;
+    border-radius: 14px;
+}
+
+.list-card {
+    transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease;
+}
+
+.list-card:hover {
+    transform: translateY(-2px);
+}
+
+.entity-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+}
+
+.vacancy-description {
+    max-width: 800px;
+    color: #495057;
+    white-space: pre-line;
+}
+
+.vacancy-date {
+    min-width: 180px;
+}
+
+.empty-state {
+    padding: 48px 24px;
+
+    text-align: center;
+
+    background-color: #ffffff;
+
+    border: 1px dashed #ced4da;
     border-radius: 14px;
 }
 
@@ -57,5 +98,9 @@ body {
     .profile-avatar-placeholder {
         width: 90px;
         height: 90px;
+    }
+
+    .vacancy-date {
+        min-width: 0;
     }
 }

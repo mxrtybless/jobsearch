@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.ProfileUpdateDto;
 import kg.attractor.jobsearch.exception.EmailAlreadyExistsException;
 import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.service.ResumeService;
 import kg.attractor.jobsearch.service.UserService;
+import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -27,6 +29,8 @@ import java.util.NoSuchElementException;
 public class ProfileController {
 
     private final UserService userService;
+    private final ResumeService resumeService;
+    private final VacancyService vacancyService;
 
     @GetMapping
     public String profile(
@@ -42,6 +46,26 @@ public class ProfileController {
                 user,
                 model
         );
+
+        if (user.isApplicant()) {
+            model.addAttribute(
+                    "resumes",
+                    resumeService
+                            .findByApplicantId(
+                                    user.getId()
+                            )
+            );
+        }
+
+        if (user.isEmployer()) {
+            model.addAttribute(
+                    "vacancies",
+                    vacancyService
+                            .findByAuthorId(
+                                    user.getId()
+                            )
+            );
+        }
 
         return "profile/profile";
     }

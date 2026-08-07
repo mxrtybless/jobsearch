@@ -26,12 +26,14 @@
 
     </#if>
 
+
     <div class="card shadow-sm border-0 mb-4">
 
         <div class="card-body p-4">
 
             <div
-                    class="d-flex flex-column
+                    class="d-flex
+                           flex-column
                            flex-md-row
                            align-items-md-center
                            gap-4">
@@ -48,19 +50,26 @@
 
                     <#else>
 
-                        <div class="profile-avatar-placeholder">
-                            ${user.name?substring(0, 1)?upper_case}
+                        <div
+                                class="profile-avatar-placeholder">
+
+                            ${user.name
+                                    ?substring(0, 1)
+                                    ?upper_case}
+
                         </div>
 
                     </#if>
 
                 </div>
 
+
                 <div class="flex-grow-1">
 
                     <#if isApplicant>
 
-                        <div class="text-secondary mb-1">
+                        <div
+                                class="text-secondary mb-1">
                             Личный кабинет соискателя
                         </div>
 
@@ -76,7 +85,8 @@
 
                     <#else>
 
-                        <div class="text-secondary mb-1">
+                        <div
+                                class="text-secondary mb-1">
                             Личный кабинет работодателя
                         </div>
 
@@ -86,28 +96,42 @@
 
                     </#if>
 
+
                     <p class="mb-1">
+
                         <strong>Email:</strong>
+
                         ${user.email}
+
                     </p>
 
                     <p class="mb-1">
+
                         <strong>Телефон:</strong>
+
                         ${user.phoneNumber}
+
                     </p>
 
                     <#if user.age??>
 
                         <p class="mb-0">
+
                             <strong>Возраст:</strong>
+
                             ${user.age}
+
                         </p>
 
                     </#if>
 
                 </div>
 
-                <div class="d-flex flex-column gap-2">
+
+                <div
+                        class="d-flex
+                               flex-column
+                               gap-2">
 
                     <button
                             class="btn btn-primary"
@@ -118,7 +142,8 @@
                     </button>
 
                     <a
-                            class="btn btn-outline-primary"
+                            class="btn
+                                   btn-outline-primary"
                             href="/profile/edit">
                         Открыть форму отдельно
                     </a>
@@ -131,93 +156,332 @@
 
     </div>
 
-    <div class="row g-4">
 
-        <div class="col-12 col-lg-6">
+    <#if isApplicant>
 
-            <div class="card border-0 shadow-sm h-100">
+        <div
+                class="d-flex
+                       align-items-center
+                       justify-content-between
+                       mb-3">
 
-                <div class="card-body p-4">
+            <div>
 
-                    <h2 class="h5">
-                        Фото профиля
-                    </h2>
+                <h2 class="h4 mb-1">
+                    Мои резюме
+                </h2>
 
-                    <form
-                            action="/profile/avatar"
-                            method="post"
-                            enctype="multipart/form-data">
-
-                        <div class="mb-3">
-
-                            <input
-                                    class="form-control"
-                                    type="file"
-                                    name="avatar"
-                                    accept="image/*"
-                                    required>
-
-                        </div>
-
-                        <button
-                                class="btn btn-outline-primary"
-                                type="submit">
-                            Обновить фото
-                        </button>
-
-                    </form>
-
-                </div>
+                <p
+                        class="text-secondary mb-0">
+                    Резюме видны только владельцу
+                    профиля.
+                </p>
 
             </div>
 
         </div>
 
-        <div class="col-12 col-lg-6">
 
-            <div class="card border-0 shadow-sm h-100">
+        <#if resumes?? && resumes?size gt 0>
 
-                <div class="card-body p-4">
+            <div class="row g-3 mb-4">
 
-                    <#if isApplicant>
+                <#list resumes as resume>
 
-                        <h2 class="h5">
-                            Мои резюме
-                        </h2>
+                    <div
+                            class="col-12
+                                   col-md-6
+                                   col-lg-4">
 
-                        <p class="text-secondary">
-                            Здесь будет список созданных
-                            вами резюме.
-                        </p>
+                        <div
+                                class="card
+                                       border-0
+                                       shadow-sm
+                                       h-100">
 
-                        <a
-                                class="btn btn-outline-primary"
-                                href="/resumes">
-                            Перейти к резюме
-                        </a>
+                            <div class="card-body">
 
-                    <#else>
+                                <div
+                                        class="d-flex
+                                               justify-content-between
+                                               gap-2
+                                               mb-3">
 
-                        <h2 class="h5">
-                            Мои вакансии
-                        </h2>
+                                    <h3 class="h5 mb-0">
+                                        ${resume.name!}
+                                    </h3>
 
-                        <p class="text-secondary">
-                            Здесь будет список созданных
-                            вами вакансий.
-                        </p>
+                                    <#if resume.isActive??>
 
-                        <a
-                                class="btn btn-outline-primary"
-                                href="/vacancies">
-                            Перейти к вакансиям
-                        </a>
+                                        <#if resume.isActive>
 
-                    </#if>
+                                            <span
+                                                    class="badge
+                                                           text-bg-success
+                                                           align-self-start">
+                                                Опубликовано
+                                            </span>
+
+                                        <#else>
+
+                                            <span
+                                                    class="badge
+                                                           text-bg-secondary
+                                                           align-self-start">
+                                                Не опубликовано
+                                            </span>
+
+                                        </#if>
+
+                                    </#if>
+
+                                </div>
+
+
+                                <p class="mb-2">
+
+                                    <strong>Зарплата:</strong>
+
+                                    ${resume.salary!}
+
+                                </p>
+
+
+                                <p
+                                        class="text-secondary
+                                               small
+                                               mb-0">
+
+                                    <strong>
+                                        Дата обновления:
+                                    </strong>
+
+                                    <#if resume.updateTime??>
+
+                                        ${resume.updateTime}
+
+                                    <#elseif resume.createdDate??>
+
+                                        ${resume.createdDate}
+
+                                    <#else>
+
+                                        —
+
+                                    </#if>
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </#list>
+
+            </div>
+
+        <#else>
+
+            <div
+                    class="empty-state mb-4">
+
+                <h3 class="h5">
+                    Резюме пока нет
+                </h3>
+
+                <p class="mb-0 text-secondary">
+                    Здесь появятся созданные вами
+                    резюме.
+                </p>
+
+            </div>
+
+        </#if>
+
+    </#if>
+
+
+    <#if isEmployer>
+
+        <div
+                class="d-flex
+                       align-items-center
+                       justify-content-between
+                       mb-3">
+
+            <div>
+
+                <h2 class="h4 mb-1">
+                    Мои вакансии
+                </h2>
+
+                <p
+                        class="text-secondary mb-0">
+                    Здесь отображаются только
+                    ваши вакансии.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <#if vacancies??
+        && vacancies?size gt 0>
+
+            <div class="row g-3 mb-4">
+
+                <#list vacancies as vacancy>
+
+                    <div
+                            class="col-12
+                                   col-md-6
+                                   col-lg-4">
+
+                        <div
+                                class="card
+                                       border-0
+                                       shadow-sm
+                                       h-100">
+
+                            <div class="card-body">
+
+                                <div
+                                        class="d-flex
+                                               justify-content-between
+                                               gap-2
+                                               mb-3">
+
+                                    <h3 class="h5 mb-0">
+                                        ${vacancy.name!}
+                                    </h3>
+
+                                    <#if vacancy.isActive??>
+
+                                        <#if vacancy.isActive>
+
+                                            <span
+                                                    class="badge
+                                                           text-bg-success
+                                                           align-self-start">
+                                                Опубликовано
+                                            </span>
+
+                                        <#else>
+
+                                            <span
+                                                    class="badge
+                                                           text-bg-secondary
+                                                           align-self-start">
+                                                Не опубликовано
+                                            </span>
+
+                                        </#if>
+
+                                    </#if>
+
+                                </div>
+
+
+                                <p class="mb-2">
+
+                                    <strong>Зарплата:</strong>
+
+                                    ${vacancy.salary!}
+
+                                </p>
+
+
+                                <p
+                                        class="text-secondary
+                                               small
+                                               mb-0">
+
+                                    <strong>
+                                        Дата обновления:
+                                    </strong>
+
+                                    <#if vacancy.updateTime??>
+
+                                        ${vacancy.updateTime}
+
+                                    <#elseif vacancy.createdDate??>
+
+                                        ${vacancy.createdDate}
+
+                                    <#else>
+
+                                        —
+
+                                    </#if>
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </#list>
+
+            </div>
+
+        <#else>
+
+            <div
+                    class="empty-state mb-4">
+
+                <h3 class="h5">
+                    Вакансий пока нет
+                </h3>
+
+                <p class="mb-0 text-secondary">
+                    Здесь появятся созданные
+                    вами вакансии.
+                </p>
+
+            </div>
+
+        </#if>
+
+    </#if>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-4">
+
+            <h2 class="h5">
+                Фото профиля
+            </h2>
+
+            <form
+                    action="/profile/avatar"
+                    method="post"
+                    enctype="multipart/form-data">
+
+                <div class="mb-3">
+
+                    <input
+                            class="form-control"
+                            type="file"
+                            name="avatar"
+                            accept="image/*"
+                            required>
 
                 </div>
 
-            </div>
+                <button
+                        class="btn
+                               btn-outline-primary"
+                        type="submit">
+                    Обновить фото
+                </button>
+
+            </form>
 
         </div>
 
@@ -247,6 +511,7 @@
                     </button>
 
                 </div>
+
 
                 <form
                         action="/profile/edit"
@@ -278,6 +543,7 @@
 
                         </div>
 
+
                         <#if isApplicant>
 
                             <div class="mb-3">
@@ -299,6 +565,7 @@
 
                         </#if>
 
+
                         <div class="mb-3">
 
                             <label
@@ -318,6 +585,7 @@
 
                         </div>
 
+
                         <div class="mb-3">
 
                             <label
@@ -335,6 +603,7 @@
                                     required>
 
                         </div>
+
 
                         <div class="mb-3">
 
@@ -355,6 +624,7 @@
                         </div>
 
                     </div>
+
 
                     <div class="modal-footer">
 

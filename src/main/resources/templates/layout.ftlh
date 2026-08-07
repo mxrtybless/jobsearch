@@ -1,8 +1,11 @@
 <#macro layout title="JobSearch">
+
     <!doctype html>
+
     <html lang="ru">
 
     <head>
+
         <meta charset="UTF-8">
 
         <meta
@@ -22,12 +25,39 @@
         <script
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
         </script>
+
     </head>
 
     <body>
 
+    <#assign authenticated =
+            SPRING_SECURITY_CONTEXT??>
+
+    <#assign isEmployer = false>
+
+    <#if authenticated>
+
+        <#assign securityUser =
+                SPRING_SECURITY_CONTEXT
+                        .authentication
+                        .principal>
+
+        <#list securityUser.authorities as authority>
+
+            <#if authority?string == "EMPLOYER">
+
+                <#assign isEmployer = true>
+
+            </#if>
+
+        </#list>
+
+    </#if>
+
+
     <nav
-            class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+            class="navbar navbar-expand-lg
+                   navbar-dark bg-primary mb-4">
 
         <div class="container">
 
@@ -55,7 +85,8 @@
                     id="navbarContent">
 
                 <ul
-                        class="navbar-nav me-auto mb-2 mb-lg-0">
+                        class="navbar-nav me-auto
+                               mb-2 mb-lg-0">
 
                     <li class="nav-item">
 
@@ -67,33 +98,37 @@
 
                     </li>
 
-                    <li class="nav-item">
+                    <#if authenticated
+                    && isEmployer>
 
-                        <a
-                                class="nav-link"
-                                href="/resumes">
-                            Резюме
-                        </a>
+                        <li class="nav-item">
 
-                    </li>
+                            <a
+                                    class="nav-link"
+                                    href="/resumes">
+                                Резюме
+                            </a>
+
+                        </li>
+
+                    </#if>
 
                 </ul>
 
-                <#assign authenticated =
-                        SPRING_SECURITY_CONTEXT??>
 
                 <#if authenticated>
 
-                    <#assign securityUser =
-                            SPRING_SECURITY_CONTEXT
-                                    .authentication
-                                    .principal>
-
                     <div
-                            class="d-flex align-items-center gap-2">
+                            class="d-flex
+                                   align-items-center
+                                   gap-2">
 
-                        <span class="text-white small">
+                        <span
+                                class="text-white small
+                                       d-none d-lg-inline">
+
                             ${securityUser.username}
+
                         </span>
 
                         <a
@@ -103,7 +138,9 @@
                         </a>
 
                         <a
-                                class="btn btn-outline-light btn-sm"
+                                class="btn
+                                       btn-outline-light
+                                       btn-sm"
                                 href="/auth/logout">
                             Выйти
                         </a>
@@ -121,7 +158,9 @@
                         </a>
 
                         <a
-                                class="btn btn-outline-light btn-sm"
+                                class="btn
+                                       btn-outline-light
+                                       btn-sm"
                                 href="/auth/register">
                             Регистрация
                         </a>
@@ -136,6 +175,7 @@
 
     </nav>
 
+
     <main class="container pb-5">
 
         <#nested>
@@ -145,4 +185,5 @@
     </body>
 
     </html>
+
 </#macro>
