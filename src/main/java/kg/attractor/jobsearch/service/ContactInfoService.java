@@ -1,23 +1,23 @@
 package kg.attractor.jobsearch.service;
 
-import kg.attractor.jobsearch.dto.EducationInfoDto;
+import kg.attractor.jobsearch.dto.ContactInfoDto;
 
 import java.util.List;
 
-public interface EducationInfoService {
+public interface ContactInfoService {
 
-    List<EducationInfoDto> findByResumeId(
+    List<ContactInfoDto> findByResumeId(
             Integer resumeId
     );
 
     void saveAll(
             Integer resumeId,
-            List<EducationInfoDto> educationInfo
+            List<ContactInfoDto> contactInfo
     );
 
     void replaceAll(
             Integer resumeId,
-            List<EducationInfoDto> educationInfo
+            List<ContactInfoDto> contactInfo
     );
 
     void deleteByResumeId(

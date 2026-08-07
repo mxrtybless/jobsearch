@@ -1,6 +1,5 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.ProfileDao;
 import kg.attractor.jobsearch.dao.UserDao;
 import kg.attractor.jobsearch.dto.ProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserCreateDto;
@@ -13,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -29,27 +29,17 @@ public class UserServiceImpl
             "default-avatar.png";
 
     private final UserDao userDao;
-    private final ProfileDao profileDao;
     private final ImageService imageService;
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public void register(
             UserCreateDto userCreateDto
     ) {
-        log.info(
-                "Registering user with email: {}",
-                userCreateDto.getEmail()
-        );
-
         if (userDao.existsByEmail(
                 userCreateDto.getEmail()
         )) {
-            log.warn(
-                    "Registration failed. Email already exists: {}",
-                    userCreateDto.getEmail()
-            );
-
             throw new EmailAlreadyExistsException(
                     userCreateDto.getEmail()
             );
@@ -98,18 +88,14 @@ public class UserServiceImpl
     public User findProfileById(
             Integer id
     ) {
-        log.debug(
-                "Searching user profile by id: {}",
-                id
-        );
-
-        return profileDao.findById(id)
+        return userDao.findById(id)
                 .orElseThrow(() ->
                         new UserNotFoundException(id)
                 );
     }
 
     @Override
+    @Transactional
     public void editProfile(
             String userEmail,
             ProfileUpdateDto profileUpdateDto
@@ -118,11 +104,6 @@ public class UserServiceImpl
                 findAuthenticatedUser(
                         userEmail
                 );
-
-        log.info(
-                "Editing profile of user id: {}",
-                user.getId()
-        );
 
         String newEmail =
                 profileUpdateDto.getEmail();
@@ -134,11 +115,6 @@ public class UserServiceImpl
                 && userDao.existsByEmail(
                 newEmail
         )) {
-
-            log.warn(
-                    "Profile update failed. Email already exists: {}",
-                    newEmail
-            );
 
             throw new EmailAlreadyExistsException(
                     newEmail
@@ -191,7 +167,7 @@ public class UserServiceImpl
             );
         }
 
-        profileDao.update(user);
+        userDao.update(user);
 
         log.info(
                 "User profile updated successfully. User id: {}",
@@ -203,10 +179,6 @@ public class UserServiceImpl
     public List<User> findByName(
             String name
     ) {
-        log.debug(
-                "Searching users by name"
-        );
-
         return userDao.findByName(name);
     }
 
@@ -214,10 +186,6 @@ public class UserServiceImpl
     public List<User> findByPhoneNumber(
             String phoneNumber
     ) {
-        log.debug(
-                "Searching users by phone number"
-        );
-
         return userDao.findByPhoneNumber(
                 phoneNumber
         );
@@ -227,11 +195,6 @@ public class UserServiceImpl
     public Optional<User> findByEmail(
             String email
     ) {
-        log.debug(
-                "Searching user by email: {}",
-                email
-        );
-
         return userDao.findByEmail(email);
     }
 
@@ -239,11 +202,6 @@ public class UserServiceImpl
     public boolean existsByEmail(
             String email
     ) {
-        log.debug(
-                "Checking user existence by email: {}",
-                email
-        );
-
         return userDao.existsByEmail(email);
     }
 
@@ -251,10 +209,6 @@ public class UserServiceImpl
     public List<User> searchApplicants(
             String query
     ) {
-        log.debug(
-                "Searching applicants"
-        );
-
         return userDao.findApplicants(query);
     }
 
@@ -262,10 +216,6 @@ public class UserServiceImpl
     public List<User> searchEmployers(
             String query
     ) {
-        log.debug(
-                "Searching employers"
-        );
-
         return userDao.findEmployers(query);
     }
 
@@ -279,22 +229,12 @@ public class UserServiceImpl
                         userEmail
                 );
 
-        log.info(
-                "Uploading avatar for user id: {}",
-                user.getId()
-        );
-
         String filename =
                 imageService.upload(file);
 
         userDao.updateAvatar(
                 user.getId(),
                 filename
-        );
-
-        log.info(
-                "Avatar uploaded successfully for user id: {}",
-                user.getId()
         );
 
         return filename;

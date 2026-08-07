@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 009-insert-jobsearch-test-data
+      id: 010-insert-jobsearch-test-data
       author: mxrty
       changes:
         - sqlFile:
-            path: data.sql
+            path: db/data/010_insert_jobsearch_data.sql
             relativeToChangelogFile: false
             encoding: UTF-8
             splitStatements: true

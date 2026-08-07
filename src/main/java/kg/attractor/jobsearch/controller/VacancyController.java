@@ -1,7 +1,7 @@
 package kg.attractor.jobsearch.controller;
 
 import jakarta.validation.Valid;
-import kg.attractor.jobsearch.model.Vacancy;
+import kg.attractor.jobsearch.dto.VacancyDto;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,12 +29,12 @@ public class VacancyController {
     public ResponseEntity<Integer> createVacancy(
             @Valid
             @RequestBody
-            Vacancy vacancy,
+            VacancyDto vacancyDto,
             Authentication authentication
     ) {
         Integer vacancyId =
                 vacancyService.createVacancy(
-                        vacancy,
+                        vacancyDto,
                         authentication.getName()
                 );
 
@@ -48,12 +48,12 @@ public class VacancyController {
             @PathVariable Integer id,
             @Valid
             @RequestBody
-            Vacancy vacancy,
+            VacancyDto vacancyDto,
             Authentication authentication
     ) {
         vacancyService.editVacancy(
                 id,
-                vacancy,
+                vacancyDto,
                 authentication.getName()
         );
 
@@ -78,7 +78,7 @@ public class VacancyController {
     }
 
     @GetMapping("search/id/{id}")
-    public ResponseEntity<Vacancy>
+    public ResponseEntity<VacancyDto>
     findVacancyById(
             @PathVariable Integer id
     ) {
@@ -88,7 +88,7 @@ public class VacancyController {
     }
 
     @GetMapping("search/all")
-    public ResponseEntity<List<Vacancy>>
+    public ResponseEntity<List<VacancyDto>>
     searchAllVacancies() {
         return ResponseEntity.ok(
                 vacancyService.findAll()
@@ -96,7 +96,7 @@ public class VacancyController {
     }
 
     @GetMapping("search/active")
-    public ResponseEntity<List<Vacancy>>
+    public ResponseEntity<List<VacancyDto>>
     searchActiveVacancies() {
         return ResponseEntity.ok(
                 vacancyService.findAllActive()
@@ -106,7 +106,7 @@ public class VacancyController {
     @GetMapping(
             "search/category/{categoryId}"
     )
-    public ResponseEntity<List<Vacancy>>
+    public ResponseEntity<List<VacancyDto>>
     searchVacanciesByCategory(
             @PathVariable Integer categoryId
     ) {
@@ -120,7 +120,7 @@ public class VacancyController {
     @GetMapping(
             "search/employer/{authorId}"
     )
-    public ResponseEntity<List<Vacancy>>
+    public ResponseEntity<List<VacancyDto>>
     searchVacanciesByEmployer(
             @PathVariable Integer authorId
     ) {
@@ -134,7 +134,7 @@ public class VacancyController {
     @GetMapping(
             "search/responded/{applicantId}"
     )
-    public ResponseEntity<List<Vacancy>>
+    public ResponseEntity<List<VacancyDto>>
     searchRespondedVacancies(
             @PathVariable Integer applicantId
     ) {

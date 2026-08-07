@@ -1,19 +1,19 @@
 package kg.attractor.jobsearch.service;
 
-import kg.attractor.jobsearch.model.Vacancy;
+import kg.attractor.jobsearch.dto.VacancyDto;
 
 import java.util.List;
 
 public interface VacancyService {
 
     Integer createVacancy(
-            Vacancy vacancy,
+            VacancyDto vacancyDto,
             String userEmail
     );
 
     void editVacancy(
             Integer id,
-            Vacancy vacancy,
+            VacancyDto vacancyDto,
             String userEmail
     );
 
@@ -22,21 +22,21 @@ public interface VacancyService {
             String userEmail
     );
 
-    Vacancy findById(Integer id);
+    VacancyDto findById(Integer id);
 
-    List<Vacancy> findAll();
+    List<VacancyDto> findAll();
 
-    List<Vacancy> findAllActive();
+    List<VacancyDto> findAllActive();
 
-    List<Vacancy> findByCategoryId(
+    List<VacancyDto> findByCategoryId(
             Integer categoryId
     );
 
-    List<Vacancy> findByAuthorId(
+    List<VacancyDto> findByAuthorId(
             Integer authorId
     );
 
-    List<Vacancy> findRespondedByApplicantId(
+    List<VacancyDto> findRespondedByApplicantId(
             Integer applicantId
     );
 }

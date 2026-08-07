@@ -1,17 +1,20 @@
 package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dao.VacancyDao;
+import kg.attractor.jobsearch.dto.VacancyDto;
 import kg.attractor.jobsearch.exception.InvalidAccountTypeException;
 import kg.attractor.jobsearch.exception.InvalidExperienceRangeException;
 import kg.attractor.jobsearch.exception.VacancyNotFoundException;
 import kg.attractor.jobsearch.model.AccountType;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.Vacancy;
+import kg.attractor.jobsearch.service.CategoryService;
 import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,10 +28,12 @@ public class VacancyServiceImpl
 
     private final VacancyDao vacancyDao;
     private final UserService userService;
+    private final CategoryService categoryService;
 
     @Override
+    @Transactional
     public Integer createVacancy(
-            Vacancy vacancy,
+            VacancyDto vacancyDto,
             String userEmail
     ) {
         User employer =
@@ -36,24 +41,49 @@ public class VacancyServiceImpl
                         userEmail
                 );
 
-        log.info(
-                "Creating vacancy '{}' for employer id: {}",
-                vacancy.getName(),
-                employer.getId()
+        categoryService.findById(
+                vacancyDto.getCategoryId()
         );
 
-        validateExperienceRange(vacancy);
+        validateExperienceRange(
+                vacancyDto
+        );
 
         LocalDateTime now =
                 LocalDateTime.now();
 
-        vacancy.setAuthorId(
-                employer.getId()
-        );
-
-        vacancy.setIsActive(true);
-        vacancy.setCreatedDate(now);
-        vacancy.setUpdateTime(now);
+        Vacancy vacancy =
+                Vacancy.builder()
+                        .name(
+                                vacancyDto.getName()
+                        )
+                        .description(
+                                vacancyDto
+                                        .getDescription()
+                        )
+                        .categoryId(
+                                vacancyDto
+                                        .getCategoryId()
+                        )
+                        .salary(
+                                vacancyDto.getSalary()
+                        )
+                        .expFrom(
+                                vacancyDto.getExpFrom()
+                        )
+                        .expTo(
+                                vacancyDto.getExpTo()
+                        )
+                        .isActive(
+                                vacancyDto
+                                        .getIsActive()
+                        )
+                        .authorId(
+                                employer.getId()
+                        )
+                        .createdDate(now)
+                        .updateTime(now)
+                        .build();
 
         Integer vacancyId =
                 vacancyDao.save(vacancy);
@@ -67,21 +97,16 @@ public class VacancyServiceImpl
     }
 
     @Override
+    @Transactional
     public void editVacancy(
             Integer id,
-            Vacancy vacancy,
+            VacancyDto vacancyDto,
             String userEmail
     ) {
         User employer =
                 findAuthenticatedEmployer(
                         userEmail
                 );
-
-        log.info(
-                "Editing vacancy with id: {} by employer id: {}",
-                id,
-                employer.getId()
-        );
 
         Vacancy savedVacancy =
                 vacancyDao.findById(id)
@@ -96,38 +121,35 @@ public class VacancyServiceImpl
                 employer
         );
 
-        validateExperienceRange(vacancy);
+        categoryService.findById(
+                vacancyDto.getCategoryId()
+        );
+
+        validateExperienceRange(
+                vacancyDto
+        );
 
         savedVacancy.setName(
-                vacancy.getName()
+                vacancyDto.getName()
         );
-
         savedVacancy.setDescription(
-                vacancy.getDescription()
+                vacancyDto.getDescription()
         );
-
         savedVacancy.setCategoryId(
-                vacancy.getCategoryId()
+                vacancyDto.getCategoryId()
         );
-
         savedVacancy.setSalary(
-                vacancy.getSalary()
+                vacancyDto.getSalary()
         );
-
         savedVacancy.setExpFrom(
-                vacancy.getExpFrom()
+                vacancyDto.getExpFrom()
         );
-
         savedVacancy.setExpTo(
-                vacancy.getExpTo()
+                vacancyDto.getExpTo()
         );
-
-        if (vacancy.getIsActive() != null) {
-            savedVacancy.setIsActive(
-                    vacancy.getIsActive()
-            );
-        }
-
+        savedVacancy.setIsActive(
+                vacancyDto.getIsActive()
+        );
         savedVacancy.setUpdateTime(
                 LocalDateTime.now()
         );
@@ -141,6 +163,7 @@ public class VacancyServiceImpl
     }
 
     @Override
+    @Transactional
     public void deleteVacancy(
             Integer id,
             String userEmail
@@ -149,12 +172,6 @@ public class VacancyServiceImpl
                 findAuthenticatedEmployer(
                         userEmail
                 );
-
-        log.warn(
-                "Deleting vacancy with id: {} by employer id: {}",
-                id,
-                employer.getId()
-        );
 
         Vacancy savedVacancy =
                 vacancyDao.findById(id)
@@ -178,78 +195,65 @@ public class VacancyServiceImpl
     }
 
     @Override
-    public Vacancy findById(Integer id) {
-        log.debug(
-                "Searching vacancy by id: {}",
-                id
-        );
-
-        return vacancyDao.findById(id)
-                .orElseThrow(() ->
-                        new VacancyNotFoundException(
-                                id
+    public VacancyDto findById(Integer id) {
+        return convertToDto(
+                vacancyDao.findById(id)
+                        .orElseThrow(() ->
+                                new VacancyNotFoundException(
+                                        id
+                                )
                         )
-                );
-    }
-
-    @Override
-    public List<Vacancy> findAll() {
-        log.debug(
-                "Searching all vacancies"
         );
-
-        return vacancyDao.findAll();
     }
 
     @Override
-    public List<Vacancy> findAllActive() {
-        log.debug(
-                "Searching all active vacancies"
-        );
-
-        return vacancyDao.findAllActive();
+    public List<VacancyDto> findAll() {
+        return vacancyDao.findAllActive()
+                .stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Override
-    public List<Vacancy> findByCategoryId(
+    public List<VacancyDto> findAllActive() {
+        return vacancyDao.findAllActive()
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    @Override
+    public List<VacancyDto> findByCategoryId(
             Integer categoryId
     ) {
-        log.debug(
-                "Searching vacancies by category id: {}",
-                categoryId
-        );
+        categoryService.findById(categoryId);
 
-        return vacancyDao.findByCategoryId(
-                categoryId
-        );
+        return vacancyDao
+                .findByCategoryId(categoryId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Override
-    public List<Vacancy> findByAuthorId(
+    public List<VacancyDto> findByAuthorId(
             Integer authorId
     ) {
-        log.debug(
-                "Searching vacancies by employer id: {}",
-                authorId
-        );
-
         validateEmployerById(authorId);
 
         return vacancyDao.findByAuthorId(
-                authorId
-        );
+                        authorId
+                )
+                .stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Override
-    public List<Vacancy>
+    public List<VacancyDto>
     findRespondedByApplicantId(
             Integer applicantId
     ) {
-        log.debug(
-                "Searching responded vacancies for applicant id: {}",
-                applicantId
-        );
-
         validateApplicantById(
                 applicantId
         );
@@ -257,7 +261,28 @@ public class VacancyServiceImpl
         return vacancyDao
                 .findRespondedByApplicantId(
                         applicantId
-                );
+                )
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    private VacancyDto convertToDto(
+            Vacancy vacancy
+    ) {
+        return new VacancyDto(
+                vacancy.getId(),
+                vacancy.getName(),
+                vacancy.getDescription(),
+                vacancy.getCategoryId(),
+                vacancy.getSalary(),
+                vacancy.getExpFrom(),
+                vacancy.getExpTo(),
+                vacancy.getIsActive(),
+                vacancy.getAuthorId(),
+                vacancy.getCreatedDate(),
+                vacancy.getUpdateTime()
+        );
     }
 
     private User findAuthenticatedEmployer(
@@ -333,12 +358,12 @@ public class VacancyServiceImpl
     }
 
     private void validateExperienceRange(
-            Vacancy vacancy
+            VacancyDto vacancyDto
     ) {
-        if (vacancy.getExpFrom() != null
-                && vacancy.getExpTo() != null
-                && vacancy.getExpFrom()
-                > vacancy.getExpTo()) {
+        if (vacancyDto.getExpFrom() != null
+                && vacancyDto.getExpTo() != null
+                && vacancyDto.getExpFrom()
+                > vacancyDto.getExpTo()) {
             throw new InvalidExperienceRangeException();
         }
     }

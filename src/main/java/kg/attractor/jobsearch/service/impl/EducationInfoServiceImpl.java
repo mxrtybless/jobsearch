@@ -1,12 +1,14 @@
 package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dao.EducationInfoDao;
+import kg.attractor.jobsearch.dto.EducationInfoDto;
 import kg.attractor.jobsearch.exception.InvalidEducationPeriodException;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.service.EducationInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,26 +22,23 @@ public class EducationInfoServiceImpl
             educationInfoDao;
 
     @Override
-    public List<EducationInfo> findByResumeId(
+    public List<EducationInfoDto> findByResumeId(
             Integer resumeId
     ) {
-        log.debug(
-                "Searching education records by resume id: {}",
-                resumeId
-        );
-
-        return educationInfoDao.findByResumeId(
-                resumeId
-        );
+        return educationInfoDao
+                .findByResumeId(resumeId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Override
+    @Transactional
     public void saveAll(
             Integer resumeId,
-            List<EducationInfo> educationInfo
+            List<EducationInfoDto> educationInfo
     ) {
         validatePeriods(educationInfo);
-
         saveRecords(
                 resumeId,
                 educationInfo
@@ -47,9 +46,10 @@ public class EducationInfoServiceImpl
     }
 
     @Override
+    @Transactional
     public void replaceAll(
             Integer resumeId,
-            List<EducationInfo> educationInfo
+            List<EducationInfoDto> educationInfo
     ) {
         validatePeriods(educationInfo);
 
@@ -60,11 +60,6 @@ public class EducationInfoServiceImpl
         saveRecords(
                 resumeId,
                 educationInfo
-        );
-
-        log.info(
-                "Education records replaced for resume id: {}",
-                resumeId
         );
     }
 
@@ -75,27 +70,43 @@ public class EducationInfoServiceImpl
         educationInfoDao.deleteByResumeId(
                 resumeId
         );
-
-        log.info(
-                "Education records deleted for resume id: {}",
-                resumeId
-        );
     }
 
     private void saveRecords(
             Integer resumeId,
-            List<EducationInfo> educationInfo
+            List<EducationInfoDto> educationInfo
     ) {
         if (educationInfo == null) {
             return;
         }
 
-        for (EducationInfo education
+        for (EducationInfoDto educationDto
                 : educationInfo) {
 
-            education.setResumeId(
-                    resumeId
-            );
+            EducationInfo education =
+                    EducationInfo.builder()
+                            .resumeId(resumeId)
+                            .institution(
+                                    educationDto
+                                            .getInstitution()
+                            )
+                            .program(
+                                    educationDto
+                                            .getProgram()
+                            )
+                            .startDate(
+                                    educationDto
+                                            .getStartDate()
+                            )
+                            .endDate(
+                                    educationDto
+                                            .getEndDate()
+                            )
+                            .degree(
+                                    educationDto
+                                            .getDegree()
+                            )
+                            .build();
 
             educationInfoDao.save(
                     education
@@ -109,28 +120,44 @@ public class EducationInfoServiceImpl
     }
 
     private void validatePeriods(
-            List<EducationInfo> educationInfo
+            List<EducationInfoDto> educationInfo
     ) {
         if (educationInfo == null) {
             return;
         }
 
-        for (EducationInfo education
+        for (EducationInfoDto educationDto
                 : educationInfo) {
 
-            if (education.getStartDate()
+            if (educationDto.getStartDate()
                     != null
-                    && education.getEndDate()
+                    && educationDto.getEndDate()
                     != null
-                    && education.getEndDate()
+                    && educationDto.getEndDate()
                     .isBefore(
-                            education.getStartDate()
+                            educationDto
+                                    .getStartDate()
                     )) {
 
                 throw new InvalidEducationPeriodException(
-                        education.getInstitution()
+                        educationDto
+                                .getInstitution()
                 );
             }
         }
+    }
+
+    private EducationInfoDto convertToDto(
+            EducationInfo educationInfo
+    ) {
+        return new EducationInfoDto(
+                educationInfo.getId(),
+                educationInfo.getResumeId(),
+                educationInfo.getInstitution(),
+                educationInfo.getProgram(),
+                educationInfo.getStartDate(),
+                educationInfo.getEndDate(),
+                educationInfo.getDegree()
+        );
     }
 }

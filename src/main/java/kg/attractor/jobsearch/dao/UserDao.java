@@ -18,6 +18,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class UserDao {
+
     private final JdbcTemplate jdbcTemplate;
 
     public Integer save(User user) {
@@ -31,9 +32,19 @@ public class UserDao {
                     password,
                     phone_number,
                     avatar,
-                    account_type
+                    account_type,
+                    enabled,
+                    role_id
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (
+                    ?, ?, ?, ?, ?, ?, ?, ?,
+                    TRUE,
+                    (
+                        SELECT id
+                        FROM roles
+                        WHERE role = ?
+                    )
+                )
                 """;
 
         KeyHolder keyHolder =
@@ -50,39 +61,36 @@ public class UserDao {
                     1,
                     user.getName()
             );
-
             statement.setString(
                     2,
                     user.getSurname()
             );
-
             statement.setObject(
                     3,
                     user.getAge()
             );
-
             statement.setString(
                     4,
                     user.getEmail()
             );
-
             statement.setString(
                     5,
                     user.getPassword()
             );
-
             statement.setString(
                     6,
                     user.getPhoneNumber()
             );
-
             statement.setString(
                     7,
                     user.getAvatar()
             );
-
             statement.setString(
                     8,
+                    user.getAccountType().name()
+            );
+            statement.setString(
+                    9,
                     user.getAccountType().name()
             );
 
@@ -92,6 +100,46 @@ public class UserDao {
         return Objects.requireNonNull(
                 keyHolder.getKey()
         ).intValue();
+    }
+
+    public Optional<User> findById(
+            Integer id
+    ) {
+        String sql = """
+                SELECT *
+                FROM users
+                WHERE id = ?
+                """;
+
+        return Optional.ofNullable(
+                DataAccessUtils.singleResult(
+                        jdbcTemplate.query(
+                                sql,
+                                new UserMapper(),
+                                id
+                        )
+                )
+        );
+    }
+
+    public Optional<User> findByEmail(
+            String email
+    ) {
+        String sql = """
+                SELECT *
+                FROM users
+                WHERE LOWER(email) = LOWER(?)
+                """;
+
+        return Optional.ofNullable(
+                DataAccessUtils.singleResult(
+                        jdbcTemplate.query(
+                                sql,
+                                new UserMapper(),
+                                email
+                        )
+                )
+        );
     }
 
     public List<User> findByName(String name) {
@@ -124,26 +172,6 @@ public class UserDao {
         );
     }
 
-    public Optional<User> findByEmail(
-            String email
-    ) {
-        String sql = """
-                SELECT *
-                FROM users
-                WHERE LOWER(email) = LOWER(?)
-                """;
-
-        return Optional.ofNullable(
-                DataAccessUtils.singleResult(
-                        jdbcTemplate.query(
-                                sql,
-                                new UserMapper(),
-                                email
-                        )
-                )
-        );
-    }
-
     public boolean existsByEmail(String email) {
         String sql = """
                 SELECT COUNT(*)
@@ -158,7 +186,8 @@ public class UserDao {
                         email
                 );
 
-        return count != null && count > 0;
+        return count != null
+                && count > 0;
     }
 
     public List<User> findApplicants(
@@ -214,6 +243,30 @@ public class UserDao {
                 search,
                 search,
                 search
+        );
+    }
+
+    public void update(User user) {
+        String sql = """
+                UPDATE users
+                SET name = ?,
+                    surname = ?,
+                    age = ?,
+                    email = ?,
+                    password = ?,
+                    phone_number = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(
+                sql,
+                user.getName(),
+                user.getSurname(),
+                user.getAge(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getPhoneNumber(),
+                user.getId()
         );
     }
 

@@ -1,11 +1,13 @@
 package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dao.WorkExperienceInfoDao;
+import kg.attractor.jobsearch.dto.WorkExperienceInfoDto;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
 import kg.attractor.jobsearch.service.WorkExperienceInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,25 +21,22 @@ public class WorkExperienceInfoServiceImpl
             workExperienceInfoDao;
 
     @Override
-    public List<WorkExperienceInfo>
+    public List<WorkExperienceInfoDto>
     findByResumeId(
             Integer resumeId
     ) {
-        log.debug(
-                "Searching work experience records by resume id: {}",
-                resumeId
-        );
-
         return workExperienceInfoDao
-                .findByResumeId(
-                        resumeId
-                );
+                .findByResumeId(resumeId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Override
+    @Transactional
     public void saveAll(
             Integer resumeId,
-            List<WorkExperienceInfo>
+            List<WorkExperienceInfoDto>
                     workExperienceInfo
     ) {
         saveRecords(
@@ -47,9 +46,10 @@ public class WorkExperienceInfoServiceImpl
     }
 
     @Override
+    @Transactional
     public void replaceAll(
             Integer resumeId,
-            List<WorkExperienceInfo>
+            List<WorkExperienceInfoDto>
                     workExperienceInfo
     ) {
         workExperienceInfoDao
@@ -60,11 +60,6 @@ public class WorkExperienceInfoServiceImpl
         saveRecords(
                 resumeId,
                 workExperienceInfo
-        );
-
-        log.info(
-                "Work experience records replaced for resume id: {}",
-                resumeId
         );
     }
 
@@ -76,28 +71,39 @@ public class WorkExperienceInfoServiceImpl
                 .deleteByResumeId(
                         resumeId
                 );
-
-        log.info(
-                "Work experience records deleted for resume id: {}",
-                resumeId
-        );
     }
 
     private void saveRecords(
             Integer resumeId,
-            List<WorkExperienceInfo>
+            List<WorkExperienceInfoDto>
                     workExperienceInfo
     ) {
         if (workExperienceInfo == null) {
             return;
         }
 
-        for (WorkExperienceInfo workExperience
+        for (WorkExperienceInfoDto workDto
                 : workExperienceInfo) {
 
-            workExperience.setResumeId(
-                    resumeId
-            );
+            WorkExperienceInfo workExperience =
+                    WorkExperienceInfo.builder()
+                            .resumeId(resumeId)
+                            .years(
+                                    workDto.getYears()
+                            )
+                            .companyName(
+                                    workDto
+                                            .getCompanyName()
+                            )
+                            .position(
+                                    workDto
+                                            .getPosition()
+                            )
+                            .responsibilities(
+                                    workDto
+                                            .getResponsibilities()
+                            )
+                            .build();
 
             workExperienceInfoDao.save(
                     workExperience
@@ -107,6 +113,19 @@ public class WorkExperienceInfoServiceImpl
         log.info(
                 "Work experience records saved for resume id: {}",
                 resumeId
+        );
+    }
+
+    private WorkExperienceInfoDto convertToDto(
+            WorkExperienceInfo workExperience
+    ) {
+        return new WorkExperienceInfoDto(
+                workExperience.getId(),
+                workExperience.getResumeId(),
+                workExperience.getYears(),
+                workExperience.getCompanyName(),
+                workExperience.getPosition(),
+                workExperience.getResponsibilities()
         );
     }
 }

@@ -1,12 +1,13 @@
 package kg.attractor.jobsearch.controller;
 
 import jakarta.validation.Valid;
-import kg.attractor.jobsearch.model.RespondedApplicant;
+import kg.attractor.jobsearch.dto.RespondedApplicantDto;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.service.RespondedApplicantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import java.util.List;
 @RequestMapping("responses")
 @RequiredArgsConstructor
 public class RespondedApplicantController {
+
     private final RespondedApplicantService
             respondedApplicantService;
 
@@ -27,11 +29,13 @@ public class RespondedApplicantController {
     public ResponseEntity<Void> createResponse(
             @Valid
             @RequestBody
-            RespondedApplicant respondedApplicant
+            RespondedApplicantDto respondedApplicantDto,
+            Authentication authentication
     ) {
         respondedApplicantService
                 .createResponse(
-                        respondedApplicant
+                        respondedApplicantDto,
+                        authentication.getName()
                 );
 
         return ResponseEntity
@@ -44,12 +48,14 @@ public class RespondedApplicantController {
     )
     public ResponseEntity<List<User>>
     searchApplicantsByVacancy(
-            @PathVariable Integer vacancyId
+            @PathVariable Integer vacancyId,
+            Authentication authentication
     ) {
         return ResponseEntity.ok(
                 respondedApplicantService
                         .findApplicantsByVacancyId(
-                                vacancyId
+                                vacancyId,
+                                authentication.getName()
                         )
         );
     }

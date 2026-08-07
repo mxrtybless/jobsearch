@@ -7,7 +7,9 @@ INSERT INTO users
     password,
     phone_number,
     avatar,
-    account_type
+    account_type,
+    enabled,
+    role_id
 )
 VALUES
     (
@@ -18,7 +20,9 @@ VALUES
         '$2y$10$rGEITnrNBARrzDPTddHfvu/kvEzvgTlJI/QKNT0BGLKsBEFm/kaWC',
         '+996700111222',
         'default-avatar.png',
-        'APPLICANT'
+        'APPLICANT',
+        TRUE,
+        (SELECT id FROM roles WHERE role = 'APPLICANT')
     ),
     (
         'Attractor',
@@ -28,9 +32,10 @@ VALUES
         '$2y$10$9lYIDGlN6906dHEARifNPO7EPbkiDxts/FK2DIvTeB0Tk6Vco3IGC',
         '+996555333444',
         'default-avatar.png',
-        'EMPLOYER'
+        'EMPLOYER',
+        TRUE,
+        (SELECT id FROM roles WHERE role = 'EMPLOYER')
     );
-
 
 INSERT INTO categories
 (
@@ -38,15 +43,8 @@ INSERT INTO categories
     parent_id
 )
 VALUES
-    (
-        'IT',
-        NULL
-    ),
-    (
-        'Design',
-        NULL
-    );
-
+    ('IT', NULL),
+    ('Design', NULL);
 
 INSERT INTO categories
 (
@@ -54,19 +52,9 @@ INSERT INTO categories
     parent_id
 )
 VALUES
-    (
-        'Backend Development',
-        1
-    ),
-    (
-        'Frontend Development',
-        1
-    ),
-    (
-        'UI/UX Design',
-        2
-    );
-
+    ('Backend Development', 1),
+    ('Frontend Development', 1),
+    ('UI/UX Design', 2);
 
 INSERT INTO resumes
 (
@@ -97,7 +85,6 @@ VALUES
         TIMESTAMP '2026-07-02 11:00:00',
         TIMESTAMP '2026-07-21 13:00:00'
     );
-
 
 INSERT INTO vacancies
 (
@@ -138,25 +125,13 @@ VALUES
         TIMESTAMP '2026-07-21 14:00:00'
     );
 
-
-INSERT INTO contact_types
-(
-    type
-)
+INSERT INTO contact_types(type)
 VALUES
-    (
-        'EMAIL'
-    ),
-    (
-        'PHONE'
-    ),
-    (
-        'TELEGRAM'
-    ),
-    (
-        'LINKEDIN'
-    );
-
+    ('EMAIL'),
+    ('PHONE'),
+    ('TELEGRAM'),
+    ('FACEBOOK'),
+    ('LINKEDIN');
 
 INSERT INTO contacts_info
 (
@@ -165,27 +140,11 @@ INSERT INTO contacts_info
     "VALUE"
 )
 VALUES
-    (
-        1,
-        1,
-        'applicant@attractor.com'
-    ),
-    (
-        2,
-        1,
-        '+996700111222'
-    ),
-    (
-        3,
-        1,
-        '@aibek_java'
-    ),
-    (
-        1,
-        2,
-        'applicant@attractor.com'
-    );
-
+    (1, 1, 'applicant@attractor.com'),
+    (2, 1, '+996700111222'),
+    (3, 1, '@aibek_java'),
+    (5, 1, 'https://linkedin.com/in/aibek'),
+    (1, 2, 'applicant@attractor.com');
 
 INSERT INTO education_info
 (
@@ -214,7 +173,6 @@ VALUES
         'Certificate'
     );
 
-
 INSERT INTO work_experience_info
 (
     resume_id,
@@ -239,7 +197,6 @@ VALUES
         'Разработка пользовательских интерфейсов'
     );
 
-
 INSERT INTO responded_applicants
 (
     resume_id,
@@ -247,17 +204,8 @@ INSERT INTO responded_applicants
     confirmation
 )
 VALUES
-    (
-        1,
-        1,
-        FALSE
-    ),
-    (
-        2,
-        2,
-        TRUE
-    );
-
+    (1, 1, FALSE),
+    (2, 2, TRUE);
 
 INSERT INTO messages
 (

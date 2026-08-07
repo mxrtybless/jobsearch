@@ -7,6 +7,8 @@ import kg.attractor.jobsearch.exception.ResumeNotFoundException;
 import kg.attractor.jobsearch.model.AccountType;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.service.CategoryService;
+import kg.attractor.jobsearch.service.ContactInfoService;
 import kg.attractor.jobsearch.service.EducationInfoService;
 import kg.attractor.jobsearch.service.ResumeService;
 import kg.attractor.jobsearch.service.UserService;
@@ -14,6 +16,7 @@ import kg.attractor.jobsearch.service.WorkExperienceInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,14 +30,13 @@ public class ResumeServiceImpl
 
     private final ResumeDao resumeDao;
     private final UserService userService;
-
-    private final EducationInfoService
-            educationInfoService;
-
-    private final WorkExperienceInfoService
-            workExperienceInfoService;
+    private final CategoryService categoryService;
+    private final EducationInfoService educationInfoService;
+    private final WorkExperienceInfoService workExperienceInfoService;
+    private final ContactInfoService contactInfoService;
 
     @Override
+    @Transactional
     public Integer createResume(
             ResumeDto resumeDto,
             String userEmail
@@ -44,35 +46,30 @@ public class ResumeServiceImpl
                         userEmail
                 );
 
-        log.info(
-                "Creating resume '{}' for applicant id: {}",
-                resumeDto.getName(),
-                applicant.getId()
+        categoryService.findById(
+                resumeDto.getCategoryId()
         );
 
         LocalDateTime now =
                 LocalDateTime.now();
 
         Resume resume = Resume.builder()
-                .applicantId(
-                        applicant.getId()
-                )
-                .name(
-                        resumeDto.getName()
-                )
-                .categoryId(
-                        resumeDto.getCategoryId()
-                )
-                .salary(
-                        resumeDto.getSalary()
-                )
-                .isActive(true)
+                .applicantId(applicant.getId())
+                .name(resumeDto.getName())
+                .categoryId(resumeDto.getCategoryId())
+                .salary(resumeDto.getSalary())
+                .isActive(resumeDto.getIsActive())
                 .createdDate(now)
                 .updateTime(now)
                 .build();
 
         Integer resumeId =
                 resumeDao.save(resume);
+
+        contactInfoService.saveAll(
+                resumeId,
+                resumeDto.getContactInfo()
+        );
 
         educationInfoService.saveAll(
                 resumeId,
@@ -81,8 +78,7 @@ public class ResumeServiceImpl
 
         workExperienceInfoService.saveAll(
                 resumeId,
-                resumeDto
-                        .getWorkExperienceInfo()
+                resumeDto.getWorkExperienceInfo()
         );
 
         log.info(
@@ -94,6 +90,7 @@ public class ResumeServiceImpl
     }
 
     @Override
+    @Transactional
     public void editResume(
             Integer id,
             ResumeDto resumeDto,
@@ -104,12 +101,6 @@ public class ResumeServiceImpl
                         userEmail
                 );
 
-        log.info(
-                "Editing resume with id: {} by applicant id: {}",
-                id,
-                applicant.getId()
-        );
-
         Resume savedResume =
                 resumeDao.findById(id)
                         .orElseThrow(() ->
@@ -123,48 +114,42 @@ public class ResumeServiceImpl
                 applicant
         );
 
-        savedResume.setName(
-                resumeDto.getName()
-        );
-
-        savedResume.setCategoryId(
+        categoryService.findById(
                 resumeDto.getCategoryId()
         );
 
+        savedResume.setName(
+                resumeDto.getName()
+        );
+        savedResume.setCategoryId(
+                resumeDto.getCategoryId()
+        );
         savedResume.setSalary(
                 resumeDto.getSalary()
         );
-
-        if (resumeDto.getIsActive()
-                != null) {
-            savedResume.setIsActive(
-                    resumeDto.getIsActive()
-            );
-        }
-
+        savedResume.setIsActive(
+                resumeDto.getIsActive()
+        );
         savedResume.setUpdateTime(
                 LocalDateTime.now()
         );
 
         resumeDao.update(savedResume);
 
-        if (resumeDto.getEducationInfo()
-                != null) {
-            educationInfoService.replaceAll(
-                    id,
-                    resumeDto.getEducationInfo()
-            );
-        }
+        contactInfoService.replaceAll(
+                id,
+                resumeDto.getContactInfo()
+        );
 
-        if (resumeDto.getWorkExperienceInfo()
-                != null) {
-            workExperienceInfoService
-                    .replaceAll(
-                            id,
-                            resumeDto
-                                    .getWorkExperienceInfo()
-                    );
-        }
+        educationInfoService.replaceAll(
+                id,
+                resumeDto.getEducationInfo()
+        );
+
+        workExperienceInfoService.replaceAll(
+                id,
+                resumeDto.getWorkExperienceInfo()
+        );
 
         log.info(
                 "Resume updated successfully with id: {}",
@@ -173,6 +158,7 @@ public class ResumeServiceImpl
     }
 
     @Override
+    @Transactional
     public void deleteResume(
             Integer id,
             String userEmail
@@ -182,12 +168,6 @@ public class ResumeServiceImpl
                         userEmail
                 );
 
-        log.warn(
-                "Deleting resume with id: {} by applicant id: {}",
-                id,
-                applicant.getId()
-        );
-
         Resume savedResume =
                 resumeDao.findById(id)
                         .orElseThrow(() ->
@@ -201,12 +181,9 @@ public class ResumeServiceImpl
                 applicant
         );
 
-        educationInfoService
-                .deleteByResumeId(id);
-
-        workExperienceInfoService
-                .deleteByResumeId(id);
-
+        contactInfoService.deleteByResumeId(id);
+        educationInfoService.deleteByResumeId(id);
+        workExperienceInfoService.deleteByResumeId(id);
         resumeDao.deleteById(id);
 
         log.info(
@@ -217,11 +194,6 @@ public class ResumeServiceImpl
 
     @Override
     public ResumeDto findById(Integer id) {
-        log.debug(
-                "Searching resume by id: {}",
-                id
-        );
-
         Resume resume =
                 resumeDao.findById(id)
                         .orElseThrow(() ->
@@ -235,10 +207,6 @@ public class ResumeServiceImpl
 
     @Override
     public List<ResumeDto> findAllActive() {
-        log.debug(
-                "Searching all active resumes"
-        );
-
         return resumeDao.findAllActive()
                 .stream()
                 .map(this::convertToDto)
@@ -249,10 +217,7 @@ public class ResumeServiceImpl
     public List<ResumeDto> findByCategoryId(
             Integer categoryId
     ) {
-        log.debug(
-                "Searching resumes by category id: {}",
-                categoryId
-        );
+        categoryService.findById(categoryId);
 
         return resumeDao
                 .findByCategoryId(categoryId)
@@ -265,11 +230,6 @@ public class ResumeServiceImpl
     public List<ResumeDto> findByApplicantId(
             Integer applicantId
     ) {
-        log.debug(
-                "Searching resumes by applicant id: {}",
-                applicantId
-        );
-
         validateApplicantById(
                 applicantId
         );
@@ -290,33 +250,33 @@ public class ResumeServiceImpl
         resumeDto.setId(
                 resume.getId()
         );
-
         resumeDto.setApplicantId(
                 resume.getApplicantId()
         );
-
         resumeDto.setName(
                 resume.getName()
         );
-
         resumeDto.setCategoryId(
                 resume.getCategoryId()
         );
-
         resumeDto.setSalary(
                 resume.getSalary()
         );
-
         resumeDto.setIsActive(
                 resume.getIsActive()
         );
-
         resumeDto.setCreatedDate(
                 resume.getCreatedDate()
         );
-
         resumeDto.setUpdateTime(
                 resume.getUpdateTime()
+        );
+
+        resumeDto.setContactInfo(
+                contactInfoService
+                        .findByResumeId(
+                                resume.getId()
+                        )
         );
 
         resumeDto.setEducationInfo(

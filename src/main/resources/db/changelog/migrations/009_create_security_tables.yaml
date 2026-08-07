@@ -1,0 +1,122 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-create-authorities-table
+      author: mxrty
+      changes:
+        - createTable:
+            tableName: authorities
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: authority
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+  - changeSet:
+      id: 009-create-roles-table
+      author: mxrty
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: role
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: authority_id
+                  type: int
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: roles
+            baseColumnNames: authority_id
+            referencedTableName: authorities
+            referencedColumnNames: id
+            constraintName: fk_roles_authority
+
+  - changeSet:
+      id: 009-insert-authorities
+      author: mxrty
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO authorities(authority)
+              VALUES ('APPLICANT');
+
+              INSERT INTO authorities(authority)
+              VALUES ('EMPLOYER');
+
+  - changeSet:
+      id: 009-insert-roles
+      author: mxrty
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO roles(role, authority_id)
+              VALUES (
+                  'APPLICANT',
+                  (
+                      SELECT id
+                      FROM authorities
+                      WHERE authority = 'APPLICANT'
+                  )
+              );
+
+              INSERT INTO roles(role, authority_id)
+              VALUES (
+                  'EMPLOYER',
+                  (
+                      SELECT id
+                      FROM authorities
+                      WHERE authority = 'EMPLOYER'
+                  )
+              );
+
+  - changeSet:
+      id: 009-add-security-columns-to-users
+      author: mxrty
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: enabled
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: role_id
+                  type: int
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: users
+            baseColumnNames: role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: fk_users_role

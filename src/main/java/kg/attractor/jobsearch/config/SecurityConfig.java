@@ -26,17 +26,21 @@ public class SecurityConfig {
                 SELECT
                     email AS username,
                     password,
-                    TRUE AS enabled
+                    enabled
                 FROM users
                 WHERE LOWER(email) = LOWER(?)
                 """;
 
         String authoritiesByEmailQuery = """
                 SELECT
-                    email AS username,
-                    account_type AS authority
-                FROM users
-                WHERE LOWER(email) = LOWER(?)
+                    u.email AS username,
+                    a.authority
+                FROM users u
+                JOIN roles r
+                    ON r.id = u.role_id
+                JOIN authorities a
+                    ON a.id = r.authority_id
+                WHERE LOWER(u.email) = LOWER(?)
                 """;
 
         JdbcUserDetailsManager userDetailsManager =
