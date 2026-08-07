@@ -1,0 +1,21 @@
+body {
+    min-height: 100vh;
+    background-color: #f5f7fb;
+}
+
+.navbar-brand {
+    letter-spacing: 0.3px;
+}
+
+.auth-card {
+    margin-top: 48px;
+    border-radius: 16px;
+}
+
+.card {
+    border-radius: 14px;
+}
+
+.btn {
+    border-radius: 8px;
+}

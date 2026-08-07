@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import javax.sql.DataSource;
 
@@ -84,29 +85,71 @@ public class SecurityConfig {
             DaoAuthenticationProvider
                     authenticationProvider
     ) throws Exception {
+
         http
                 .authenticationProvider(
                         authenticationProvider
                 )
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
+                                SessionCreationPolicy.IF_REQUIRED
                         )
                 )
+
                 .httpBasic(
                         Customizer.withDefaults()
                 )
-                .formLogin(
-                        AbstractHttpConfigurer::disable
+
+                .formLogin(login ->
+                        login
+                                .loginPage(
+                                        "/auth/login"
+                                )
+                                .loginProcessingUrl(
+                                        "/auth/login"
+                                )
+                                .defaultSuccessUrl(
+                                        "/profile",
+                                        true
+                                )
+                                .failureUrl(
+                                        "/auth/login?error=true"
+                                )
+                                .permitAll()
                 )
-                .logout(
-                        AbstractHttpConfigurer::disable
+
+                .logout(logout ->
+                        logout
+                                .logoutRequestMatcher(
+                                        PathPatternRequestMatcher
+                                                .withDefaults()
+                                                .matcher(
+                                                        "/auth/logout"
+                                                )
+                                )
+                                .logoutSuccessUrl(
+                                        "/auth/login?logout=true"
+                                )
+                                .permitAll()
                 )
+
                 .csrf(
                         AbstractHttpConfigurer::disable
                 )
+
                 .authorizeHttpRequests(authorize ->
                         authorize
+
+                                .requestMatchers(
+                                        "/auth/login",
+                                        "/auth/register",
+                                        "/css/**",
+                                        "/images/**",
+                                        "/error"
+                                )
+                                .permitAll()
+
                                 .requestMatchers(
                                         HttpMethod.POST,
                                         "/users/register"
@@ -122,8 +165,7 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/swagger-ui/**",
                                         "/swagger-ui.html",
-                                        "/v3/api-docs/**",
-                                        "/error"
+                                        "/v3/api-docs/**"
                                 )
                                 .permitAll()
 
