@@ -20,6 +20,15 @@
                         Введите email и пароль
                     </p>
 
+                    <#if RequestParameters.registered??>
+
+                        <div class="alert alert-success">
+                            Регистрация прошла успешно.
+                            Теперь войдите в аккаунт.
+                        </div>
+
+                    </#if>
+
                     <#if RequestParameters.error??>
 
                         <div class="alert alert-danger">

@@ -37,12 +37,36 @@ public class UserServiceImpl
     public void register(
             UserCreateDto userCreateDto
     ) {
+        register(
+                userCreateDto,
+                null
+        );
+    }
+
+    @Override
+    @Transactional
+    public void register(
+            UserCreateDto userCreateDto,
+            MultipartFile avatar
+    ) {
         if (userDao.existsByEmail(
                 userCreateDto.getEmail()
         )) {
             throw new EmailAlreadyExistsException(
                     userCreateDto.getEmail()
             );
+        }
+
+        String avatarFilename =
+                DEFAULT_AVATAR;
+
+        if (avatar != null
+                && !avatar.isEmpty()) {
+
+            avatarFilename =
+                    imageService.upload(
+                            avatar
+                    );
         }
 
         User user = User.builder()
@@ -68,7 +92,9 @@ public class UserServiceImpl
                         userCreateDto
                                 .getPhoneNumber()
                 )
-                .avatar(DEFAULT_AVATAR)
+                .avatar(
+                        avatarFilename
+                )
                 .accountType(
                         userCreateDto
                                 .getAccountType()

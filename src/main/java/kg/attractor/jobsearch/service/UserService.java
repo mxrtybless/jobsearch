@@ -14,6 +14,11 @@ public interface UserService {
             UserCreateDto userCreateDto
     );
 
+    void register(
+            UserCreateDto userCreateDto,
+            MultipartFile avatar
+    );
+
     User findProfileById(Integer id);
 
     void editProfile(
