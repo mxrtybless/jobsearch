@@ -7,6 +7,8 @@ import kg.attractor.jobsearch.service.ContactTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ContactTypeServiceImpl
@@ -22,5 +24,10 @@ public class ContactTypeServiceImpl
                                 id
                         )
                 );
+    }
+
+    @Override
+    public List<ContactType> findAll() {
+        return contactTypeDao.findAll();
     }
 }

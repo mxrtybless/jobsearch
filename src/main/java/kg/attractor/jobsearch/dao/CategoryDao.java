@@ -6,6 +6,7 @@ import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -51,5 +52,36 @@ public class CategoryDao {
                 );
 
         return Optional.ofNullable(category);
+    }
+
+    public List<Category> findAll() {
+        String sql = """
+                SELECT id, name, parent_id
+                FROM categories
+                ORDER BY id
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) ->
+                        Category.builder()
+                                .id(
+                                        rs.getInt(
+                                                "id"
+                                        )
+                                )
+                                .name(
+                                        rs.getString(
+                                                "name"
+                                        )
+                                )
+                                .parentId(
+                                        (Integer)
+                                                rs.getObject(
+                                                        "parent_id"
+                                                )
+                                )
+                                .build()
+        );
     }
 }

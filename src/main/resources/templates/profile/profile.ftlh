@@ -26,6 +26,30 @@
 
     </#if>
 
+    <#if RequestParameters.resumeCreated??>
+
+        <div class="alert alert-success">
+            Резюме успешно создано.
+        </div>
+
+    </#if>
+
+    <#if RequestParameters.resumeUpdated??>
+
+        <div class="alert alert-success">
+            Резюме успешно обновлено.
+        </div>
+
+    </#if>
+
+    <#if RequestParameters.resumeRefreshed??>
+
+        <div class="alert alert-success">
+            Дата обновления резюме изменена.
+        </div>
+
+    </#if>
+
 
     <div class="card shadow-sm border-0 mb-4">
 
@@ -179,6 +203,12 @@
 
             </div>
 
+            <a
+                    class="btn btn-primary"
+                    href="/resumes/form/create">
+                Создать резюме
+            </a>
+
         </div>
 
 
@@ -271,6 +301,28 @@
                                     </#if>
 
                                 </p>
+
+                                <div class="d-flex gap-2 mt-3">
+
+                                    <form
+                                            action="/resumes/form/update/${resume.id?c}"
+                                            method="post">
+
+                                        <button
+                                                class="btn btn-outline-primary btn-sm"
+                                                type="submit">
+                                            Обновить
+                                        </button>
+
+                                    </form>
+
+                                    <a
+                                            class="btn btn-outline-secondary btn-sm"
+                                            href="/resumes/form/edit/${resume.id?c}">
+                                        Редактировать
+                                    </a>
+
+                                </div>
 
                             </div>
 

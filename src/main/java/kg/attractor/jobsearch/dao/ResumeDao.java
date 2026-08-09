@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -176,6 +177,23 @@ public class ResumeDao {
                 resume.getIsActive(),
                 resume.getUpdateTime(),
                 resume.getId()
+        );
+    }
+
+    public void updateTime(
+            Integer id,
+            LocalDateTime updateTime
+    ) {
+        String sql = """
+                UPDATE resumes
+                SET update_time = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(
+                sql,
+                updateTime,
+                id
         );
     }
 

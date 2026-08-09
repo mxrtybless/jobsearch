@@ -2,7 +2,11 @@ package kg.attractor.jobsearch.service;
 
 import kg.attractor.jobsearch.model.ContactType;
 
+import java.util.List;
+
 public interface ContactTypeService {
 
     ContactType findById(Integer id);
+
+    List<ContactType> findAll();
 }

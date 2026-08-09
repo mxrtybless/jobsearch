@@ -17,12 +17,22 @@ public interface ResumeService {
             String userEmail
     );
 
+    void updateResumeDate(
+            Integer id,
+            String userEmail
+    );
+
     void deleteResume(
             Integer id,
             String userEmail
     );
 
     ResumeDto findById(Integer id);
+
+    ResumeDto findOwnedById(
+            Integer id,
+            String userEmail
+    );
 
     List<ResumeDto> findAllActive();
 

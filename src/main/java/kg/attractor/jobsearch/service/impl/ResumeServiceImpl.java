@@ -159,6 +159,41 @@ public class ResumeServiceImpl
 
     @Override
     @Transactional
+    public void updateResumeDate(
+            Integer id,
+            String userEmail
+    ) {
+        User applicant =
+                findAuthenticatedApplicant(
+                        userEmail
+                );
+
+        Resume savedResume =
+                resumeDao.findById(id)
+                        .orElseThrow(() ->
+                                new ResumeNotFoundException(
+                                        id
+                                )
+                        );
+
+        validateResumeOwner(
+                savedResume,
+                applicant
+        );
+
+        resumeDao.updateTime(
+                id,
+                LocalDateTime.now()
+        );
+
+        log.info(
+                "Resume update time refreshed for id: {}",
+                id
+        );
+    }
+
+    @Override
+    @Transactional
     public void deleteResume(
             Integer id,
             String userEmail
@@ -201,6 +236,32 @@ public class ResumeServiceImpl
                                         id
                                 )
                         );
+
+        return convertToDto(resume);
+    }
+
+    @Override
+    public ResumeDto findOwnedById(
+            Integer id,
+            String userEmail
+    ) {
+        User applicant =
+                findAuthenticatedApplicant(
+                        userEmail
+                );
+
+        Resume resume =
+                resumeDao.findById(id)
+                        .orElseThrow(() ->
+                                new ResumeNotFoundException(
+                                        id
+                                )
+                        );
+
+        validateResumeOwner(
+                resume,
+                applicant
+        );
 
         return convertToDto(resume);
     }

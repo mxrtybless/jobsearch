@@ -2,6 +2,7 @@ package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dao.ContactInfoDao;
 import kg.attractor.jobsearch.dto.ContactInfoDto;
+import kg.attractor.jobsearch.exception.InvalidContactValueException;
 import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.ContactType;
 import kg.attractor.jobsearch.service.ContactInfoService;
@@ -47,6 +48,13 @@ public class ContactInfoServiceImpl
         for (ContactInfoDto contactDto
                 : contactInfo) {
 
+            if (contactDto == null
+                    || contactDto.getValue() == null
+                    || contactDto.getValue()
+                    .isBlank()) {
+                continue;
+            }
+
             ContactType contactType =
                     contactTypeService.findById(
                             contactDto.getTypeId()
@@ -69,6 +77,7 @@ public class ContactInfoServiceImpl
                             .value(
                                     contactDto
                                             .getValue()
+                                            .trim()
                             )
                             .build();
 
@@ -136,9 +145,8 @@ public class ContactInfoServiceImpl
         }
 
         if (!valid) {
-            throw new IllegalArgumentException(
-                    "Invalid value for contact type "
-                            + type
+            throw new InvalidContactValueException(
+                    type
             );
         }
     }

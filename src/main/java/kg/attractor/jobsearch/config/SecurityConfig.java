@@ -170,6 +170,13 @@ public class SecurityConfig {
                                 .permitAll()
 
                                 .requestMatchers(
+                                        "/resumes/form/**"
+                                )
+                                .hasAuthority(
+                                        "APPLICANT"
+                                )
+
+                                .requestMatchers(
                                         HttpMethod.GET,
                                         "/resumes"
                                 )
