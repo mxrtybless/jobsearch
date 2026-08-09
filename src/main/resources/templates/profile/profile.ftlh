@@ -50,6 +50,30 @@
 
     </#if>
 
+    <#if RequestParameters.vacancyCreated??>
+
+        <div class="alert alert-success">
+            Вакансия успешно создана.
+        </div>
+
+    </#if>
+
+    <#if RequestParameters.vacancyUpdated??>
+
+        <div class="alert alert-success">
+            Вакансия успешно обновлена.
+        </div>
+
+    </#if>
+
+    <#if RequestParameters.vacancyRefreshed??>
+
+        <div class="alert alert-success">
+            Дата обновления вакансии изменена.
+        </div>
+
+    </#if>
+
 
     <div class="card shadow-sm border-0 mb-4">
 
@@ -377,6 +401,12 @@
 
             </div>
 
+            <a
+                    class="btn btn-primary"
+                    href="/vacancies/form/create">
+                Создать вакансию
+            </a>
+
         </div>
 
 
@@ -471,6 +501,28 @@
 
                                 </p>
 
+                                <div class="d-flex gap-2 mt-3">
+
+                                    <form
+                                            action="/vacancies/form/update/${vacancy.id?c}"
+                                            method="post">
+
+                                        <button
+                                                class="btn btn-outline-primary btn-sm"
+                                                type="submit">
+                                            Обновить
+                                        </button>
+
+                                    </form>
+
+                                    <a
+                                            class="btn btn-outline-secondary btn-sm"
+                                            href="/vacancies/form/edit/${vacancy.id?c}">
+                                        Редактировать
+                                    </a>
+
+                                </div>
+
                             </div>
 
                         </div>
@@ -500,7 +552,6 @@
         </#if>
 
     </#if>
-
 
     <div class="card border-0 shadow-sm">
 

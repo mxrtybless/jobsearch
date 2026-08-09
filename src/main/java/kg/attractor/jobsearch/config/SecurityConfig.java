@@ -157,12 +157,6 @@ public class SecurityConfig {
                                 .permitAll()
 
                                 .requestMatchers(
-                                        HttpMethod.GET,
-                                        "/vacancies/**"
-                                )
-                                .permitAll()
-
-                                .requestMatchers(
                                         "/swagger-ui/**",
                                         "/swagger-ui.html",
                                         "/v3/api-docs/**"
@@ -175,6 +169,19 @@ public class SecurityConfig {
                                 .hasAuthority(
                                         "APPLICANT"
                                 )
+
+                                .requestMatchers(
+                                        "/vacancies/form/**"
+                                )
+                                .hasAuthority(
+                                        "EMPLOYER"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/vacancies/**"
+                                )
+                                .permitAll()
 
                                 .requestMatchers(
                                         HttpMethod.GET,

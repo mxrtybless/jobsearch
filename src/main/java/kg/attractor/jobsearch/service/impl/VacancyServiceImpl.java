@@ -132,24 +132,31 @@ public class VacancyServiceImpl
         savedVacancy.setName(
                 vacancyDto.getName()
         );
+
         savedVacancy.setDescription(
                 vacancyDto.getDescription()
         );
+
         savedVacancy.setCategoryId(
                 vacancyDto.getCategoryId()
         );
+
         savedVacancy.setSalary(
                 vacancyDto.getSalary()
         );
+
         savedVacancy.setExpFrom(
                 vacancyDto.getExpFrom()
         );
+
         savedVacancy.setExpTo(
                 vacancyDto.getExpTo()
         );
+
         savedVacancy.setIsActive(
                 vacancyDto.getIsActive()
         );
+
         savedVacancy.setUpdateTime(
                 LocalDateTime.now()
         );
@@ -158,6 +165,41 @@ public class VacancyServiceImpl
 
         log.info(
                 "Vacancy updated successfully with id: {}",
+                id
+        );
+    }
+
+    @Override
+    @Transactional
+    public void updateVacancyDate(
+            Integer id,
+            String userEmail
+    ) {
+        User employer =
+                findAuthenticatedEmployer(
+                        userEmail
+                );
+
+        Vacancy savedVacancy =
+                vacancyDao.findById(id)
+                        .orElseThrow(() ->
+                                new VacancyNotFoundException(
+                                        id
+                                )
+                        );
+
+        validateVacancyOwner(
+                savedVacancy,
+                employer
+        );
+
+        vacancyDao.updateTime(
+                id,
+                LocalDateTime.now()
+        );
+
+        log.info(
+                "Vacancy update time refreshed for id: {}",
                 id
         );
     }
@@ -207,8 +249,34 @@ public class VacancyServiceImpl
     }
 
     @Override
+    public VacancyDto findOwnedById(
+            Integer id,
+            String userEmail
+    ) {
+        User employer =
+                findAuthenticatedEmployer(
+                        userEmail
+                );
+
+        Vacancy vacancy =
+                vacancyDao.findById(id)
+                        .orElseThrow(() ->
+                                new VacancyNotFoundException(
+                                        id
+                                )
+                        );
+
+        validateVacancyOwner(
+                vacancy,
+                employer
+        );
+
+        return convertToDto(vacancy);
+    }
+
+    @Override
     public List<VacancyDto> findAll() {
-        return vacancyDao.findAllActive()
+        return vacancyDao.findAll()
                 .stream()
                 .map(this::convertToDto)
                 .toList();
@@ -226,10 +294,14 @@ public class VacancyServiceImpl
     public List<VacancyDto> findByCategoryId(
             Integer categoryId
     ) {
-        categoryService.findById(categoryId);
+        categoryService.findById(
+                categoryId
+        );
 
         return vacancyDao
-                .findByCategoryId(categoryId)
+                .findByCategoryId(
+                        categoryId
+                )
                 .stream()
                 .map(this::convertToDto)
                 .toList();
@@ -239,9 +311,12 @@ public class VacancyServiceImpl
     public List<VacancyDto> findByAuthorId(
             Integer authorId
     ) {
-        validateEmployerById(authorId);
+        validateEmployerById(
+                authorId
+        );
 
-        return vacancyDao.findByAuthorId(
+        return vacancyDao
+                .findByAuthorId(
                         authorId
                 )
                 .stream()
@@ -302,6 +377,7 @@ public class VacancyServiceImpl
 
         if (user.getAccountType()
                 != AccountType.EMPLOYER) {
+
             throw new InvalidAccountTypeException(
                     user.getId(),
                     AccountType.EMPLOYER
@@ -321,6 +397,7 @@ public class VacancyServiceImpl
 
         if (employer.getAccountType()
                 != AccountType.EMPLOYER) {
+
             throw new InvalidAccountTypeException(
                     employerId,
                     AccountType.EMPLOYER
@@ -338,6 +415,7 @@ public class VacancyServiceImpl
 
         if (applicant.getAccountType()
                 != AccountType.APPLICANT) {
+
             throw new InvalidAccountTypeException(
                     applicantId,
                     AccountType.APPLICANT
@@ -351,6 +429,7 @@ public class VacancyServiceImpl
     ) {
         if (!vacancy.getAuthorId()
                 .equals(employer.getId())) {
+
             throw new IllegalArgumentException(
                     "You can only change your own vacancy"
             );
@@ -364,6 +443,7 @@ public class VacancyServiceImpl
                 && vacancyDto.getExpTo() != null
                 && vacancyDto.getExpFrom()
                 > vacancyDto.getExpTo()) {
+
             throw new InvalidExperienceRangeException();
         }
     }

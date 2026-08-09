@@ -1,32 +1,26 @@
 <#import "../layout.ftlh" as layout>
 
-<@layout.layout title="Резюме | JobSearch">
+<@layout.layout title="Вакансии | JobSearch">
 
     <div class="mb-4">
 
         <h1 class="h2 mb-2">
-            Резюме соискателей
+            Вакансии
         </h1>
 
         <p class="text-secondary mb-0">
-            Опубликованные резюме соискателей
-            JobSearch
+            Актуальные вакансии работодателей
         </p>
 
     </div>
 
-
-    <#if resumes?? && resumes?size gt 0>
+    <#if vacancies?? && vacancies?size gt 0>
 
         <div class="d-flex flex-column gap-3">
 
-            <#list resumes as resume>
+            <#list vacancies as vacancy>
 
-                <div
-                        class="card
-                               border-0
-                               shadow-sm
-                               list-card">
+                <div class="card border-0 shadow-sm list-card">
 
                     <div class="card-body p-4">
 
@@ -37,47 +31,51 @@
                                        justify-content-between
                                        gap-3">
 
-                            <div>
+                            <div class="flex-grow-1">
 
                                 <h2 class="h4 mb-3">
-                                    ${resume.name!}
+                                    ${vacancy.name!}
                                 </h2>
 
-                                <div class="entity-meta">
+                                <div class="entity-meta mb-3">
 
                                     <div>
-
-                                        <span
-                                                class="text-secondary">
-                                            Ожидаемая зарплата:
+                                        <span class="text-secondary">
+                                            Зарплата:
                                         </span>
-
-                                        <strong>
-                                            ${resume.salary!}
-                                        </strong>
-
+                                        <strong>${vacancy.salary!}</strong>
                                     </div>
 
                                     <div>
+                                        <span class="text-secondary">
+                                            Опыт:
+                                        </span>
+                                        <strong>
+                                            ${vacancy.expFrom!0}
+                                            —
+                                            ${vacancy.expTo!0}
+                                            лет
+                                        </strong>
+                                    </div>
 
-                                        <span
-                                                class="text-secondary">
+                                    <div>
+                                        <span class="text-secondary">
                                             Категория:
                                         </span>
-
-                                        <strong>
-                                            ${resume.categoryId!}
-                                        </strong>
-
+                                        <strong>${vacancy.categoryId!}</strong>
                                     </div>
 
                                 </div>
 
+                                <p class="vacancy-description mb-0">
+                                    ${vacancy.description!}
+                                </p>
+
                             </div>
 
-
                             <div
-                                    class="text-md-end
+                                    class="vacancy-date
+                                           text-md-end
                                            text-secondary
                                            small">
 
@@ -85,21 +83,14 @@
                                     Обновлено
                                 </div>
 
-                                <strong
-                                        class="text-dark">
+                                <strong class="text-dark">
 
-                                    <#if resume.updateTime??>
-
-                                        ${resume.updateTime}
-
-                                    <#elseif resume.createdDate??>
-
-                                        ${resume.createdDate}
-
+                                    <#if vacancy.updateTime??>
+                                        ${vacancy.updateTime}
+                                    <#elseif vacancy.createdDate??>
+                                        ${vacancy.createdDate}
                                     <#else>
-
                                         —
-
                                     </#if>
 
                                 </strong>
@@ -121,12 +112,12 @@
         <div class="empty-state">
 
             <h2 class="h5">
-                Опубликованных резюме нет
+                Активных вакансий пока нет
             </h2>
 
             <p class="text-secondary mb-0">
-                Когда соискатели опубликуют
-                резюме, они появятся здесь.
+                Опубликованные вакансии появятся
+                на этой странице.
             </p>
 
         </div>

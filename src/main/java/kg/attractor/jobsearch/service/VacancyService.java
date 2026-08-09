@@ -17,12 +17,22 @@ public interface VacancyService {
             String userEmail
     );
 
+    void updateVacancyDate(
+            Integer id,
+            String userEmail
+    );
+
     void deleteVacancy(
             Integer id,
             String userEmail
     );
 
     VacancyDto findById(Integer id);
+
+    VacancyDto findOwnedById(
+            Integer id,
+            String userEmail
+    );
 
     List<VacancyDto> findAll();
 
