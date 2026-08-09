@@ -1,133 +1,124 @@
 package kg.attractor.jobsearch.exception;
 
-import kg.attractor.jobsearch.service.ErrorService;
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.NoSuchElementException;
 
-@RestControllerAdvice
-@RequiredArgsConstructor
+@ControllerAdvice
 public class GlobalControllerAdvice {
-
-    private final ErrorService errorService;
 
     @ExceptionHandler(
             MethodArgumentNotValidException.class
     )
-    public ResponseEntity<ErrorResponseBody>
-    validationHandler(
-            MethodArgumentNotValidException exception
+    private String validationHandler(
+            HttpServletRequest request,
+            Model model
     ) {
-        ErrorResponseBody response =
-                errorService.makeResponse(
-                        exception.getBindingResult()
-                );
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
+        return errorPage(
+                request,
+                model,
+                HttpStatus.BAD_REQUEST
+        );
     }
 
     @ExceptionHandler(
             NoSuchElementException.class
     )
-    public ResponseEntity<ErrorResponseBody>
-    notFoundHandler(
-            NoSuchElementException exception
+    private String notFoundHandler(
+            HttpServletRequest request,
+            Model model
     ) {
-        ErrorResponseBody response =
-                errorService.makeResponse(
-                        exception
-                );
-
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(response);
+        return errorPage(
+                request,
+                model,
+                HttpStatus.NOT_FOUND
+        );
     }
 
     @ExceptionHandler({
             EmailAlreadyExistsException.class,
             ResponseAlreadyExistsException.class
     })
-    public ResponseEntity<ErrorResponseBody>
-    conflictHandler(
-            IllegalArgumentException exception
+    private String conflictHandler(
+            HttpServletRequest request,
+            Model model
     ) {
-        ErrorResponseBody response =
-                errorService.makeResponse(
-                        exception
-                );
-
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(response);
+        return errorPage(
+                request,
+                model,
+                HttpStatus.CONFLICT
+        );
     }
 
     @ExceptionHandler(
             IllegalArgumentException.class
     )
-    public ResponseEntity<ErrorResponseBody>
-    badRequestHandler(
-            IllegalArgumentException exception
+    private String badRequestHandler(
+            HttpServletRequest request,
+            Model model
     ) {
-        ErrorResponseBody response =
-                errorService.makeResponse(
-                        exception
-                );
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
+        return errorPage(
+                request,
+                model,
+                HttpStatus.BAD_REQUEST
+        );
     }
 
     @ExceptionHandler(
             HttpMessageNotReadableException.class
     )
-    public ResponseEntity<ErrorResponseBody>
-    invalidRequestBodyHandler(
-            HttpMessageNotReadableException exception
+    private String invalidRequestBodyHandler(
+            HttpServletRequest request,
+            Model model
     ) {
-        IllegalArgumentException responseException =
-                new IllegalArgumentException(
-                        "Request body has an invalid format"
-                );
-
-        ErrorResponseBody response =
-                errorService.makeResponse(
-                        responseException
-                );
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
+        return errorPage(
+                request,
+                model,
+                HttpStatus.BAD_REQUEST
+        );
     }
 
     @ExceptionHandler(
             DataIntegrityViolationException.class
     )
-    public ResponseEntity<ErrorResponseBody>
-    databaseConflictHandler(
-            DataIntegrityViolationException exception
+    private String databaseConflictHandler(
+            HttpServletRequest request,
+            Model model
     ) {
-        IllegalArgumentException responseException =
-                new IllegalArgumentException(
-                        "Operation violates database relationships"
-                );
+        return errorPage(
+                request,
+                model,
+                HttpStatus.CONFLICT
+        );
+    }
 
-        ErrorResponseBody response =
-                errorService.makeResponse(
-                        responseException
-                );
+    private String errorPage(
+            HttpServletRequest request,
+            Model model,
+            HttpStatus status
+    ) {
+        model.addAttribute(
+                "status",
+                status.value()
+        );
 
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(response);
+        model.addAttribute(
+                "reason",
+                status.getReasonPhrase()
+        );
+
+        model.addAttribute(
+                "details",
+                request
+        );
+
+        return "errors/error";
     }
 }
