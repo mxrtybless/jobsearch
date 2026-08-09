@@ -22,12 +22,11 @@ public class ProfileUpdateDto {
     private String name;
 
     @Size(
-            min = 2,
             max = 100,
-            message = "Surname length must be between 2 and 100 characters"
+            message = "Surname must not be longer than 100 characters"
     )
     @Pattern(
-            regexp = "^[\\p{L}][\\p{L}\\s'-]*$",
+            regexp = "^$|^[\\p{L}][\\p{L}\\s'-]{1,99}$",
             message = "Surname must contain only letters, spaces, apostrophes and hyphens"
     )
     private String surname;

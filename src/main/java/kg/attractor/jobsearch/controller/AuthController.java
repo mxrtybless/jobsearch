@@ -16,9 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 @Controller
 @RequestMapping("auth")
 @RequiredArgsConstructor
@@ -64,11 +61,6 @@ public class AuthController {
             Model model
     ) {
         if (bindingResult.hasErrors()) {
-            addValidationErrors(
-                    bindingResult,
-                    model
-            );
-
             return "auth/register";
         }
 
@@ -80,17 +72,10 @@ public class AuthController {
         } catch (
                 EmailAlreadyExistsException e
         ) {
-            Map<String, String> errors =
-                    new LinkedHashMap<>();
-
-            errors.put(
+            bindingResult.rejectValue(
                     "email",
+                    "email.exists",
                     e.getMessage()
-            );
-
-            model.addAttribute(
-                    "errors",
-                    errors
             );
 
             return "auth/register";
@@ -106,27 +91,5 @@ public class AuthController {
         }
 
         return "redirect:/auth/login?registered=true";
-    }
-
-    private void addValidationErrors(
-            BindingResult bindingResult,
-            Model model
-    ) {
-        Map<String, String> errors =
-                new LinkedHashMap<>();
-
-        bindingResult
-                .getFieldErrors()
-                .forEach(error ->
-                        errors.putIfAbsent(
-                                error.getField(),
-                                error.getDefaultMessage()
-                        )
-                );
-
-        model.addAttribute(
-                "errors",
-                errors
-        );
     }
 }

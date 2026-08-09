@@ -1,4 +1,5 @@
 <#import "../layout.ftlh" as layout>
+<#import "/spring.ftl" as spring>
 
 <@layout.layout title="Регистрация | JobSearch">
 
@@ -37,6 +38,8 @@
                             <label class="form-label fw-semibold">
                                 Тип учётной записи
                             </label>
+
+                            <@spring.bind "userCreateDto.accountType"/>
 
                             <div class="d-flex gap-4">
 
@@ -84,16 +87,10 @@
 
                             </div>
 
-                            <#if errors??
-                            && errors["accountType"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["accountType"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors "<br>" "text-danger small"/>
 
                         </div>
+
 
                         <div class="mb-3">
 
@@ -104,24 +101,16 @@
                                 Имя пользователя
                             </label>
 
-                            <input
-                                    id="name"
-                                    class="form-control"
-                                    type="text"
-                                    name="name"
-                                    value="${userCreateDto.name!}"
-                                    required>
+                            <@spring.formInput
+                                    "userCreateDto.name"
+                                    'id="name" class="form-control" required'/>
 
-                            <#if errors??
-                            && errors["name"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["name"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
+
 
                         <div
                                 class="mb-3"
@@ -133,23 +122,16 @@
                                 Фамилия
                             </label>
 
-                            <input
-                                    id="surname"
-                                    class="form-control"
-                                    type="text"
-                                    name="surname"
-                                    value="${userCreateDto.surname!}">
+                            <@spring.formInput
+                                    "userCreateDto.surname"
+                                    'id="surname" class="form-control"'/>
 
-                            <#if errors??
-                            && errors["surname"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["surname"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
+
 
                         <div class="mb-3">
 
@@ -160,26 +142,17 @@
                                 Возраст
                             </label>
 
-                            <input
-                                    id="age"
-                                    class="form-control"
-                                    type="number"
-                                    name="age"
-                                    min="18"
-                                    max="100"
-                                    value="${userCreateDto.age!}"
-                                    required>
+                            <@spring.formInput
+                                    "userCreateDto.age"
+                                    'id="age" class="form-control" min="18" max="100" required'
+                                    "number"/>
 
-                            <#if errors??
-                            && errors["age"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["age"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
+
 
                         <div class="mb-3">
 
@@ -189,24 +162,17 @@
                                 Email
                             </label>
 
-                            <input
-                                    id="email"
-                                    class="form-control"
-                                    type="email"
-                                    name="email"
-                                    value="${userCreateDto.email!}"
-                                    required>
+                            <@spring.formInput
+                                    "userCreateDto.email"
+                                    'id="email" class="form-control" required'
+                                    "email"/>
 
-                            <#if errors??
-                            && errors["email"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["email"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
+
 
                         <div class="mb-3">
 
@@ -216,25 +182,16 @@
                                 Номер телефона
                             </label>
 
-                            <input
-                                    id="phoneNumber"
-                                    class="form-control"
-                                    type="text"
-                                    name="phoneNumber"
-                                    value="${userCreateDto.phoneNumber!}"
-                                    placeholder="+996700123456"
-                                    required>
+                            <@spring.formInput
+                                    "userCreateDto.phoneNumber"
+                                    'id="phoneNumber" class="form-control" placeholder="+996700123456" required'/>
 
-                            <#if errors??
-                            && errors["phoneNumber"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["phoneNumber"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
+
 
                         <div class="mb-3">
 
@@ -244,28 +201,22 @@
                                 Пароль
                             </label>
 
-                            <input
-                                    id="password"
-                                    class="form-control"
-                                    type="password"
-                                    name="password"
-                                    required>
+                            <@spring.formInput
+                                    "userCreateDto.password"
+                                    'id="password" class="form-control" required'
+                                    "password"/>
 
                             <div class="form-text">
                                 8–32 символа, заглавная и строчная
                                 буква и хотя бы одна цифра.
                             </div>
 
-                            <#if errors??
-                            && errors["password"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["password"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
+
 
                         <div class="mb-4">
 
@@ -289,6 +240,7 @@
 
                         </div>
 
+
                         <button
                                 class="btn btn-primary w-100"
                                 type="submit">
@@ -296,6 +248,7 @@
                         </button>
 
                     </form>
+
 
                     <p class="text-center mt-4 mb-0">
 
@@ -314,6 +267,7 @@
         </div>
 
     </div>
+
 
     <script>
         const applicantRadio =

@@ -1,4 +1,5 @@
 <#import "../layout.ftlh" as layout>
+<#import "/spring.ftl" as spring>
 
 <@layout.layout title="Редактирование профиля | JobSearch">
 
@@ -32,24 +33,16 @@
 
                             </label>
 
-                            <input
-                                    id="name"
-                                    class="form-control"
-                                    type="text"
-                                    name="name"
-                                    value="${profileUpdateDto.name!}"
-                                    required>
+                            <@spring.formInput
+                                    "profileUpdateDto.name"
+                                    'id="name" class="form-control" required'/>
 
-                            <#if errors??
-                            && errors["name"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["name"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
+
 
                         <#if isApplicant>
 
@@ -61,25 +54,18 @@
                                     Фамилия
                                 </label>
 
-                                <input
-                                        id="surname"
-                                        class="form-control"
-                                        type="text"
-                                        name="surname"
-                                        value="${profileUpdateDto.surname!}">
+                                <@spring.formInput
+                                        "profileUpdateDto.surname"
+                                        'id="surname" class="form-control"'/>
 
-                                <#if errors??
-                                && errors["surname"]??>
-
-                                    <div class="text-danger small mt-1">
-                                        ${errors["surname"]}
-                                    </div>
-
-                                </#if>
+                                <@spring.showErrors
+                                        "<br>"
+                                        "text-danger small"/>
 
                             </div>
 
                         </#if>
+
 
                         <div class="mb-3">
 
@@ -89,25 +75,17 @@
                                 Возраст
                             </label>
 
-                            <input
-                                    id="age"
-                                    class="form-control"
-                                    type="number"
-                                    name="age"
-                                    min="18"
-                                    max="100"
-                                    value="${profileUpdateDto.age!}">
+                            <@spring.formInput
+                                    "profileUpdateDto.age"
+                                    'id="age" class="form-control" min="18" max="100"'
+                                    "number"/>
 
-                            <#if errors??
-                            && errors["age"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["age"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
+
 
                         <div class="mb-3">
 
@@ -117,24 +95,17 @@
                                 Email
                             </label>
 
-                            <input
-                                    id="email"
-                                    class="form-control"
-                                    type="email"
-                                    name="email"
-                                    value="${profileUpdateDto.email!}"
-                                    required>
+                            <@spring.formInput
+                                    "profileUpdateDto.email"
+                                    'id="email" class="form-control" required'
+                                    "email"/>
 
-                            <#if errors??
-                            && errors["email"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["email"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
+
 
                         <div class="mb-4">
 
@@ -144,24 +115,16 @@
                                 Телефон
                             </label>
 
-                            <input
-                                    id="phoneNumber"
-                                    class="form-control"
-                                    type="text"
-                                    name="phoneNumber"
-                                    value="${profileUpdateDto.phoneNumber!}"
-                                    required>
+                            <@spring.formInput
+                                    "profileUpdateDto.phoneNumber"
+                                    'id="phoneNumber" class="form-control" required'/>
 
-                            <#if errors??
-                            && errors["phoneNumber"]??>
-
-                                <div class="text-danger small mt-1">
-                                    ${errors["phoneNumber"]}
-                                </div>
-
-                            </#if>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
+
 
                         <div class="d-flex gap-2">
 

@@ -19,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Controller
@@ -112,17 +110,12 @@ public class ProfileController {
                         authentication
                 );
 
+        addUserToModel(
+                user,
+                model
+        );
+
         if (bindingResult.hasErrors()) {
-            addValidationErrors(
-                    bindingResult,
-                    model
-            );
-
-            addUserToModel(
-                    user,
-                    model
-            );
-
             return "profile/edit";
         }
 
@@ -137,22 +130,10 @@ public class ProfileController {
         } catch (
                 EmailAlreadyExistsException e
         ) {
-            Map<String, String> errors =
-                    new LinkedHashMap<>();
-
-            errors.put(
+            bindingResult.rejectValue(
                     "email",
+                    "email.exists",
                     e.getMessage()
-            );
-
-            model.addAttribute(
-                    "errors",
-                    errors
-            );
-
-            addUserToModel(
-                    user,
-                    model
             );
 
             return "profile/edit";
@@ -257,28 +238,6 @@ public class ProfileController {
         model.addAttribute(
                 "isEmployer",
                 user.isEmployer()
-        );
-    }
-
-    private void addValidationErrors(
-            BindingResult bindingResult,
-            Model model
-    ) {
-        Map<String, String> errors =
-                new LinkedHashMap<>();
-
-        bindingResult
-                .getFieldErrors()
-                .forEach(error ->
-                        errors.putIfAbsent(
-                                error.getField(),
-                                error.getDefaultMessage()
-                        )
-                );
-
-        model.addAttribute(
-                "errors",
-                errors
         );
     }
 }
