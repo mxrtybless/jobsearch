@@ -1,4 +1,4 @@
-package kg.attractor.jobsearch.controller;
+package kg.attractor.jobsearch.controller.api;
 
 import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.ProfileUpdateDto;
@@ -83,7 +83,8 @@ public class UserController {
     @GetMapping("search/phone")
     public ResponseEntity<List<User>>
     findByPhoneNumber(
-            @RequestParam String phoneNumber
+            @RequestParam
+            String phoneNumber
     ) {
         return ResponseEntity.ok(
                 userService.findByPhoneNumber(
@@ -96,7 +97,8 @@ public class UserController {
     public ResponseEntity<User> findByEmail(
             @RequestParam String email
     ) {
-        return userService.findByEmail(email)
+        return userService
+                .findByEmail(email)
                 .map(ResponseEntity::ok)
                 .orElseGet(() ->
                         ResponseEntity
