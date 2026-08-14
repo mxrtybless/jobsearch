@@ -251,10 +251,7 @@ public class UserDao {
                 UPDATE users
                 SET name = ?,
                     surname = ?,
-                    age = ?,
-                    email = ?,
-                    password = ?,
-                    phone_number = ?
+                    age = ?
                 WHERE id = ?
                 """;
 
@@ -263,9 +260,6 @@ public class UserDao {
                 user.getName(),
                 user.getSurname(),
                 user.getAge(),
-                user.getEmail(),
-                user.getPassword(),
-                user.getPhoneNumber(),
                 user.getId()
         );
     }

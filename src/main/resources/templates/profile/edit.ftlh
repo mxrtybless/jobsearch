@@ -43,7 +43,6 @@
 
                         </div>
 
-
                         <#if isApplicant>
 
                             <div class="mb-3">
@@ -66,8 +65,7 @@
 
                         </#if>
 
-
-                        <div class="mb-3">
+                        <div class="mb-4">
 
                             <label
                                     class="form-label"
@@ -86,45 +84,9 @@
 
                         </div>
 
-
-                        <div class="mb-3">
-
-                            <label
-                                    class="form-label"
-                                    for="email">
-                                Email
-                            </label>
-
-                            <@spring.formInput
-                                    "profileUpdateDto.email"
-                                    'id="email" class="form-control" required'
-                                    "email"/>
-
-                            <@spring.showErrors
-                                    "<br>"
-                                    "text-danger small"/>
-
+                        <div class="alert alert-secondary small">
+                            Email и номер телефона в этой форме не изменяются.
                         </div>
-
-
-                        <div class="mb-4">
-
-                            <label
-                                    class="form-label"
-                                    for="phoneNumber">
-                                Телефон
-                            </label>
-
-                            <@spring.formInput
-                                    "profileUpdateDto.phoneNumber"
-                                    'id="phoneNumber" class="form-control" required'/>
-
-                            <@spring.showErrors
-                                    "<br>"
-                                    "text-danger small"/>
-
-                        </div>
-
 
                         <div class="d-flex gap-2">
 

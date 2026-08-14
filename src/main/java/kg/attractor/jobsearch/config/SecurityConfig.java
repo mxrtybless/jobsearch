@@ -110,7 +110,7 @@ public class SecurityConfig {
                                         "/auth/login"
                                 )
                                 .defaultSuccessUrl(
-                                        "/profile",
+                                        "/vacancies",
                                         true
                                 )
                                 .failureUrl(
@@ -144,6 +144,7 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/auth/login",
                                         "/auth/register",
+                                        "/",
                                         "/css/**",
                                         "/images/**",
                                         "/error"
@@ -166,15 +167,17 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/resumes/form/**"
                                 )
-                                .hasAuthority(
-                                        "APPLICANT"
+                                .hasAnyAuthority(
+                                        "APPLICANT",
+                                        "ROLE_APPLICANT"
                                 )
 
                                 .requestMatchers(
                                         "/vacancies/form/**"
                                 )
-                                .hasAuthority(
-                                        "EMPLOYER"
+                                .hasAnyAuthority(
+                                        "EMPLOYER",
+                                        "ROLE_EMPLOYER"
                                 )
 
                                 .requestMatchers(
@@ -187,72 +190,81 @@ public class SecurityConfig {
                                         HttpMethod.GET,
                                         "/resumes"
                                 )
-                                .hasAuthority(
-                                        "EMPLOYER"
+                                .hasAnyAuthority(
+                                        "EMPLOYER",
+                                        "ROLE_EMPLOYER"
                                 )
 
                                 .requestMatchers(
                                         HttpMethod.POST,
                                         "/resumes/create"
                                 )
-                                .hasAuthority(
-                                        "APPLICANT"
+                                .hasAnyAuthority(
+                                        "APPLICANT",
+                                        "ROLE_APPLICANT"
                                 )
 
                                 .requestMatchers(
                                         HttpMethod.PUT,
                                         "/resumes/edit/**"
                                 )
-                                .hasAuthority(
-                                        "APPLICANT"
+                                .hasAnyAuthority(
+                                        "APPLICANT",
+                                        "ROLE_APPLICANT"
                                 )
 
                                 .requestMatchers(
                                         HttpMethod.DELETE,
                                         "/resumes/delete/**"
                                 )
-                                .hasAuthority(
-                                        "APPLICANT"
+                                .hasAnyAuthority(
+                                        "APPLICANT",
+                                        "ROLE_APPLICANT"
                                 )
 
                                 .requestMatchers(
                                         HttpMethod.POST,
                                         "/vacancies/create"
                                 )
-                                .hasAuthority(
-                                        "EMPLOYER"
+                                .hasAnyAuthority(
+                                        "EMPLOYER",
+                                        "ROLE_EMPLOYER"
                                 )
 
                                 .requestMatchers(
                                         HttpMethod.PUT,
                                         "/vacancies/edit/**"
                                 )
-                                .hasAuthority(
-                                        "EMPLOYER"
+                                .hasAnyAuthority(
+                                        "EMPLOYER",
+                                        "ROLE_EMPLOYER"
                                 )
 
                                 .requestMatchers(
                                         HttpMethod.DELETE,
                                         "/vacancies/delete/**"
                                 )
-                                .hasAuthority(
-                                        "EMPLOYER"
+                                .hasAnyAuthority(
+                                        "EMPLOYER",
+                                        "ROLE_EMPLOYER"
                                 )
 
                                 .requestMatchers(
                                         HttpMethod.POST,
                                         "/responses/create"
                                 )
-                                .hasAuthority(
-                                        "APPLICANT"
+                                .hasAnyAuthority(
+                                        "APPLICANT",
+                                        "ROLE_APPLICANT"
                                 )
 
                                 .requestMatchers(
                                         HttpMethod.GET,
                                         "/responses/search/vacancy/**"
                                 )
-                                .hasAuthority(
-                                        "EMPLOYER"
+                                .hasAnyAuthority(
+                                        "EMPLOYER",
+                                        "ROLE_EMPLOYER"
                                 )
 
                                 .anyRequest()

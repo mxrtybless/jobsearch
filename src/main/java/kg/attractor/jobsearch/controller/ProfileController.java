@@ -2,7 +2,6 @@ package kg.attractor.jobsearch.controller;
 
 import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.ProfileUpdateDto;
-import kg.attractor.jobsearch.exception.EmailAlreadyExistsException;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.service.ResumeService;
 import kg.attractor.jobsearch.service.UserService;
@@ -119,35 +118,10 @@ public class ProfileController {
             return "profile/edit";
         }
 
-        String oldEmail =
-                user.getEmail();
-
-        try {
-            userService.editProfile(
-                    oldEmail,
-                    profileUpdateDto
-            );
-        } catch (
-                EmailAlreadyExistsException e
-        ) {
-            bindingResult.rejectValue(
-                    "email",
-                    "email.exists",
-                    e.getMessage()
-            );
-
-            return "profile/edit";
-        }
-
-        String newEmail =
-                profileUpdateDto.getEmail();
-
-        if (newEmail != null
-                && !oldEmail.equalsIgnoreCase(
-                newEmail
-        )) {
-            return "redirect:/auth/logout";
-        }
+        userService.editProfile(
+                user.getEmail(),
+                profileUpdateDto
+        );
 
         return "redirect:/profile?updated=true";
     }
@@ -208,14 +182,6 @@ public class ProfileController {
 
         dto.setAge(
                 user.getAge()
-        );
-
-        dto.setEmail(
-                user.getEmail()
-        );
-
-        dto.setPhoneNumber(
-                user.getPhoneNumber()
         );
 
         return dto;

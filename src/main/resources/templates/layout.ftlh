@@ -31,20 +31,23 @@
     <body>
 
     <#assign authenticated =
-            SPRING_SECURITY_CONTEXT??>
+            SPRING_SECURITY_CONTEXT??
+            && SPRING_SECURITY_CONTEXT.authentication??>
 
     <#assign isEmployer = false>
 
     <#if authenticated>
 
+        <#assign authentication =
+                SPRING_SECURITY_CONTEXT.authentication>
+
         <#assign securityUser =
-                SPRING_SECURITY_CONTEXT
-                        .authentication
-                        .principal>
+                authentication.principal>
 
-        <#list securityUser.authorities as authority>
+        <#list authentication.authorities as authority>
 
-            <#if authority?string == "EMPLOYER">
+            <#if authority?string == "EMPLOYER"
+            || authority?string == "ROLE_EMPLOYER">
 
                 <#assign isEmployer = true>
 

@@ -131,22 +131,6 @@ public class UserServiceImpl
                         userEmail
                 );
 
-        String newEmail =
-                profileUpdateDto.getEmail();
-
-        if (newEmail != null
-                && !newEmail.equalsIgnoreCase(
-                user.getEmail()
-        )
-                && userDao.existsByEmail(
-                newEmail
-        )) {
-
-            throw new EmailAlreadyExistsException(
-                    newEmail
-            );
-        }
-
         if (profileUpdateDto.getName()
                 != null) {
             user.setName(
@@ -165,31 +149,6 @@ public class UserServiceImpl
                 != null) {
             user.setAge(
                     profileUpdateDto.getAge()
-            );
-        }
-
-        if (profileUpdateDto.getEmail()
-                != null) {
-            user.setEmail(
-                    profileUpdateDto.getEmail()
-            );
-        }
-
-        if (profileUpdateDto.getPassword()
-                != null) {
-            user.setPassword(
-                    passwordEncoder.encode(
-                            profileUpdateDto
-                                    .getPassword()
-                    )
-            );
-        }
-
-        if (profileUpdateDto.getPhoneNumber()
-                != null) {
-            user.setPhoneNumber(
-                    profileUpdateDto
-                            .getPhoneNumber()
             );
         }
 

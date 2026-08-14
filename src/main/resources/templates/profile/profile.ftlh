@@ -689,41 +689,8 @@
                         </div>
 
 
-                        <div class="mb-3">
-
-                            <label
-                                    class="form-label"
-                                    for="modalEmail">
-                                Email
-                            </label>
-
-                            <input
-                                    id="modalEmail"
-                                    class="form-control"
-                                    type="email"
-                                    name="email"
-                                    value="${user.email}"
-                                    required>
-
-                        </div>
-
-
-                        <div class="mb-3">
-
-                            <label
-                                    class="form-label"
-                                    for="modalPhone">
-                                Телефон
-                            </label>
-
-                            <input
-                                    id="modalPhone"
-                                    class="form-control"
-                                    type="text"
-                                    name="phoneNumber"
-                                    value="${user.phoneNumber}"
-                                    required>
-
+                        <div class="alert alert-secondary small mb-0">
+                            Email и номер телефона в этой форме не изменяются.
                         </div>
 
                     </div>

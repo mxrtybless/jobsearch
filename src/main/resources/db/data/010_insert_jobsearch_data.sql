@@ -22,7 +22,11 @@ VALUES
         'default-avatar.png',
         'APPLICANT',
         TRUE,
-        (SELECT id FROM roles WHERE role = 'APPLICANT')
+        (
+            SELECT id
+            FROM roles
+            WHERE role = 'APPLICANT'
+            )
     ),
     (
         'Attractor',
@@ -34,7 +38,11 @@ VALUES
         'default-avatar.png',
         'EMPLOYER',
         TRUE,
-        (SELECT id FROM roles WHERE role = 'EMPLOYER')
+        (
+            SELECT id
+            FROM roles
+            WHERE role = 'EMPLOYER'
+            )
     );
 
 INSERT INTO categories
@@ -52,9 +60,30 @@ INSERT INTO categories
     parent_id
 )
 VALUES
-    ('Backend Development', 1),
-    ('Frontend Development', 1),
-    ('UI/UX Design', 2);
+    (
+        'Backend Development',
+        (
+            SELECT id
+            FROM categories
+            WHERE name = 'IT'
+            )
+    ),
+    (
+        'Frontend Development',
+        (
+            SELECT id
+            FROM categories
+            WHERE name = 'IT'
+            )
+    ),
+    (
+        'UI/UX Design',
+        (
+            SELECT id
+            FROM categories
+            WHERE name = 'Design'
+            )
+    );
 
 INSERT INTO resumes
 (
@@ -68,18 +97,34 @@ INSERT INTO resumes
 )
 VALUES
     (
-        1,
+        (
+            SELECT id
+            FROM users
+            WHERE email = 'applicant@attractor.com'
+            ),
         'Java Developer',
-        3,
+        (
+            SELECT id
+            FROM categories
+            WHERE name = 'Backend Development'
+            ),
         90000.00,
         TRUE,
         TIMESTAMP '2026-07-01 10:00:00',
         TIMESTAMP '2026-07-20 12:00:00'
     ),
     (
-        1,
+        (
+            SELECT id
+            FROM users
+            WHERE email = 'applicant@attractor.com'
+            ),
         'Frontend Developer',
-        4,
+        (
+            SELECT id
+            FROM categories
+            WHERE name = 'Frontend Development'
+            ),
         80000.00,
         TRUE,
         TIMESTAMP '2026-07-02 11:00:00',
@@ -103,24 +148,40 @@ VALUES
     (
         'Junior Java Developer',
         'Разработка приложений на Java и Spring Boot',
-        3,
+        (
+            SELECT id
+            FROM categories
+            WHERE name = 'Backend Development'
+            ),
         120000.00,
         0,
         2,
         TRUE,
-        2,
+        (
+            SELECT id
+            FROM users
+            WHERE email = 'employer@attractor.com'
+            ),
         TIMESTAMP '2026-07-10 09:00:00',
         TIMESTAMP '2026-07-20 11:00:00'
     ),
     (
         'Frontend Developer',
         'Разработка пользовательских интерфейсов',
-        4,
+        (
+            SELECT id
+            FROM categories
+            WHERE name = 'Frontend Development'
+            ),
         100000.00,
         1,
         3,
         TRUE,
-        2,
+        (
+            SELECT id
+            FROM users
+            WHERE email = 'employer@attractor.com'
+            ),
         TIMESTAMP '2026-07-11 09:30:00',
         TIMESTAMP '2026-07-21 14:00:00'
     );
@@ -140,11 +201,81 @@ INSERT INTO contacts_info
     "VALUE"
 )
 VALUES
-    (1, 1, 'applicant@attractor.com'),
-    (2, 1, '+996700111222'),
-    (3, 1, '@aibek_java'),
-    (5, 1, 'https://linkedin.com/in/aibek'),
-    (1, 2, 'applicant@attractor.com');
+    (
+        (
+            SELECT id
+            FROM contact_types
+            WHERE type = 'EMAIL'
+            ),
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Java Developer'
+            ),
+        'applicant@attractor.com'
+    ),
+    (
+        (
+            SELECT id
+            FROM contact_types
+            WHERE type = 'PHONE'
+            ),
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Java Developer'
+            ),
+        '+996700111222'
+    ),
+    (
+        (
+            SELECT id
+            FROM contact_types
+            WHERE type = 'TELEGRAM'
+            ),
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Java Developer'
+            ),
+        '@aibek_java'
+    ),
+    (
+        (
+            SELECT id
+            FROM contact_types
+            WHERE type = 'LINKEDIN'
+            ),
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Java Developer'
+            ),
+        'https://linkedin.com/in/aibek'
+    ),
+    (
+        (
+            SELECT id
+            FROM contact_types
+            WHERE type = 'EMAIL'
+            ),
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Frontend Developer'
+            ),
+        'applicant@attractor.com'
+    );
 
 INSERT INTO education_info
 (
@@ -157,7 +288,13 @@ INSERT INTO education_info
 )
 VALUES
     (
-        1,
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Java Developer'
+            ),
         'Attractor School',
         'Java Development',
         DATE '2025-09-01',
@@ -165,7 +302,13 @@ VALUES
         'Certificate'
     ),
     (
-        2,
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Frontend Developer'
+            ),
         'Attractor School',
         'Frontend Development',
         DATE '2025-09-01',
@@ -183,14 +326,26 @@ INSERT INTO work_experience_info
 )
 VALUES
     (
-        1,
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Java Developer'
+            ),
         1,
         'Freelance',
         'Junior Java Developer',
         'Разработка учебных приложений'
     ),
     (
-        2,
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Frontend Developer'
+            ),
         1,
         'Freelance',
         'Junior Frontend Developer',
@@ -204,8 +359,40 @@ INSERT INTO responded_applicants
     confirmation
 )
 VALUES
-    (1, 1, FALSE),
-    (2, 2, TRUE);
+    (
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Java Developer'
+            ),
+        (
+            SELECT v.id
+            FROM vacancies v
+                     JOIN users u ON u.id = v.author_id
+            WHERE u.email = 'employer@attractor.com'
+              AND v.name = 'Junior Java Developer'
+            ),
+        FALSE
+    ),
+    (
+        (
+            SELECT r.id
+            FROM resumes r
+                     JOIN users u ON u.id = r.applicant_id
+            WHERE u.email = 'applicant@attractor.com'
+              AND r.name = 'Frontend Developer'
+            ),
+        (
+            SELECT v.id
+            FROM vacancies v
+                     JOIN users u ON u.id = v.author_id
+            WHERE u.email = 'employer@attractor.com'
+              AND v.name = 'Frontend Developer'
+            ),
+        TRUE
+    );
 
 INSERT INTO messages
 (
@@ -215,12 +402,34 @@ INSERT INTO messages
 )
 VALUES
     (
-        1,
+        (
+            SELECT ra.id
+            FROM responded_applicants ra
+                     JOIN resumes r ON r.id = ra.resume_id
+                     JOIN vacancies v ON v.id = ra.vacancy_id
+                     JOIN users applicant ON applicant.id = r.applicant_id
+                     JOIN users employer ON employer.id = v.author_id
+            WHERE applicant.email = 'applicant@attractor.com'
+              AND employer.email = 'employer@attractor.com'
+              AND r.name = 'Java Developer'
+              AND v.name = 'Junior Java Developer'
+            ),
         'Здравствуйте! Хочу откликнуться на вакансию.',
         TIMESTAMP '2026-07-22 10:00:00'
     ),
     (
-        1,
+        (
+            SELECT ra.id
+            FROM responded_applicants ra
+                     JOIN resumes r ON r.id = ra.resume_id
+                     JOIN vacancies v ON v.id = ra.vacancy_id
+                     JOIN users applicant ON applicant.id = r.applicant_id
+                     JOIN users employer ON employer.id = v.author_id
+            WHERE applicant.email = 'applicant@attractor.com'
+              AND employer.email = 'employer@attractor.com'
+              AND r.name = 'Java Developer'
+              AND v.name = 'Junior Java Developer'
+            ),
         'Здравствуйте! Мы рассмотрим ваше резюме.',
         TIMESTAMP '2026-07-22 10:15:00'
     );
