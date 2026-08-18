@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,52 +18,54 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "work_experience_info")
-public class WorkExperienceInfo {
+@Table(name = "roles")
+public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "resume_id", nullable = false)
-    private Integer resumeId;
+    @Column(
+            name = "role",
+            nullable = false,
+            unique = true,
+            length = 50
+    )
+    private String role;
+
+    @Column(
+            name = "authority_id",
+            nullable = false
+    )
+    private Integer authorityId;
 
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-            name = "resume_id",
+            name = "authority_id",
             insertable = false,
             updatable = false
     )
-    private Resume resume;
+    private Authority authority;
 
-    @Column(name = "years")
-    private Integer years;
-
-    @Column(
-            name = "company_name",
-            nullable = false,
-            length = 255
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @Builder.Default
+    @OneToMany(
+            mappedBy = "role",
+            fetch = FetchType.LAZY
     )
-    private String companyName;
-
-    @Column(
-            name = "position",
-            nullable = false,
-            length = 255
-    )
-    private String position;
-
-    @Column(
-            name = "responsibilities",
-            length = 2000
-    )
-    private String responsibilities;
+    private List<User> users =
+            new ArrayList<>();
 }
