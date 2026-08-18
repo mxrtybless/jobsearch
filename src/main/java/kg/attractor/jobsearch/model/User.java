@@ -33,9 +33,7 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue(
-            strategy = GenerationType.IDENTITY
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(
@@ -101,20 +99,12 @@ public class User {
     private Boolean enabled;
 
     @JsonIgnore
-    @Column(
-            name = "role_id",
-            nullable = false
-    )
-    private Integer roleId;
-
-    @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(
             name = "role_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private Role role;
 

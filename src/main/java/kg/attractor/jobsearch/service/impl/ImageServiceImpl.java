@@ -19,55 +19,128 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
-public class ImageServiceImpl implements ImageService {
-    private static final String uploadDir = "data/images";
+public class ImageServiceImpl
+        implements ImageService {
+
+    private static final String uploadDir =
+            "data/images";
 
     @Override
-    public ResponseEntity<?> download(String filename) throws IOException {
+    public ResponseEntity<?> download(
+            String filename
+    ) throws IOException {
         try {
-            Path filePath = Paths.get(uploadDir).resolve(filename);
-            byte[] file = Files.readAllBytes(filePath);
+            Path directory = Paths.get(uploadDir)
+                    .toAbsolutePath()
+                    .normalize();
 
-            Resource resource = new ByteArrayResource(file);
+            Path filePath = directory
+                    .resolve(filename)
+                    .normalize();
+
+            if (!filePath.startsWith(directory)) {
+                return ResponseEntity
+                        .badRequest()
+                        .body("Invalid image path");
+            }
+
+            byte[] file =
+                    Files.readAllBytes(filePath);
+
+            Resource resource =
+                    new ByteArrayResource(file);
+
+            String contentType =
+                    Files.probeContentType(filePath);
+
+            MediaType mediaType =
+                    contentType == null
+                            ? MediaType.APPLICATION_OCTET_STREAM
+                            : MediaType.parseMediaType(
+                            contentType
+                    );
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                    .contentLength(resource.contentLength())
-                    .contentType(MediaType.IMAGE_JPEG)
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\""
+                                    + filename
+                                    + "\""
+                    )
+                    .contentLength(
+                            resource.contentLength()
+                    )
+                    .contentType(mediaType)
                     .body(resource);
         } catch (NoSuchFileException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Image not found");
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Image not found");
         }
     }
 
     @Override
-    public String upload(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File is required.");
+    public String upload(
+            MultipartFile file
+    ) {
+        if (file == null
+                || file.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "File is required."
+            );
         }
 
-        String originalFilename = file.getOriginalFilename();
+        String contentType =
+                file.getContentType();
 
-        if (originalFilename == null || originalFilename.isBlank()) {
-            throw new IllegalArgumentException("File name is required.");
+        if (contentType == null
+                || !contentType.startsWith(
+                "image/"
+        )) {
+            throw new IllegalArgumentException(
+                    "Only image files are allowed."
+            );
         }
 
-        String uuid = UUID.randomUUID().toString();
-        String resultFilename = uuid + "_" + originalFilename;
+        String originalFilename =
+                file.getOriginalFilename();
+
+        if (originalFilename == null
+                || originalFilename.isBlank()) {
+            throw new IllegalArgumentException(
+                    "File name is required."
+            );
+        }
+
+        String uuid =
+                UUID.randomUUID().toString();
+
+        String resultFilename =
+                uuid + "_" + originalFilename;
 
         try {
-            Path pathDir = Paths.get(uploadDir);
+            Path pathDir =
+                    Paths.get(uploadDir);
+
             Files.createDirectories(pathDir);
 
-            Path filePath = pathDir.resolve(resultFilename);
+            Path filePath = pathDir
+                    .resolve(resultFilename)
+                    .normalize();
 
-            try (OutputStream out = Files.newOutputStream(filePath)) {
+            try (OutputStream out =
+                         Files.newOutputStream(
+                                 filePath
+                         )) {
                 out.write(file.getBytes());
             }
 
             return resultFilename;
         } catch (IOException e) {
-            throw new RuntimeException("Could not save image.", e);
+            throw new RuntimeException(
+                    "Could not save image.",
+                    e
+            );
         }
     }
 }

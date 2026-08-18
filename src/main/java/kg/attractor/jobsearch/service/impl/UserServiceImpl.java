@@ -1,11 +1,14 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.UserDao;
 import kg.attractor.jobsearch.dto.ProfileUpdateDto;
 import kg.attractor.jobsearch.dto.UserCreateDto;
 import kg.attractor.jobsearch.exception.EmailAlreadyExistsException;
 import kg.attractor.jobsearch.exception.UserNotFoundException;
+import kg.attractor.jobsearch.model.AccountType;
+import kg.attractor.jobsearch.model.Role;
 import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.repository.RoleRepository;
+import kg.attractor.jobsearch.repository.UserRepository;
 import kg.attractor.jobsearch.service.ImageService;
 import kg.attractor.jobsearch.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +31,8 @@ public class UserServiceImpl
     private static final String DEFAULT_AVATAR =
             "default-avatar.png";
 
-    private final UserDao userDao;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final ImageService imageService;
     private final PasswordEncoder passwordEncoder;
 
@@ -49,7 +53,7 @@ public class UserServiceImpl
             UserCreateDto userCreateDto,
             MultipartFile avatar
     ) {
-        if (userDao.existsByEmail(
+        if (userRepository.existsByEmailIgnoreCase(
                 userCreateDto.getEmail()
         )) {
             throw new EmailAlreadyExistsException(
@@ -62,12 +66,26 @@ public class UserServiceImpl
 
         if (avatar != null
                 && !avatar.isEmpty()) {
-
             avatarFilename =
                     imageService.upload(
                             avatar
                     );
         }
+
+        AccountType accountType =
+                userCreateDto.getAccountType();
+
+        Role role = roleRepository
+                .findByRole(
+                        accountType.name()
+                )
+                .orElseThrow(() ->
+                        new NoSuchElementException(
+                                "Role "
+                                        + accountType.name()
+                                        + " not found"
+                        )
+                );
 
         User user = User.builder()
                 .name(
@@ -96,25 +114,28 @@ public class UserServiceImpl
                         avatarFilename
                 )
                 .accountType(
-                        userCreateDto
-                                .getAccountType()
+                        accountType
                 )
+                .enabled(true)
+                .role(role)
                 .build();
 
-        Integer userId =
-                userDao.save(user);
+        User savedUser =
+                userRepository.save(user);
 
         log.info(
                 "User registered successfully with id: {}",
-                userId
+                savedUser.getId()
         );
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User findProfileById(
             Integer id
     ) {
-        return userDao.findById(id)
+        return userRepository
+                .findById(id)
                 .orElseThrow(() ->
                         new UserNotFoundException(id)
                 );
@@ -152,7 +173,7 @@ public class UserServiceImpl
             );
         }
 
-        userDao.update(user);
+        userRepository.save(user);
 
         log.info(
                 "User profile updated successfully. User id: {}",
@@ -161,50 +182,71 @@ public class UserServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> findByName(
             String name
     ) {
-        return userDao.findByName(name);
+        return userRepository
+                .findByNameContainingIgnoreCase(
+                        name
+                );
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> findByPhoneNumber(
             String phoneNumber
     ) {
-        return userDao.findByPhoneNumber(
-                phoneNumber
-        );
+        return userRepository
+                .findByPhoneNumberContaining(
+                        phoneNumber
+                );
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<User> findByEmail(
             String email
     ) {
-        return userDao.findByEmail(email);
+        return userRepository
+                .findByEmailIgnoreCase(email);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean existsByEmail(
             String email
     ) {
-        return userDao.existsByEmail(email);
+        return userRepository
+                .existsByEmailIgnoreCase(email);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> searchApplicants(
             String query
     ) {
-        return userDao.findApplicants(query);
+        return userRepository
+                .searchByAccountType(
+                        AccountType.APPLICANT,
+                        query
+                );
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> searchEmployers(
             String query
     ) {
-        return userDao.findEmployers(query);
+        return userRepository
+                .searchByAccountType(
+                        AccountType.EMPLOYER,
+                        query
+                );
     }
 
     @Override
+    @Transactional
     public String uploadAvatar(
             String userEmail,
             MultipartFile file
@@ -217,10 +259,8 @@ public class UserServiceImpl
         String filename =
                 imageService.upload(file);
 
-        userDao.updateAvatar(
-                user.getId(),
-                filename
-        );
+        user.setAvatar(filename);
+        userRepository.save(user);
 
         return filename;
     }
@@ -228,7 +268,8 @@ public class UserServiceImpl
     private User findAuthenticatedUser(
             String userEmail
     ) {
-        return userDao.findByEmail(
+        return userRepository
+                .findByEmailIgnoreCase(
                         userEmail
                 )
                 .orElseThrow(() ->

@@ -1,5 +1,7 @@
 package kg.attractor.jobsearch.config;
 
+import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -9,56 +11,46 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
-
-import javax.sql.DataSource;
 
 @Configuration
 public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService(
-            DataSource dataSource
+            UserRepository userRepository
     ) {
-        String usersByEmailQuery = """
-                SELECT
-                    email AS username,
-                    password,
-                    enabled
-                FROM users
-                WHERE LOWER(email) = LOWER(?)
-                """;
+        return email -> {
+            User user = userRepository
+                    .findByEmailIgnoreCase(email)
+                    .orElseThrow(() ->
+                            new UsernameNotFoundException(
+                                    "User with email "
+                                            + email
+                                            + " not found"
+                            )
+                    );
 
-        String authoritiesByEmailQuery = """
-                SELECT
-                    u.email AS username,
-                    a.authority
-                FROM users u
-                JOIN roles r
-                    ON r.id = u.role_id
-                JOIN authorities a
-                    ON a.id = r.authority_id
-                WHERE LOWER(u.email) = LOWER(?)
-                """;
+            String authority = user
+                    .getRole()
+                    .getAuthority()
+                    .getAuthority();
 
-        JdbcUserDetailsManager userDetailsManager =
-                new JdbcUserDetailsManager(
-                        dataSource
-                );
-
-        userDetailsManager.setUsersByUsernameQuery(
-                usersByEmailQuery
-        );
-
-        userDetailsManager
-                .setAuthoritiesByUsernameQuery(
-                        authoritiesByEmailQuery
-                );
-
-        return userDetailsManager;
+            return org.springframework.security
+                    .core.userdetails.User
+                    .withUsername(user.getEmail())
+                    .password(user.getPassword())
+                    .authorities(authority)
+                    .disabled(
+                            !Boolean.TRUE.equals(
+                                    user.getEnabled()
+                            )
+                    )
+                    .build();
+        };
     }
 
     @Bean

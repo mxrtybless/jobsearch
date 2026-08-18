@@ -41,20 +41,13 @@ public class Role {
     )
     private String role;
 
-    @Column(
-            name = "authority_id",
-            nullable = false
-    )
-    private Integer authorityId;
-
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(
             name = "authority_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private Authority authority;
 
