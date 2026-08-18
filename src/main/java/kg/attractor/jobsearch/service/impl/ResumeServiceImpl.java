@@ -16,6 +16,10 @@ import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.service.WorkExperienceInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -258,6 +262,36 @@ public class ResumeServiceImpl
 
     @Override
     @Transactional(readOnly = true)
+    public Page<ResumeDto> findAllActive(
+            int page,
+            int size,
+            String sort
+    ) {
+        Pageable pageable = createPageable(page, size, sort);
+        Page<Resume> resumes = "responses".equalsIgnoreCase(sort)
+                ? resumeRepository.findActiveOrderByResponses(pageable)
+                : resumeRepository.findAllByIsActiveTrue(pageable);
+        return resumes.map(this::convertToDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ResumeDto> findByApplicantId(
+            Integer applicantId,
+            int page,
+            int size,
+            String sort
+    ) {
+        validateApplicantById(applicantId);
+        Pageable pageable = createPageable(page, size, sort);
+        Page<Resume> resumes = "responses".equalsIgnoreCase(sort)
+                ? resumeRepository.findByApplicantOrderByResponses(applicantId, pageable)
+                : resumeRepository.findByApplicant_Id(applicantId, pageable);
+        return resumes.map(this::convertToDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ResumeDto> findByCategoryId(
             Integer categoryId
     ) {
@@ -396,6 +430,23 @@ public class ResumeServiceImpl
                     AccountType.APPLICANT
             );
         }
+    }
+
+    private Pageable createPageable(
+            int page,
+            int size,
+            String sort
+    ) {
+        int safePage = Math.max(page, 1) - 1;
+        int safeSize = Math.max(1, Math.min(size, 50));
+        if ("responses".equalsIgnoreCase(sort)) {
+            return PageRequest.of(safePage, safeSize);
+        }
+        return PageRequest.of(
+                safePage,
+                safeSize,
+                Sort.by(Sort.Direction.DESC, "updateTime")
+        );
     }
 
     private void validateResumeOwner(

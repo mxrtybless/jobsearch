@@ -14,6 +14,10 @@ import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -273,6 +277,52 @@ public class VacancyServiceImpl
 
     @Override
     @Transactional(readOnly = true)
+    public Page<VacancyDto> findAllActive(
+            int page,
+            int size,
+            String sort
+    ) {
+        Pageable pageable = createPageable(page, size, sort);
+        Page<Vacancy> vacancies = "responses".equalsIgnoreCase(sort)
+                ? vacancyRepository.findActiveOrderByResponses(pageable)
+                : vacancyRepository.findAllByIsActiveTrue(pageable);
+        return vacancies.map(this::convertToDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<VacancyDto> findByAuthorId(
+            Integer authorId,
+            int page,
+            int size,
+            String sort
+    ) {
+        validateEmployerById(authorId);
+        Pageable pageable = createPageable(page, size, sort);
+        Page<Vacancy> vacancies = "responses".equalsIgnoreCase(sort)
+                ? vacancyRepository.findByAuthorOrderByResponses(authorId, pageable)
+                : vacancyRepository.findByAuthor_Id(authorId, pageable);
+        return vacancies.map(this::convertToDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<VacancyDto> findActiveByAuthorId(
+            Integer authorId,
+            int page,
+            int size,
+            String sort
+    ) {
+        validateEmployerById(authorId);
+        Pageable pageable = createPageable(page, size, sort);
+        Page<Vacancy> vacancies = "responses".equalsIgnoreCase(sort)
+                ? vacancyRepository.findActiveByAuthorOrderByResponses(authorId, pageable)
+                : vacancyRepository.findByAuthor_IdAndIsActiveTrue(authorId, pageable);
+        return vacancies.map(this::convertToDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<VacancyDto> findByCategoryId(
             Integer categoryId
     ) {
@@ -431,6 +481,23 @@ public class VacancyServiceImpl
                     "You can only change your own vacancy"
             );
         }
+    }
+
+    private Pageable createPageable(
+            int page,
+            int size,
+            String sort
+    ) {
+        int safePage = Math.max(page, 1) - 1;
+        int safeSize = Math.max(1, Math.min(size, 50));
+        if ("responses".equalsIgnoreCase(sort)) {
+            return PageRequest.of(safePage, safeSize);
+        }
+        return PageRequest.of(
+                safePage,
+                safeSize,
+                Sort.by(Sort.Direction.DESC, "updateTime")
+        );
     }
 
     private void validateExperienceRange(

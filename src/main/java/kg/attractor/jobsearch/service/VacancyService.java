@@ -1,6 +1,7 @@
 package kg.attractor.jobsearch.service;
 
 import kg.attractor.jobsearch.dto.VacancyDto;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -37,6 +38,12 @@ public interface VacancyService {
     List<VacancyDto> findAll();
 
     List<VacancyDto> findAllActive();
+
+    Page<VacancyDto> findAllActive(int page, int size, String sort);
+
+    Page<VacancyDto> findByAuthorId(Integer authorId, int page, int size, String sort);
+
+    Page<VacancyDto> findActiveByAuthorId(Integer authorId, int page, int size, String sort);
 
     List<VacancyDto> findByCategoryId(
             Integer categoryId

@@ -2,6 +2,8 @@ package kg.attractor.jobsearch.repository;
 
 import kg.attractor.jobsearch.model.AccountType;
 import kg.attractor.jobsearch.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,6 +35,11 @@ public interface UserRepository
 
     List<User> findByPhoneNumberContaining(
             String phoneNumber
+    );
+
+    Page<User> findByAccountType(
+            AccountType accountType,
+            Pageable pageable
     );
 
     @Query("""

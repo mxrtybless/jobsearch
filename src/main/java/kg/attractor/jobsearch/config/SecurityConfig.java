@@ -174,6 +174,15 @@ public class SecurityConfig {
 
                                 .requestMatchers(
                                         HttpMethod.GET,
+                                        "/companies/**"
+                                )
+                                .hasAnyAuthority(
+                                        "APPLICANT",
+                                        "ROLE_APPLICANT"
+                                )
+
+                                .requestMatchers(
+                                        HttpMethod.GET,
                                         "/vacancies/**"
                                 )
                                 .permitAll()

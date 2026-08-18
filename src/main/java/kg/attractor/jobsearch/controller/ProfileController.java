@@ -2,11 +2,14 @@ package kg.attractor.jobsearch.controller;
 
 import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.ProfileUpdateDto;
+import kg.attractor.jobsearch.dto.ResumeDto;
+import kg.attractor.jobsearch.dto.VacancyDto;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.service.ResumeService;
 import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,179 +34,89 @@ public class ProfileController {
 
     @GetMapping
     public String profile(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "date") String sort,
             Authentication authentication,
             Model model
     ) {
-        User user =
-                findCurrentUser(
-                        authentication
-                );
-
-        addUserToModel(
-                user,
-                model
-        );
+        User user = findCurrentUser(authentication);
+        addUserToModel(user, model);
+        model.addAttribute("sort", sort);
 
         if (user.isApplicant()) {
-            model.addAttribute(
-                    "resumes",
-                    resumeService
-                            .findByApplicantId(
-                                    user.getId()
-                            )
-            );
+            Page<ResumeDto> resumePage = resumeService.findByApplicantId(user.getId(), page, 6, sort);
+            model.addAttribute("resumes", resumePage.getContent());
+            model.addAttribute("currentPage", resumePage.getNumber() + 1);
+            model.addAttribute("totalPages", resumePage.getTotalPages());
         }
 
         if (user.isEmployer()) {
-            model.addAttribute(
-                    "vacancies",
-                    vacancyService
-                            .findByAuthorId(
-                                    user.getId()
-                            )
-            );
+            Page<VacancyDto> vacancyPage = vacancyService.findByAuthorId(user.getId(), page, 6, sort);
+            model.addAttribute("vacancies", vacancyPage.getContent());
+            model.addAttribute("currentPage", vacancyPage.getNumber() + 1);
+            model.addAttribute("totalPages", vacancyPage.getTotalPages());
         }
 
         return "profile/profile";
     }
 
     @GetMapping("edit")
-    public String editProfile(
-            Authentication authentication,
-            Model model
-    ) {
-        User user =
-                findCurrentUser(
-                        authentication
-                );
-
-        ProfileUpdateDto profileUpdateDto =
-                createProfileUpdateDto(
-                        user
-                );
-
-        model.addAttribute(
-                "profileUpdateDto",
-                profileUpdateDto
-        );
-
-        addUserToModel(
-                user,
-                model
-        );
-
+    public String editProfile(Authentication authentication, Model model) {
+        User user = findCurrentUser(authentication);
+        ProfileUpdateDto profileUpdateDto = createProfileUpdateDto(user);
+        model.addAttribute("profileUpdateDto", profileUpdateDto);
+        addUserToModel(user, model);
         return "profile/edit";
     }
 
     @PostMapping("edit")
     public String editProfile(
-            @Valid
-            @ModelAttribute("profileUpdateDto")
-            ProfileUpdateDto profileUpdateDto,
+            @Valid @ModelAttribute("profileUpdateDto") ProfileUpdateDto profileUpdateDto,
             BindingResult bindingResult,
             Authentication authentication,
             Model model
     ) {
-        User user =
-                findCurrentUser(
-                        authentication
-                );
-
-        addUserToModel(
-                user,
-                model
-        );
-
+        User user = findCurrentUser(authentication);
+        addUserToModel(user, model);
         if (bindingResult.hasErrors()) {
             return "profile/edit";
         }
-
-        userService.editProfile(
-                user.getEmail(),
-                profileUpdateDto
-        );
-
+        userService.editProfile(user.getEmail(), profileUpdateDto);
         return "redirect:/profile?updated=true";
     }
 
     @PostMapping("avatar")
     public String uploadAvatar(
-            @RequestParam("avatar")
-            MultipartFile avatar,
+            @RequestParam("avatar") MultipartFile avatar,
             Authentication authentication
     ) {
-        if (avatar == null
-                || avatar.isEmpty()) {
+        if (avatar == null || avatar.isEmpty()) {
             return "redirect:/profile?avatarError=true";
         }
-
         try {
-            userService.uploadAvatar(
-                    authentication.getName(),
-                    avatar
-            );
-        } catch (
-                IllegalArgumentException e
-        ) {
+            userService.uploadAvatar(authentication.getName(), avatar);
+        } catch (IllegalArgumentException e) {
             return "redirect:/profile?avatarError=true";
         }
-
         return "redirect:/profile?avatarUpdated=true";
     }
 
-    private User findCurrentUser(
-            Authentication authentication
-    ) {
-        return userService
-                .findByEmail(
-                        authentication.getName()
-                )
-                .orElseThrow(() ->
-                        new NoSuchElementException(
-                                "Authenticated user not found"
-                        )
-                );
+    private User findCurrentUser(Authentication authentication) {
+        return userService.findByEmail(authentication.getName())
+                .orElseThrow(() -> new NoSuchElementException("Authenticated user not found"));
     }
 
-    private ProfileUpdateDto
-    createProfileUpdateDto(
-            User user
-    ) {
-        ProfileUpdateDto dto =
-                new ProfileUpdateDto();
-
-        dto.setName(
-                user.getName()
-        );
-
-        dto.setSurname(
-                user.getSurname()
-        );
-
-        dto.setAge(
-                user.getAge()
-        );
-
+    private ProfileUpdateDto createProfileUpdateDto(User user) {
+        ProfileUpdateDto dto = new ProfileUpdateDto();
+        dto.setName(user.getName());
+        dto.setSurname(user.getSurname());
+        dto.setAge(user.getAge());
         return dto;
     }
 
-    private void addUserToModel(
-            User user,
-            Model model
-    ) {
-        model.addAttribute(
-                "user",
-                user
-        );
-
-        model.addAttribute(
-                "isApplicant",
-                user.isApplicant()
-        );
-
-        model.addAttribute(
-                "isEmployer",
-                user.isEmployer()
-        );
+    private void addUserToModel(User user, Model model) {
+        model.addAttribute("user", user);
+        model.addAttribute("isApplicant", user.isApplicant());
+        model.addAttribute("isEmployer", user.isEmployer());
     }
 }

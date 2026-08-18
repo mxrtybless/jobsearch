@@ -10,6 +10,7 @@ import kg.attractor.jobsearch.service.CategoryService;
 import kg.attractor.jobsearch.service.ContactTypeService;
 import kg.attractor.jobsearch.service.ResumeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,13 +38,15 @@ public class ResumePageController {
 
     @GetMapping
     public String getResumeList(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "date") String sort,
             Model model
     ) {
-        model.addAttribute(
-                "resumes",
-                resumeService.findAllActive()
-        );
-
+        Page<ResumeDto> resumePage = resumeService.findAllActive(page, 6, sort);
+        model.addAttribute("resumes", resumePage.getContent());
+        model.addAttribute("currentPage", resumePage.getNumber() + 1);
+        model.addAttribute("totalPages", resumePage.getTotalPages());
+        model.addAttribute("sort", sort);
         return "resumes/list";
     }
 
