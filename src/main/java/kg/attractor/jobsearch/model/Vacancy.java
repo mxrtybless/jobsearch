@@ -49,20 +49,13 @@ public class Vacancy {
     )
     private String description;
 
-    @Column(
-            name = "category_id",
-            nullable = false
-    )
-    private Integer categoryId;
-
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "category_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private Category category;
 
@@ -85,20 +78,13 @@ public class Vacancy {
     )
     private Boolean isActive;
 
-    @Column(
-            name = "author_id",
-            nullable = false
-    )
-    private Integer authorId;
-
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "author_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private User author;
 

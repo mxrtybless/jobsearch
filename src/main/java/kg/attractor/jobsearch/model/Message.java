@@ -31,20 +31,13 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(
-            name = "responded_applicant_id",
-            nullable = false
-    )
-    private Integer respondedApplicantId;
-
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "responded_applicant_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private RespondedApplicant respondedApplicant;
 

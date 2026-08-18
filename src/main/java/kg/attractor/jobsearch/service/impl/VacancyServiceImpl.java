@@ -1,13 +1,14 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.VacancyDao;
 import kg.attractor.jobsearch.dto.VacancyDto;
 import kg.attractor.jobsearch.exception.InvalidAccountTypeException;
 import kg.attractor.jobsearch.exception.InvalidExperienceRangeException;
 import kg.attractor.jobsearch.exception.VacancyNotFoundException;
 import kg.attractor.jobsearch.model.AccountType;
+import kg.attractor.jobsearch.model.Category;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.Vacancy;
+import kg.attractor.jobsearch.repository.VacancyRepository;
 import kg.attractor.jobsearch.service.CategoryService;
 import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.service.VacancyService;
@@ -26,7 +27,7 @@ import java.util.NoSuchElementException;
 public class VacancyServiceImpl
         implements VacancyService {
 
-    private final VacancyDao vacancyDao;
+    private final VacancyRepository vacancyRepository;
     private final UserService userService;
     private final CategoryService categoryService;
 
@@ -41,9 +42,10 @@ public class VacancyServiceImpl
                         userEmail
                 );
 
-        categoryService.findById(
-                vacancyDto.getCategoryId()
-        );
+        Category category =
+                categoryService.findById(
+                        vacancyDto.getCategoryId()
+                );
 
         validateExperienceRange(
                 vacancyDto
@@ -58,13 +60,9 @@ public class VacancyServiceImpl
                                 vacancyDto.getName()
                         )
                         .description(
-                                vacancyDto
-                                        .getDescription()
+                                vacancyDto.getDescription()
                         )
-                        .categoryId(
-                                vacancyDto
-                                        .getCategoryId()
-                        )
+                        .category(category)
                         .salary(
                                 vacancyDto.getSalary()
                         )
@@ -75,25 +73,24 @@ public class VacancyServiceImpl
                                 vacancyDto.getExpTo()
                         )
                         .isActive(
-                                vacancyDto
-                                        .getIsActive()
+                                vacancyDto.getIsActive()
                         )
-                        .authorId(
-                                employer.getId()
-                        )
+                        .author(employer)
                         .createdDate(now)
                         .updateTime(now)
                         .build();
 
-        Integer vacancyId =
-                vacancyDao.save(vacancy);
+        Vacancy savedVacancy =
+                vacancyRepository.save(
+                        vacancy
+                );
 
         log.info(
                 "Vacancy created successfully with id: {}",
-                vacancyId
+                savedVacancy.getId()
         );
 
-        return vacancyId;
+        return savedVacancy.getId();
     }
 
     @Override
@@ -109,21 +106,17 @@ public class VacancyServiceImpl
                 );
 
         Vacancy savedVacancy =
-                vacancyDao.findById(id)
-                        .orElseThrow(() ->
-                                new VacancyNotFoundException(
-                                        id
-                                )
-                        );
+                findVacancy(id);
 
         validateVacancyOwner(
                 savedVacancy,
                 employer
         );
 
-        categoryService.findById(
-                vacancyDto.getCategoryId()
-        );
+        Category category =
+                categoryService.findById(
+                        vacancyDto.getCategoryId()
+                );
 
         validateExperienceRange(
                 vacancyDto
@@ -132,36 +125,31 @@ public class VacancyServiceImpl
         savedVacancy.setName(
                 vacancyDto.getName()
         );
-
         savedVacancy.setDescription(
                 vacancyDto.getDescription()
         );
-
-        savedVacancy.setCategoryId(
-                vacancyDto.getCategoryId()
+        savedVacancy.setCategory(
+                category
         );
-
         savedVacancy.setSalary(
                 vacancyDto.getSalary()
         );
-
         savedVacancy.setExpFrom(
                 vacancyDto.getExpFrom()
         );
-
         savedVacancy.setExpTo(
                 vacancyDto.getExpTo()
         );
-
         savedVacancy.setIsActive(
                 vacancyDto.getIsActive()
         );
-
         savedVacancy.setUpdateTime(
                 LocalDateTime.now()
         );
 
-        vacancyDao.update(savedVacancy);
+        vacancyRepository.save(
+                savedVacancy
+        );
 
         log.info(
                 "Vacancy updated successfully with id: {}",
@@ -181,21 +169,19 @@ public class VacancyServiceImpl
                 );
 
         Vacancy savedVacancy =
-                vacancyDao.findById(id)
-                        .orElseThrow(() ->
-                                new VacancyNotFoundException(
-                                        id
-                                )
-                        );
+                findVacancy(id);
 
         validateVacancyOwner(
                 savedVacancy,
                 employer
         );
 
-        vacancyDao.updateTime(
-                id,
+        savedVacancy.setUpdateTime(
                 LocalDateTime.now()
+        );
+
+        vacancyRepository.save(
+                savedVacancy
         );
 
         log.info(
@@ -216,19 +202,16 @@ public class VacancyServiceImpl
                 );
 
         Vacancy savedVacancy =
-                vacancyDao.findById(id)
-                        .orElseThrow(() ->
-                                new VacancyNotFoundException(
-                                        id
-                                )
-                        );
+                findVacancy(id);
 
         validateVacancyOwner(
                 savedVacancy,
                 employer
         );
 
-        vacancyDao.deleteById(id);
+        vacancyRepository.delete(
+                savedVacancy
+        );
 
         log.info(
                 "Vacancy deleted successfully with id: {}",
@@ -237,18 +220,15 @@ public class VacancyServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public VacancyDto findById(Integer id) {
         return convertToDto(
-                vacancyDao.findById(id)
-                        .orElseThrow(() ->
-                                new VacancyNotFoundException(
-                                        id
-                                )
-                        )
+                findVacancy(id)
         );
     }
 
     @Override
+    @Transactional(readOnly = true)
     public VacancyDto findOwnedById(
             Integer id,
             String userEmail
@@ -259,38 +239,40 @@ public class VacancyServiceImpl
                 );
 
         Vacancy vacancy =
-                vacancyDao.findById(id)
-                        .orElseThrow(() ->
-                                new VacancyNotFoundException(
-                                        id
-                                )
-                        );
+                findVacancy(id);
 
         validateVacancyOwner(
                 vacancy,
                 employer
         );
 
-        return convertToDto(vacancy);
+        return convertToDto(
+                vacancy
+        );
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<VacancyDto> findAll() {
-        return vacancyDao.findAll()
+        return vacancyRepository
+                .findAllByOrderByUpdateTimeDesc()
                 .stream()
                 .map(this::convertToDto)
                 .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<VacancyDto> findAllActive() {
-        return vacancyDao.findAllActive()
+        return vacancyRepository
+                .findAllByIsActiveTrueOrderByUpdateTimeDesc()
                 .stream()
                 .map(this::convertToDto)
                 .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<VacancyDto> findByCategoryId(
             Integer categoryId
     ) {
@@ -298,8 +280,8 @@ public class VacancyServiceImpl
                 categoryId
         );
 
-        return vacancyDao
-                .findByCategoryId(
+        return vacancyRepository
+                .findByCategory_IdAndIsActiveTrueOrderByUpdateTimeDesc(
                         categoryId
                 )
                 .stream()
@@ -308,6 +290,7 @@ public class VacancyServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<VacancyDto> findByAuthorId(
             Integer authorId
     ) {
@@ -315,8 +298,8 @@ public class VacancyServiceImpl
                 authorId
         );
 
-        return vacancyDao
-                .findByAuthorId(
+        return vacancyRepository
+                .findByAuthor_IdOrderByUpdateTimeDesc(
                         authorId
                 )
                 .stream()
@@ -325,6 +308,7 @@ public class VacancyServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<VacancyDto>
     findRespondedByApplicantId(
             Integer applicantId
@@ -333,7 +317,7 @@ public class VacancyServiceImpl
                 applicantId
         );
 
-        return vacancyDao
+        return vacancyRepository
                 .findRespondedByApplicantId(
                         applicantId
                 )
@@ -349,15 +333,27 @@ public class VacancyServiceImpl
                 vacancy.getId(),
                 vacancy.getName(),
                 vacancy.getDescription(),
-                vacancy.getCategoryId(),
+                vacancy.getCategory().getId(),
                 vacancy.getSalary(),
                 vacancy.getExpFrom(),
                 vacancy.getExpTo(),
                 vacancy.getIsActive(),
-                vacancy.getAuthorId(),
+                vacancy.getAuthor().getId(),
                 vacancy.getCreatedDate(),
                 vacancy.getUpdateTime()
         );
+    }
+
+    private Vacancy findVacancy(
+            Integer id
+    ) {
+        return vacancyRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new VacancyNotFoundException(
+                                id
+                        )
+                );
     }
 
     private User findAuthenticatedEmployer(
@@ -427,7 +423,8 @@ public class VacancyServiceImpl
             Vacancy vacancy,
             User employer
     ) {
-        if (!vacancy.getAuthorId()
+        if (!vacancy.getAuthor()
+                .getId()
                 .equals(employer.getId())) {
 
             throw new IllegalArgumentException(

@@ -33,22 +33,15 @@ public class RespondedApplicant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "resume_id", nullable = false)
-    private Integer resumeId;
-
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "resume_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private Resume resume;
-
-    @Column(name = "vacancy_id", nullable = false)
-    private Integer vacancyId;
 
     @JsonIgnore
     @ToString.Exclude
@@ -56,8 +49,7 @@ public class RespondedApplicant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "vacancy_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private Vacancy vacancy;
 

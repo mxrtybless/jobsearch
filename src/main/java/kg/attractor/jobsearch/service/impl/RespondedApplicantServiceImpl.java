@@ -1,18 +1,20 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.RespondedApplicantDao;
 import kg.attractor.jobsearch.dto.RespondedApplicantDto;
-import kg.attractor.jobsearch.dto.ResumeDto;
-import kg.attractor.jobsearch.dto.VacancyDto;
 import kg.attractor.jobsearch.exception.InvalidAccountTypeException;
 import kg.attractor.jobsearch.exception.ResponseAlreadyExistsException;
+import kg.attractor.jobsearch.exception.ResumeNotFoundException;
+import kg.attractor.jobsearch.exception.VacancyNotFoundException;
 import kg.attractor.jobsearch.model.AccountType;
 import kg.attractor.jobsearch.model.RespondedApplicant;
+import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.User;
+import kg.attractor.jobsearch.model.Vacancy;
+import kg.attractor.jobsearch.repository.RespondedApplicantRepository;
+import kg.attractor.jobsearch.repository.ResumeRepository;
+import kg.attractor.jobsearch.repository.VacancyRepository;
 import kg.attractor.jobsearch.service.RespondedApplicantService;
-import kg.attractor.jobsearch.service.ResumeService;
 import kg.attractor.jobsearch.service.UserService;
-import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,11 +29,10 @@ import java.util.NoSuchElementException;
 public class RespondedApplicantServiceImpl
         implements RespondedApplicantService {
 
-    private final RespondedApplicantDao
-            respondedApplicantDao;
-
-    private final ResumeService resumeService;
-    private final VacancyService vacancyService;
+    private final RespondedApplicantRepository
+            respondedApplicantRepository;
+    private final ResumeRepository resumeRepository;
+    private final VacancyRepository vacancyRepository;
     private final UserService userService;
 
     @Override
@@ -54,17 +55,26 @@ public class RespondedApplicantServiceImpl
                 respondedApplicantDto
                         .getVacancyId();
 
-        ResumeDto resume =
-                resumeService.findById(
-                        resumeId
-                );
+        Resume resume =
+                resumeRepository
+                        .findById(resumeId)
+                        .orElseThrow(() ->
+                                new ResumeNotFoundException(
+                                        resumeId
+                                )
+                        );
 
-        VacancyDto vacancy =
-                vacancyService.findById(
-                        vacancyId
-                );
+        Vacancy vacancy =
+                vacancyRepository
+                        .findById(vacancyId)
+                        .orElseThrow(() ->
+                                new VacancyNotFoundException(
+                                        vacancyId
+                                )
+                        );
 
-        if (!resume.getApplicantId()
+        if (!resume.getApplicant()
+                .getId()
                 .equals(applicant.getId())) {
             throw new IllegalArgumentException(
                     "You can only respond with your own resume"
@@ -87,10 +97,11 @@ public class RespondedApplicantServiceImpl
             );
         }
 
-        if (respondedApplicantDao.exists(
-                resumeId,
-                vacancyId
-        )) {
+        if (respondedApplicantRepository
+                .existsByResume_IdAndVacancy_Id(
+                        resumeId,
+                        vacancyId
+                )) {
             throw new ResponseAlreadyExistsException(
                     resumeId,
                     vacancyId
@@ -99,12 +110,12 @@ public class RespondedApplicantServiceImpl
 
         RespondedApplicant response =
                 RespondedApplicant.builder()
-                        .resumeId(resumeId)
-                        .vacancyId(vacancyId)
+                        .resume(resume)
+                        .vacancy(vacancy)
                         .confirmation(false)
                         .build();
 
-        respondedApplicantDao.save(
+        respondedApplicantRepository.save(
                 response
         );
 
@@ -116,6 +127,7 @@ public class RespondedApplicantServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User>
     findApplicantsByVacancyId(
             Integer vacancyId,
@@ -127,19 +139,24 @@ public class RespondedApplicantServiceImpl
                         AccountType.EMPLOYER
                 );
 
-        VacancyDto vacancy =
-                vacancyService.findById(
-                        vacancyId
-                );
+        Vacancy vacancy =
+                vacancyRepository
+                        .findById(vacancyId)
+                        .orElseThrow(() ->
+                                new VacancyNotFoundException(
+                                        vacancyId
+                                )
+                        );
 
-        if (!vacancy.getAuthorId()
+        if (!vacancy.getAuthor()
+                .getId()
                 .equals(employer.getId())) {
             throw new IllegalArgumentException(
                     "You can only view responses to your own vacancy"
             );
         }
 
-        return respondedApplicantDao
+        return respondedApplicantRepository
                 .findApplicantsByVacancyId(
                         vacancyId
                 );
