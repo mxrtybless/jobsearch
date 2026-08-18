@@ -1,10 +1,13 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.ContactInfoDao;
 import kg.attractor.jobsearch.dto.ContactInfoDto;
 import kg.attractor.jobsearch.exception.InvalidContactValueException;
+import kg.attractor.jobsearch.exception.ResumeNotFoundException;
 import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.ContactType;
+import kg.attractor.jobsearch.model.Resume;
+import kg.attractor.jobsearch.repository.ContactInfoRepository;
+import kg.attractor.jobsearch.repository.ResumeRepository;
 import kg.attractor.jobsearch.service.ContactInfoService;
 import kg.attractor.jobsearch.service.ContactTypeService;
 import lombok.RequiredArgsConstructor;
@@ -20,16 +23,17 @@ import java.util.List;
 public class ContactInfoServiceImpl
         implements ContactInfoService {
 
-    private final ContactInfoDao contactInfoDao;
-    private final ContactTypeService
-            contactTypeService;
+    private final ContactInfoRepository contactInfoRepository;
+    private final ResumeRepository resumeRepository;
+    private final ContactTypeService contactTypeService;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ContactInfoDto> findByResumeId(
             Integer resumeId
     ) {
-        return contactInfoDao
-                .findByResumeId(resumeId)
+        return contactInfoRepository
+                .findByResume_Id(resumeId)
                 .stream()
                 .map(this::convertToDto)
                 .toList();
@@ -45,13 +49,14 @@ public class ContactInfoServiceImpl
             return;
         }
 
+        Resume resume = findResume(resumeId);
+
         for (ContactInfoDto contactDto
                 : contactInfo) {
 
             if (contactDto == null
                     || contactDto.getValue() == null
-                    || contactDto.getValue()
-                    .isBlank()) {
+                    || contactDto.getValue().isBlank()) {
                 continue;
             }
 
@@ -67,13 +72,8 @@ public class ContactInfoServiceImpl
 
             ContactInfo contact =
                     ContactInfo.builder()
-                            .typeId(
-                                    contactDto
-                                            .getTypeId()
-                            )
-                            .resumeId(
-                                    resumeId
-                            )
+                            .type(contactType)
+                            .resume(resume)
                             .value(
                                     contactDto
                                             .getValue()
@@ -81,7 +81,7 @@ public class ContactInfoServiceImpl
                             )
                             .build();
 
-            contactInfoDao.save(contact);
+            contactInfoRepository.save(contact);
         }
 
         log.info(
@@ -96,7 +96,7 @@ public class ContactInfoServiceImpl
             Integer resumeId,
             List<ContactInfoDto> contactInfo
     ) {
-        contactInfoDao.deleteByResumeId(
+        contactInfoRepository.deleteByResume_Id(
                 resumeId
         );
 
@@ -107,12 +107,23 @@ public class ContactInfoServiceImpl
     }
 
     @Override
+    @Transactional
     public void deleteByResumeId(
             Integer resumeId
     ) {
-        contactInfoDao.deleteByResumeId(
+        contactInfoRepository.deleteByResume_Id(
                 resumeId
         );
+    }
+
+    private Resume findResume(Integer resumeId) {
+        return resumeRepository
+                .findById(resumeId)
+                .orElseThrow(() ->
+                        new ResumeNotFoundException(
+                                resumeId
+                        )
+                );
     }
 
     private void validateContactValue(
@@ -156,8 +167,8 @@ public class ContactInfoServiceImpl
     ) {
         return new ContactInfoDto(
                 contactInfo.getId(),
-                contactInfo.getResumeId(),
-                contactInfo.getTypeId(),
+                contactInfo.getResume().getId(),
+                contactInfo.getType().getId(),
                 contactInfo.getValue()
         );
     }

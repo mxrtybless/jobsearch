@@ -1,60 +1,40 @@
 <#import "../layout.ftlh" as layout>
 
-<@layout.layout title="Вакансии | JobSearch">
+<@layout.layout title="Резюме | JobSearch">
 
     <div class="mb-4">
-
         <h1 class="h2 mb-2">
-            Вакансии
+            Резюме соискателей
         </h1>
 
         <p class="text-secondary mb-0">
-            Актуальные вакансии работодателей
+            Опубликованные резюме соискателей
         </p>
-
     </div>
 
-    <#if vacancies?? && vacancies?size gt 0>
+    <#if resumes?? && resumes?size gt 0>
 
         <div class="d-flex flex-column gap-3">
 
-            <#list vacancies as vacancy>
+            <#list resumes as resume>
 
                 <div class="card border-0 shadow-sm list-card">
-
                     <div class="card-body p-4">
 
-                        <div
-                                class="d-flex
-                                       flex-column
-                                       flex-md-row
-                                       justify-content-between
-                                       gap-3">
+                        <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
 
                             <div class="flex-grow-1">
-
                                 <h2 class="h4 mb-3">
-                                    ${vacancy.name!}
+                                    ${resume.name!}
                                 </h2>
 
                                 <div class="entity-meta mb-3">
-
                                     <div>
                                         <span class="text-secondary">
-                                            Зарплата:
-                                        </span>
-                                        <strong>${vacancy.salary!}</strong>
-                                    </div>
-
-                                    <div>
-                                        <span class="text-secondary">
-                                            Опыт:
+                                            Желаемая зарплата:
                                         </span>
                                         <strong>
-                                            ${vacancy.expFrom!0}
-                                            —
-                                            ${vacancy.expTo!0}
-                                            лет
+                                            ${resume.salary!}
                                         </strong>
                                     </div>
 
@@ -62,45 +42,52 @@
                                         <span class="text-secondary">
                                             Категория:
                                         </span>
-                                        <strong>${vacancy.categoryId!}</strong>
+                                        <strong>
+                                            ${resume.categoryId!}
+                                        </strong>
                                     </div>
 
+                                    <div>
+                                        <span class="text-secondary">
+                                            Соискатель ID:
+                                        </span>
+                                        <strong>
+                                            ${resume.applicantId!}
+                                        </strong>
+                                    </div>
                                 </div>
 
-                                <p class="vacancy-description mb-0">
-                                    ${vacancy.description!}
-                                </p>
-
+                                <#if resume.workExperienceInfo??
+                                && resume.workExperienceInfo?size gt 0>
+                                    <div class="small text-secondary">
+                                        Опыт работы:
+                                        <strong class="text-dark">
+                                            ${resume.workExperienceInfo?size}
+                                            записей
+                                        </strong>
+                                    </div>
+                                </#if>
                             </div>
 
-                            <div
-                                    class="vacancy-date
-                                           text-md-end
-                                           text-secondary
-                                           small">
-
+                            <div class="text-md-end text-secondary small">
                                 <div class="mb-1">
                                     Обновлено
                                 </div>
 
                                 <strong class="text-dark">
-
-                                    <#if vacancy.updateTime??>
-                                        ${vacancy.updateTime}
-                                    <#elseif vacancy.createdDate??>
-                                        ${vacancy.createdDate}
+                                    <#if resume.updateTime??>
+                                        ${resume.updateTime}
+                                    <#elseif resume.createdDate??>
+                                        ${resume.createdDate}
                                     <#else>
                                         —
                                     </#if>
-
                                 </strong>
-
                             </div>
 
                         </div>
 
                     </div>
-
                 </div>
 
             </#list>
@@ -110,16 +97,13 @@
     <#else>
 
         <div class="empty-state">
-
             <h2 class="h5">
-                Активных вакансий пока нет
+                Активных резюме пока нет
             </h2>
 
             <p class="text-secondary mb-0">
-                Опубликованные вакансии появятся
-                на этой странице.
+                Опубликованные резюме появятся на этой странице.
             </p>
-
         </div>
 
     </#if>

@@ -35,20 +35,13 @@ public class Resume {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(
-            name = "applicant_id",
-            nullable = false
-    )
-    private Integer applicantId;
-
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "applicant_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private User applicant;
 
@@ -59,20 +52,13 @@ public class Resume {
     )
     private String name;
 
-    @Column(
-            name = "category_id",
-            nullable = false
-    )
-    private Integer categoryId;
-
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "category_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private Category category;
 
@@ -131,8 +117,7 @@ public class Resume {
             mappedBy = "resume",
             fetch = FetchType.LAZY
     )
-    private List<WorkExperienceInfo>
-            workExperienceInfo =
+    private List<WorkExperienceInfo> workExperienceInfo =
             new ArrayList<>();
 
     @JsonIgnore

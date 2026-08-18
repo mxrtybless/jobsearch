@@ -1,11 +1,12 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.ContactTypeDao;
 import kg.attractor.jobsearch.exception.ContactTypeNotFoundException;
 import kg.attractor.jobsearch.model.ContactType;
+import kg.attractor.jobsearch.repository.ContactTypeRepository;
 import kg.attractor.jobsearch.service.ContactTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,11 +15,13 @@ import java.util.List;
 public class ContactTypeServiceImpl
         implements ContactTypeService {
 
-    private final ContactTypeDao contactTypeDao;
+    private final ContactTypeRepository contactTypeRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public ContactType findById(Integer id) {
-        return contactTypeDao.findById(id)
+        return contactTypeRepository
+                .findById(id)
                 .orElseThrow(() ->
                         new ContactTypeNotFoundException(
                                 id
@@ -27,7 +30,8 @@ public class ContactTypeServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ContactType> findAll() {
-        return contactTypeDao.findAll();
+        return contactTypeRepository.findAll();
     }
 }

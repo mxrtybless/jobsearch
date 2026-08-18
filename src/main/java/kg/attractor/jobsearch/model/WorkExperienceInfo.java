@@ -29,17 +29,13 @@ public class WorkExperienceInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "resume_id", nullable = false)
-    private Integer resumeId;
-
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "resume_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private Resume resume;
 

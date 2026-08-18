@@ -29,22 +29,15 @@ public class ContactInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "type_id", nullable = false)
-    private Integer typeId;
-
     @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "type_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private ContactType type;
-
-    @Column(name = "resume_id", nullable = false)
-    private Integer resumeId;
 
     @JsonIgnore
     @ToString.Exclude
@@ -52,8 +45,7 @@ public class ContactInfo {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "resume_id",
-            insertable = false,
-            updatable = false
+            nullable = false
     )
     private Resume resume;
 

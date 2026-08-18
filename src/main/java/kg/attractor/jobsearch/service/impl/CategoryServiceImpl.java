@@ -1,11 +1,12 @@
 package kg.attractor.jobsearch.service.impl;
 
-import kg.attractor.jobsearch.dao.CategoryDao;
 import kg.attractor.jobsearch.exception.CategoryNotFoundException;
 import kg.attractor.jobsearch.model.Category;
+import kg.attractor.jobsearch.repository.CategoryRepository;
 import kg.attractor.jobsearch.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,11 +15,13 @@ import java.util.List;
 public class CategoryServiceImpl
         implements CategoryService {
 
-    private final CategoryDao categoryDao;
+    private final CategoryRepository categoryRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public Category findById(Integer id) {
-        return categoryDao.findById(id)
+        return categoryRepository
+                .findById(id)
                 .orElseThrow(() ->
                         new CategoryNotFoundException(
                                 id
@@ -27,7 +30,8 @@ public class CategoryServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Category> findAll() {
-        return categoryDao.findAll();
+        return categoryRepository.findAll();
     }
 }
