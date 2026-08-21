@@ -1,11 +1,11 @@
 <#import "../layout.ftlh" as layout>
-<@layout.layout title="Р’Р°РєР°РЅСЃРёРё | JobSearch">
+<@layout.layout title="Вакансии | JobSearch">
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
-    <div><h1 class="h2 mb-2">Р’Р°РєР°РЅСЃРёРё</h1><p class="text-secondary mb-0">РђРєС‚СѓР°Р»СЊРЅС‹Рµ РІР°РєР°РЅСЃРёРё СЂР°Р±РѕС‚РѕРґР°С‚РµР»РµР№</p></div>
+    <div><h1 class="h2 mb-2">Вакансии</h1><p class="text-secondary mb-0">Актуальные вакансии работодателей</p></div>
     <form method="get" action="/vacancies" class="d-flex gap-2">
         <select class="form-select" name="sort" onchange="this.form.submit()">
-            <option value="date" <#if sort!"date" == "date">selected</#if>>РџРѕ РґР°С‚Рµ РїСѓР±Р»РёРєР°С†РёРё</option>
-            <option value="responses" <#if sort!"date" == "responses">selected</#if>>РџРѕ РєРѕР»РёС‡РµСЃС‚РІСѓ РѕС‚РєР»РёРєРѕРІ</option>
+            <option value="date" <#if sort!"date" == "date">selected</#if>>По дате публикации</option>
+            <option value="responses" <#if sort!"date" == "responses">selected</#if>>По количеству откликов</option>
         </select>
         <input type="hidden" name="page" value="1">
     </form>
@@ -17,17 +17,17 @@
                 <div class="d-flex justify-content-between gap-3">
                     <div>
                         <h2 class="h4"><a class="text-decoration-none" href="/vacancies/${vacancy.id}">${vacancy.name!}</a></h2>
-                        <p class="mb-2"><strong>Р—Р°СЂРїР»Р°С‚Р°:</strong> ${vacancy.salary!}</p>
-                        <p class="mb-2"><strong>РћРїС‹С‚:</strong> ${vacancy.expFrom!0} вЂ” ${vacancy.expTo!0} Р»РµС‚</p>
+                        <p class="mb-2"><strong>Зарплата:</strong> ${vacancy.salary!}</p>
+                        <p class="mb-2"><strong>Опыт:</strong> ${vacancy.expFrom!0} — ${vacancy.expTo!0} лет</p>
                         <p class="mb-0 text-secondary">${vacancy.description!}</p>
                     </div>
-                    <div class="text-secondary small text-end">РћР±РЅРѕРІР»РµРЅРѕ<br><strong class="text-dark"><#if vacancy.updateTime??>${vacancy.updateTime}<#elseif vacancy.createdDate??>${vacancy.createdDate}<#else>вЂ”</#if></strong></div>
+                    <div class="text-secondary small text-end">Обновлено<br><strong class="text-dark"><#if vacancy.updateTime??>${vacancy.updateTime}<#elseif vacancy.createdDate??>${vacancy.createdDate}<#else>—</#if></strong></div>
                 </div>
             </div></div>
         </#list>
     </div>
 <#else>
-    <div class="alert alert-light">РђРєС‚РёРІРЅС‹С… РІР°РєР°РЅСЃРёР№ РїРѕРєР° РЅРµС‚.</div>
+    <div class="alert alert-light">Активных вакансий пока нет.</div>
 </#if>
 <@layout.pagination currentPage=currentPage!1 totalPages=totalPages!0 baseUrl="/vacancies" sort=sort!"date"/>
 </@layout.layout>

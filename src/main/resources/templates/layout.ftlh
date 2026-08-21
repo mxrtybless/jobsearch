@@ -33,24 +33,24 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link" href="/vacancies">Р’Р°РєР°РЅСЃРёРё</a></li>
+                <li class="nav-item"><a class="nav-link" href="/vacancies">Вакансии</a></li>
                 <#if authenticated && isEmployer>
-                    <li class="nav-item"><a class="nav-link" href="/resumes">Р’СЃРµ СЂРµР·СЋРјРµ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/resumes">Все резюме</a></li>
                 </#if>
                 <#if authenticated && isApplicant>
-                    <li class="nav-item"><a class="nav-link" href="/companies">РљРѕРјРїР°РЅРёРё</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/companies">Компании</a></li>
                 </#if>
             </ul>
             <#if authenticated>
                 <div class="d-flex align-items-center gap-2">
                     <span class="text-white small d-none d-lg-inline">${securityUser.username}</span>
-                    <a class="btn btn-light btn-sm" href="/profile">Р›РёС‡РЅС‹Р№ РєР°Р±РёРЅРµС‚</a>
-                    <a class="btn btn-outline-light btn-sm" href="/auth/logout">Р’С‹Р№С‚Рё</a>
+                    <a class="btn btn-light btn-sm" href="/profile">Личный кабинет</a>
+                    <a class="btn btn-outline-light btn-sm" href="/auth/logout">Выйти</a>
                 </div>
             <#else>
                 <div class="d-flex gap-2">
-                    <a class="btn btn-light btn-sm" href="/auth/login">Р’РѕР№С‚Рё</a>
-                    <a class="btn btn-outline-light btn-sm" href="/auth/register">Р РµРіРёСЃС‚СЂР°С†РёСЏ</a>
+                    <a class="btn btn-light btn-sm" href="/auth/login">Войти</a>
+                    <a class="btn btn-outline-light btn-sm" href="/auth/register">Регистрация</a>
                 </div>
             </#if>
         </div>
@@ -66,7 +66,7 @@
         <nav class="mt-4">
             <ul class="pagination justify-content-center">
                 <#if currentPage gt 1>
-                    <li class="page-item"><a class="page-link" href="${baseUrl}?page=${currentPage - 1}&sort=${sort}">РќР°Р·Р°Рґ</a></li>
+                    <li class="page-item"><a class="page-link" href="${baseUrl}?page=${currentPage - 1}&sort=${sort}">Назад</a></li>
                 </#if>
                 <#list 1..totalPages as number>
                     <li class="page-item <#if number == currentPage>active</#if>">
@@ -74,7 +74,7 @@
                     </li>
                 </#list>
                 <#if currentPage lt totalPages>
-                    <li class="page-item"><a class="page-link" href="${baseUrl}?page=${currentPage + 1}&sort=${sort}">Р’РїРµСЂС‘Рґ</a></li>
+                    <li class="page-item"><a class="page-link" href="${baseUrl}?page=${currentPage + 1}&sort=${sort}">Вперёд</a></li>
                 </#if>
             </ul>
         </nav>
