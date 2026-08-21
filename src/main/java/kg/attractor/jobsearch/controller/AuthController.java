@@ -1,11 +1,18 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.UserCreateDto;
 import kg.attractor.jobsearch.exception.EmailAlreadyExistsException;
 import kg.attractor.jobsearch.model.AccountType;
 import kg.attractor.jobsearch.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class AuthController {
 
     private final UserService userService;
+    private final AuthenticationManager
+            authenticationManager;
 
     @GetMapping("login")
     public String login() {
@@ -58,7 +67,8 @@ public class AuthController {
                     required = false
             )
             MultipartFile avatar,
-            Model model
+            Model model,
+            HttpServletRequest request
     ) {
         if (bindingResult.hasErrors()) {
             return "auth/register";
@@ -90,6 +100,52 @@ public class AuthController {
             return "auth/register";
         }
 
-        return "redirect:/auth/login?registered=true";
+        authenticateRegisteredUser(
+                userCreateDto,
+                request
+        );
+
+        if (userCreateDto.getAccountType()
+                == AccountType.EMPLOYER) {
+            return "redirect:/resumes";
+        }
+
+        return "redirect:/vacancies";
+    }
+
+    private void authenticateRegisteredUser(
+            UserCreateDto userCreateDto,
+            HttpServletRequest request
+    ) {
+        UsernamePasswordAuthenticationToken
+                authenticationRequest =
+                new UsernamePasswordAuthenticationToken(
+                        userCreateDto.getEmail(),
+                        userCreateDto.getPassword()
+                );
+
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        authenticationRequest
+                );
+
+        SecurityContext securityContext =
+                SecurityContextHolder
+                        .createEmptyContext();
+
+        securityContext.setAuthentication(
+                authentication
+        );
+
+        SecurityContextHolder.setContext(
+                securityContext
+        );
+
+        request.getSession(true)
+                .setAttribute(
+                        HttpSessionSecurityContextRepository
+                                .SPRING_SECURITY_CONTEXT_KEY,
+                        securityContext
+                );
     }
 }
