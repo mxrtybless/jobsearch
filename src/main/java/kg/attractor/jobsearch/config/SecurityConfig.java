@@ -1,7 +1,5 @@
 package kg.attractor.jobsearch.config;
 
-import kg.attractor.jobsearch.model.User;
-import kg.attractor.jobsearch.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,47 +9,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 @Configuration
 public class SecurityConfig {
-
-    @Bean
-    public UserDetailsService userDetailsService(
-            UserRepository userRepository
-    ) {
-        return email -> {
-            User user = userRepository
-                    .findByEmailIgnoreCase(email)
-                    .orElseThrow(() ->
-                            new UsernameNotFoundException(
-                                    "User with email "
-                                            + email
-                                            + " not found"
-                            )
-                    );
-
-            String authority = user
-                    .getRole()
-                    .getAuthority()
-                    .getAuthority();
-
-            return org.springframework.security
-                    .core.userdetails.User
-                    .withUsername(user.getEmail())
-                    .password(user.getPassword())
-                    .authorities(authority)
-                    .disabled(
-                            !Boolean.TRUE.equals(
-                                    user.getEnabled()
-                            )
-                    )
-                    .build();
-        };
-    }
 
     @Bean
     public DaoAuthenticationProvider
