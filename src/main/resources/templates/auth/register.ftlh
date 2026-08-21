@@ -33,6 +33,8 @@
                             method="post"
                             enctype="multipart/form-data">
 
+                        <@layout.csrfInput/>
+
                         <div class="mb-4">
 
                             <label class="form-label fw-semibold">

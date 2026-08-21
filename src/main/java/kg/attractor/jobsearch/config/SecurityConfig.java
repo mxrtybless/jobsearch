@@ -8,13 +8,11 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import java.util.List;
 
@@ -100,21 +98,29 @@ public class SecurityConfig {
 
                 .logout(logout ->
                         logout
-                                .logoutRequestMatcher(
-                                        PathPatternRequestMatcher
-                                                .withDefaults()
-                                                .matcher(
-                                                        "/auth/logout"
-                                                )
+                                .logoutUrl(
+                                        "/auth/logout"
                                 )
                                 .logoutSuccessUrl(
                                         "/auth/login?logout=true"
                                 )
+                                .clearAuthentication(true)
+                                .invalidateHttpSession(true)
                                 .permitAll()
                 )
 
-                .csrf(
-                        AbstractHttpConfigurer::disable
+                .csrf(csrf ->
+                        csrf.ignoringRequestMatchers(
+                                "/users/**",
+                                "/images/**",
+                                "/responses/**",
+                                "/resumes/create",
+                                "/resumes/edit/**",
+                                "/resumes/delete/**",
+                                "/vacancies/create",
+                                "/vacancies/edit/**",
+                                "/vacancies/delete/**"
+                        )
                 )
 
                 .authorizeHttpRequests(authorize ->
@@ -261,7 +267,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     private String successUrl(
             Authentication authentication

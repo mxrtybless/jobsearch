@@ -49,6 +49,8 @@
                             action="/auth/login"
                             method="post">
 
+                        <@layout.csrfInput/>
+
                         <div class="mb-3">
 
                             <label

@@ -13,6 +13,7 @@
             <div class="d-flex flex-wrap gap-2">
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">Редактировать</button>
                 <form action="/profile/avatar" method="post" enctype="multipart/form-data" class="d-flex gap-2">
+                    <@layout.csrfInput/>
                     <input class="form-control" type="file" name="avatar" accept="image/*" required>
                     <button class="btn btn-outline-primary" type="submit">Обновить фото</button>
                 </form>
@@ -45,7 +46,7 @@
             <p><strong>Зарплата:</strong> ${resume.salary!}</p>
             <p class="small text-secondary">Обновлено: <#if resume.updateTime??>${resume.updateTime}<#elseif resume.createdDate??>${resume.createdDate}<#else>—</#if></p>
             <div class="d-flex gap-2"><a class="btn btn-outline-primary btn-sm" href="/resumes/form/edit/${resume.id}">Редактировать</a>
-            <form method="post" action="/resumes/form/update/${resume.id}"><button class="btn btn-outline-secondary btn-sm">Обновить дату</button></form></div>
+            <form method="post" action="/resumes/form/update/${resume.id}"><@layout.csrfInput/><button class="btn btn-outline-secondary btn-sm">Обновить дату</button></form></div>
         </div></div></div></#list>
     </div><#else><div class="alert alert-light">У вас пока нет резюме.</div></#if>
 <#else>
@@ -55,7 +56,7 @@
             <p><strong>Зарплата:</strong> ${vacancy.salary!}</p>
             <p class="small text-secondary">Обновлено: <#if vacancy.updateTime??>${vacancy.updateTime}<#elseif vacancy.createdDate??>${vacancy.createdDate}<#else>—</#if></p>
             <div class="d-flex gap-2"><a class="btn btn-outline-primary btn-sm" href="/vacancies/form/edit/${vacancy.id}">Редактировать</a>
-            <form method="post" action="/vacancies/form/update/${vacancy.id}"><button class="btn btn-outline-secondary btn-sm">Обновить дату</button></form></div>
+            <form method="post" action="/vacancies/form/update/${vacancy.id}"><@layout.csrfInput/><button class="btn btn-outline-secondary btn-sm">Обновить дату</button></form></div>
         </div></div></div></#list>
     </div><#else><div class="alert alert-light">У вас пока нет вакансий.</div></#if>
 </#if>
@@ -63,6 +64,7 @@
 
 <div class="modal fade" id="editProfileModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
 <form action="/profile/edit" method="post">
+    <@layout.csrfInput/>
 <div class="modal-header"><h5 class="modal-title">Редактирование профиля</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
 <div class="modal-body">
     <div class="mb-3"><label class="form-label">Имя</label><input class="form-control" name="name" value="${user.name!}" required></div>

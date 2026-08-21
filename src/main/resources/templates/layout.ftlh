@@ -1,3 +1,12 @@
+<#macro csrfInput>
+    <#if _csrf??>
+        <input
+                type="hidden"
+                name="${(_csrf.parameterName)!'csrf-param-name'}"
+                value="${(_csrf.token)!'csrf-token'}">
+    </#if>
+</#macro>
+
 <#macro layout title="JobSearch">
 <!doctype html>
 <html lang="ru">
@@ -45,7 +54,14 @@
                 <div class="d-flex align-items-center gap-2">
                     <span class="text-white small d-none d-lg-inline">${securityUser.username}</span>
                     <a class="btn btn-light btn-sm" href="/profile">Личный кабинет</a>
-                    <a class="btn btn-outline-light btn-sm" href="/auth/logout">Выйти</a>
+                    <form action="/auth/logout" method="post" class="m-0">
+                        <@csrfInput/>
+                        <button
+                                class="btn btn-outline-light btn-sm"
+                                type="submit">
+                            Выйти
+                        </button>
+                    </form>
                 </div>
             <#else>
                 <div class="d-flex gap-2">
