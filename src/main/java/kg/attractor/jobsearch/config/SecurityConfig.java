@@ -8,6 +8,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -64,9 +65,17 @@ public class SecurityConfig {
                                 .loginProcessingUrl(
                                         "/auth/login"
                                 )
-                                .defaultSuccessUrl(
-                                        "/vacancies",
-                                        true
+                                .successHandler(
+                                        (
+                                                request,
+                                                response,
+                                                authentication
+                                        ) ->
+                                                response.sendRedirect(
+                                                        successUrl(
+                                                                authentication
+                                                        )
+                                                )
                                 )
                                 .failureUrl(
                                         "/auth/login?error=true"
@@ -236,5 +245,27 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+
+    private String successUrl(
+            Authentication authentication
+    ) {
+        boolean employer =
+                authentication
+                        .getAuthorities()
+                        .stream()
+                        .anyMatch(authority ->
+                                authority.getAuthority()
+                                        .equals("EMPLOYER")
+                                        || authority.getAuthority()
+                                        .equals("ROLE_EMPLOYER")
+                        );
+
+        if (employer) {
+            return "/resumes";
+        }
+
+        return "/vacancies";
     }
 }
