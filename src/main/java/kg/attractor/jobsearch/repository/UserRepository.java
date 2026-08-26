@@ -29,6 +29,10 @@ public interface UserRepository
             String email
     );
 
+    Optional<User> findByResetPasswordToken(
+            String token
+    );
+
     List<User> findByNameContainingIgnoreCase(
             String name
     );

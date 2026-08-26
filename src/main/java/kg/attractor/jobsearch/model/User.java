@@ -75,6 +75,12 @@ public class User implements UserDetails {
     private String password;
 
     @Column(
+            name = "reset_password_token",
+            length = 255
+    )
+    private String resetPasswordToken;
+
+    @Column(
             name = "phone_number",
             nullable = false,
             length = 50
