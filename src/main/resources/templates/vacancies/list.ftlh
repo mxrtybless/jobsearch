@@ -4,8 +4,10 @@
     <div><h1 class="h2 mb-2">Вакансии</h1><p class="text-secondary mb-0">Актуальные вакансии работодателей</p></div>
     <form method="get" action="/vacancies" class="d-flex gap-2">
         <select class="form-select" name="sort" onchange="this.form.submit()">
-            <option value="date" <#if sort!"date" == "date">selected</#if>>По дате публикации</option>
-            <option value="responses" <#if sort!"date" == "responses">selected</#if>>По количеству откликов</option>
+            <option value="dateDesc" <#if (sort!"dateDesc") == "dateDesc">selected</#if>>По дате — сначала новые</option>
+            <option value="dateAsc" <#if (sort!"dateDesc") == "dateAsc">selected</#if>>По дате — сначала старые</option>
+            <option value="responsesDesc" <#if (sort!"dateDesc") == "responsesDesc">selected</#if>>По откликам — по убыванию</option>
+            <option value="responsesAsc" <#if (sort!"dateDesc") == "responsesAsc">selected</#if>>По откликам — по возрастанию</option>
         </select>
         <input type="hidden" name="page" value="1">
     </form>
@@ -29,5 +31,5 @@
 <#else>
     <div class="alert alert-light">Активных вакансий пока нет.</div>
 </#if>
-<@layout.pagination currentPage=currentPage!1 totalPages=totalPages!0 baseUrl="/vacancies" sort=sort!"date"/>
+<@layout.pagination currentPage=currentPage!1 totalPages=totalPages!0 baseUrl="/vacancies" sort=sort!"dateDesc"/>
 </@layout.layout>

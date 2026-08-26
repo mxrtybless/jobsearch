@@ -70,6 +70,17 @@ public class AuthController {
             Model model,
             HttpServletRequest request
     ) {
+        if (userCreateDto.getAccountType()
+                == AccountType.APPLICANT
+                && (userCreateDto.getSurname() == null
+                || userCreateDto.getSurname().isBlank())) {
+            bindingResult.rejectValue(
+                    "surname",
+                    "surname.required",
+                    "Surname must not be blank"
+            );
+        }
+
         if (bindingResult.hasErrors()) {
             return "auth/register";
         }

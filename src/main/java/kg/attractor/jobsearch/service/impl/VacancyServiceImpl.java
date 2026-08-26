@@ -283,9 +283,19 @@ public class VacancyServiceImpl
             String sort
     ) {
         Pageable pageable = createPageable(page, size, sort);
-        Page<Vacancy> vacancies = "responses".equalsIgnoreCase(sort)
-                ? vacancyRepository.findActiveOrderByResponses(pageable)
-                : vacancyRepository.findAllByIsActiveTrue(pageable);
+        Page<Vacancy> vacancies;
+
+        if ("responsesAsc".equalsIgnoreCase(sort)) {
+            vacancies = vacancyRepository
+                    .findActiveOrderByResponsesAsc(pageable);
+        } else if ("responsesDesc".equalsIgnoreCase(sort)
+                || "responses".equalsIgnoreCase(sort)) {
+            vacancies = vacancyRepository
+                    .findActiveOrderByResponses(pageable);
+        } else {
+            vacancies = vacancyRepository
+                    .findAllByIsActiveTrue(pageable);
+        }
         return vacancies.map(this::convertToDto);
     }
 
@@ -299,9 +309,28 @@ public class VacancyServiceImpl
     ) {
         validateEmployerById(authorId);
         Pageable pageable = createPageable(page, size, sort);
-        Page<Vacancy> vacancies = "responses".equalsIgnoreCase(sort)
-                ? vacancyRepository.findByAuthorOrderByResponses(authorId, pageable)
-                : vacancyRepository.findByAuthor_Id(authorId, pageable);
+        Page<Vacancy> vacancies;
+
+        if ("responsesAsc".equalsIgnoreCase(sort)) {
+            vacancies = vacancyRepository
+                    .findByAuthorOrderByResponsesAsc(
+                            authorId,
+                            pageable
+                    );
+        } else if ("responsesDesc".equalsIgnoreCase(sort)
+                || "responses".equalsIgnoreCase(sort)) {
+            vacancies = vacancyRepository
+                    .findByAuthorOrderByResponses(
+                            authorId,
+                            pageable
+                    );
+        } else {
+            vacancies = vacancyRepository
+                    .findByAuthor_Id(
+                            authorId,
+                            pageable
+                    );
+        }
         return vacancies.map(this::convertToDto);
     }
 
@@ -315,9 +344,28 @@ public class VacancyServiceImpl
     ) {
         validateEmployerById(authorId);
         Pageable pageable = createPageable(page, size, sort);
-        Page<Vacancy> vacancies = "responses".equalsIgnoreCase(sort)
-                ? vacancyRepository.findActiveByAuthorOrderByResponses(authorId, pageable)
-                : vacancyRepository.findByAuthor_IdAndIsActiveTrue(authorId, pageable);
+        Page<Vacancy> vacancies;
+
+        if ("responsesAsc".equalsIgnoreCase(sort)) {
+            vacancies = vacancyRepository
+                    .findActiveByAuthorOrderByResponsesAsc(
+                            authorId,
+                            pageable
+                    );
+        } else if ("responsesDesc".equalsIgnoreCase(sort)
+                || "responses".equalsIgnoreCase(sort)) {
+            vacancies = vacancyRepository
+                    .findActiveByAuthorOrderByResponses(
+                            authorId,
+                            pageable
+                    );
+        } else {
+            vacancies = vacancyRepository
+                    .findByAuthor_IdAndIsActiveTrue(
+                            authorId,
+                            pageable
+                    );
+        }
         return vacancies.map(this::convertToDto);
     }
 
@@ -490,13 +538,20 @@ public class VacancyServiceImpl
     ) {
         int safePage = Math.max(page, 1) - 1;
         int safeSize = Math.max(1, Math.min(size, 50));
-        if ("responses".equalsIgnoreCase(sort)) {
+        if (sort != null
+                && sort.toLowerCase().startsWith("responses")) {
             return PageRequest.of(safePage, safeSize);
         }
+
+        Sort.Direction direction =
+                "dateAsc".equalsIgnoreCase(sort)
+                        ? Sort.Direction.ASC
+                        : Sort.Direction.DESC;
+
         return PageRequest.of(
                 safePage,
                 safeSize,
-                Sort.by(Sort.Direction.DESC, "updateTime")
+                Sort.by(direction, "updateTime")
         );
     }
 

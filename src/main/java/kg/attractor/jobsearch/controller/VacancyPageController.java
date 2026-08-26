@@ -32,7 +32,7 @@ public class VacancyPageController {
     @GetMapping
     public String getVacancyList(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "date") String sort,
+            @RequestParam(defaultValue = "dateDesc") String sort,
             Model model
     ) {
         Page<VacancyDto> vacancyPage = vacancyService.findAllActive(page, 6, sort);

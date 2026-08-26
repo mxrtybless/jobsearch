@@ -2,7 +2,9 @@ package kg.attractor.jobsearch.controller;
 
 import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.ContactInfoDto;
+import kg.attractor.jobsearch.dto.EducationInfoDto;
 import kg.attractor.jobsearch.dto.ResumeDto;
+import kg.attractor.jobsearch.dto.WorkExperienceInfoDto;
 import kg.attractor.jobsearch.exception.InvalidContactValueException;
 import kg.attractor.jobsearch.exception.InvalidEducationPeriodException;
 import kg.attractor.jobsearch.model.ContactType;
@@ -39,7 +41,7 @@ public class ResumePageController {
     @GetMapping
     public String getResumeList(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "date") String sort,
+            @RequestParam(defaultValue = "dateDesc") String sort,
             Model model
     ) {
         Page<ResumeDto> resumePage = resumeService.findAllActive(page, 6, sort);
@@ -60,6 +62,7 @@ public class ResumePageController {
         resumeDto.setIsActive(true);
 
         prepareContactInfo(resumeDto);
+        prepareSingleResumeDetails(resumeDto);
 
         addFormData(
                 model,
@@ -81,6 +84,7 @@ public class ResumePageController {
             Model model
     ) {
         prepareContactInfo(resumeDto);
+        prepareSingleResumeDetails(resumeDto);
 
         if (bindingResult.hasErrors()) {
             addFormData(
@@ -133,6 +137,7 @@ public class ResumePageController {
                 );
 
         prepareContactInfo(resumeDto);
+        prepareSingleResumeDetails(resumeDto);
 
         addFormData(
                 model,
@@ -155,6 +160,7 @@ public class ResumePageController {
             Model model
     ) {
         prepareContactInfo(resumeDto);
+        prepareSingleResumeDetails(resumeDto);
 
         if (bindingResult.hasErrors()) {
             addFormData(
@@ -294,4 +300,45 @@ public class ResumePageController {
 
         resumeDto.setContactInfo(normalized);
     }
+
+    private void prepareSingleResumeDetails(
+            ResumeDto resumeDto
+    ) {
+        List<WorkExperienceInfoDto> workExperience =
+                new ArrayList<>();
+
+        if (resumeDto.getWorkExperienceInfo() != null
+                && !resumeDto.getWorkExperienceInfo().isEmpty()) {
+            workExperience.add(
+                    resumeDto.getWorkExperienceInfo().get(0)
+            );
+        } else {
+            workExperience.add(
+                    new WorkExperienceInfoDto()
+            );
+        }
+
+        resumeDto.setWorkExperienceInfo(
+                workExperience
+        );
+
+        List<EducationInfoDto> education =
+                new ArrayList<>();
+
+        if (resumeDto.getEducationInfo() != null
+                && !resumeDto.getEducationInfo().isEmpty()) {
+            education.add(
+                    resumeDto.getEducationInfo().get(0)
+            );
+        } else {
+            education.add(
+                    new EducationInfoDto()
+            );
+        }
+
+        resumeDto.setEducationInfo(
+                education
+        );
+    }
+
 }

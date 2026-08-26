@@ -29,8 +29,10 @@
     <div class="d-flex gap-2">
         <form method="get" action="/profile">
             <select class="form-select" name="sort" onchange="this.form.submit()">
-                <option value="date" <#if sort!"date" == "date">selected</#if>>По дате</option>
-                <option value="responses" <#if sort!"date" == "responses">selected</#if>>По откликам</option>
+                <option value="dateDesc" <#if (sort!"dateDesc") == "dateDesc">selected</#if>>По дате — сначала новые</option>
+                <option value="dateAsc" <#if (sort!"dateDesc") == "dateAsc">selected</#if>>По дате — сначала старые</option>
+                <option value="responsesDesc" <#if (sort!"dateDesc") == "responsesDesc">selected</#if>>По откликам — по убыванию</option>
+                <option value="responsesAsc" <#if (sort!"dateDesc") == "responsesAsc">selected</#if>>По откликам — по возрастанию</option>
             </select>
             <input type="hidden" name="page" value="1">
         </form>
@@ -60,7 +62,7 @@
         </div></div></div></#list>
     </div><#else><div class="alert alert-light">У вас пока нет вакансий.</div></#if>
 </#if>
-<@layout.pagination currentPage=currentPage!1 totalPages=totalPages!0 baseUrl="/profile" sort=sort!"date"/>
+<@layout.pagination currentPage=currentPage!1 totalPages=totalPages!0 baseUrl="/profile" sort=sort!"dateDesc"/>
 
 <div class="modal fade" id="editProfileModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
 <form action="/profile/edit" method="post">
@@ -68,7 +70,9 @@
 <div class="modal-header"><h5 class="modal-title">Редактирование профиля</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
 <div class="modal-body">
     <div class="mb-3"><label class="form-label">Имя</label><input class="form-control" name="name" value="${user.name!}" required></div>
-    <div class="mb-3"><label class="form-label">Фамилия</label><input class="form-control" name="surname" value="${user.surname!}"></div>
+    <#if isApplicant>
+        <div class="mb-3"><label class="form-label">Фамилия</label><input class="form-control" name="surname" value="${user.surname!}" required></div>
+    </#if>
     <div class="mb-3"><label class="form-label">Возраст</label><input class="form-control" type="number" name="age" value="${user.age!}"></div>
 </div>
 <div class="modal-footer"><button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Отмена</button><button class="btn btn-primary" type="submit">Сохранить</button></div>

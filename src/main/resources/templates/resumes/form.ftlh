@@ -138,144 +138,92 @@
 
                         <hr class="my-4">
 
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h2 class="h5 mb-0">
-                                Опыт работы
-                            </h2>
+                        <h2 class="h5 mb-3">
+                            Опыт работы
+                        </h2>
 
-                            <button
-                                    class="btn btn-outline-primary btn-sm"
-                                    type="button"
-                                    id="addWorkExperience">
-                                Добавить опыт
-                            </button>
-                        </div>
-
-                        <div id="workExperienceContainer" class="d-flex flex-column gap-3 mb-4">
-                            <#if resumeDto.workExperienceInfo??>
-                                <#list resumeDto.workExperienceInfo as work>
-                                    <#assign workIndex = work?index>
-
-                                    <div class="card border work-experience-item">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <strong>Место работы</strong>
-                                                <button
-                                                        class="btn btn-outline-danger btn-sm remove-item"
-                                                        type="button">
-                                                    Удалить
-                                                </button>
-                                            </div>
-
-                                            <div class="row g-3">
-                                                <div class="col-12 col-md-6">
-                                                    <label class="form-label">Компания</label>
-                                                    <@spring.formInput
-                                                            "resumeDto.workExperienceInfo[${workIndex}].companyName"
-                                                            'class="form-control" required'/>
-                                                </div>
-
-                                                <div class="col-12 col-md-6">
-                                                    <label class="form-label">Должность</label>
-                                                    <@spring.formInput
-                                                            "resumeDto.workExperienceInfo[${workIndex}].position"
-                                                            'class="form-control" required'/>
-                                                </div>
-
-                                                <div class="col-12 col-md-4">
-                                                    <label class="form-label">Лет опыта</label>
-                                                    <@spring.formInput
-                                                            "resumeDto.workExperienceInfo[${workIndex}].years"
-                                                            'class="form-control" min="0" max="70" required'
-                                                            "number"/>
-                                                </div>
-
-                                                <div class="col-12">
-                                                    <label class="form-label">Обязанности</label>
-                                                    <@spring.formTextarea
-                                                            "resumeDto.workExperienceInfo[${workIndex}].responsibilities"
-                                                            'class="form-control" rows="3" required'/>
-                                                </div>
-                                            </div>
-                                        </div>
+                        <div class="card border mb-4">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Компания</label>
+                                        <@spring.formInput
+                                                "resumeDto.workExperienceInfo[0].companyName"
+                                                'class="form-control" required'/>
                                     </div>
-                                </#list>
-                            </#if>
+
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Должность</label>
+                                        <@spring.formInput
+                                                "resumeDto.workExperienceInfo[0].position"
+                                                'class="form-control" required'/>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label">Лет опыта</label>
+                                        <@spring.formInput
+                                                "resumeDto.workExperienceInfo[0].years"
+                                                'class="form-control" min="0" max="70" required'
+                                                "number"/>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">Обязанности</label>
+                                        <@spring.formTextarea
+                                                "resumeDto.workExperienceInfo[0].responsibilities"
+                                                'class="form-control" rows="3" required'/>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <hr class="my-4">
 
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h2 class="h5 mb-0">
-                                Образование и курсы
-                            </h2>
+                        <h2 class="h5 mb-3">
+                            Образование и курсы
+                        </h2>
 
-                            <button
-                                    class="btn btn-outline-primary btn-sm"
-                                    type="button"
-                                    id="addEducation">
-                                Добавить образование
-                            </button>
-                        </div>
-
-                        <div id="educationContainer" class="d-flex flex-column gap-3 mb-4">
-                            <#if resumeDto.educationInfo??>
-                                <#list resumeDto.educationInfo as education>
-                                    <#assign educationIndex = education?index>
-
-                                    <div class="card border education-item">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <strong>Образование</strong>
-                                                <button
-                                                        class="btn btn-outline-danger btn-sm remove-item"
-                                                        type="button">
-                                                    Удалить
-                                                </button>
-                                            </div>
-
-                                            <div class="row g-3">
-                                                <div class="col-12 col-md-6">
-                                                    <label class="form-label">Учебное заведение</label>
-                                                    <@spring.formInput
-                                                            "resumeDto.educationInfo[${educationIndex}].institution"
-                                                            'class="form-control" required'/>
-                                                </div>
-
-                                                <div class="col-12 col-md-6">
-                                                    <label class="form-label">Программа</label>
-                                                    <@spring.formInput
-                                                            "resumeDto.educationInfo[${educationIndex}].program"
-                                                            'class="form-control" required'/>
-                                                </div>
-
-                                                <div class="col-12 col-md-4">
-                                                    <label class="form-label">Дата начала</label>
-                                                    <@spring.formInput
-                                                            "resumeDto.educationInfo[${educationIndex}].startDate"
-                                                            'class="form-control" required'
-                                                            "date"/>
-                                                </div>
-
-                                                <div class="col-12 col-md-4">
-                                                    <label class="form-label">Дата окончания</label>
-                                                    <@spring.formInput
-                                                            "resumeDto.educationInfo[${educationIndex}].endDate"
-                                                            'class="form-control"'
-                                                            "date"/>
-                                                </div>
-
-                                                <div class="col-12 col-md-4">
-                                                    <label class="form-label">Степень / сертификат</label>
-                                                    <@spring.formInput
-                                                            "resumeDto.educationInfo[${educationIndex}].degree"
-                                                            'class="form-control" required'/>
-                                                </div>
-                                            </div>
-                                        </div>
+                        <div class="card border mb-4">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Учебное заведение</label>
+                                        <@spring.formInput
+                                                "resumeDto.educationInfo[0].institution"
+                                                'class="form-control" required'/>
                                     </div>
-                                </#list>
-                            </#if>
+
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Программа</label>
+                                        <@spring.formInput
+                                                "resumeDto.educationInfo[0].program"
+                                                'class="form-control" required'/>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label">Дата начала</label>
+                                        <@spring.formInput
+                                                "resumeDto.educationInfo[0].startDate"
+                                                'class="form-control" required'
+                                                "date"/>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label">Дата окончания</label>
+                                        <@spring.formInput
+                                                "resumeDto.educationInfo[0].endDate"
+                                                'class="form-control"'
+                                                "date"/>
+                                    </div>
+
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label">Степень / сертификат</label>
+                                        <@spring.formInput
+                                                "resumeDto.educationInfo[0].degree"
+                                                'class="form-control" required'/>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="form-check form-switch mb-4">
@@ -312,104 +260,6 @@
         </div>
     </div>
 
-    <script>
-        const workContainer = document.getElementById('workExperienceContainer');
-        const educationContainer = document.getElementById('educationContainer');
 
-        document.getElementById('addWorkExperience').addEventListener('click', () => {
-            const index = workContainer.querySelectorAll('.work-experience-item').length;
-
-            const html =
-                '<div class="card border work-experience-item">' +
-                    '<div class="card-body">' +
-                        '<div class="d-flex justify-content-between align-items-center mb-3">' +
-                            '<strong>Место работы</strong>' +
-                            '<button class="btn btn-outline-danger btn-sm remove-item" type="button">Удалить</button>' +
-                        '</div>' +
-                        '<div class="row g-3">' +
-                            '<div class="col-12 col-md-6">' +
-                                '<label class="form-label">Компания</label>' +
-                                '<input class="form-control" name="workExperienceInfo[' + index + '].companyName" required>' +
-                            '</div>' +
-                            '<div class="col-12 col-md-6">' +
-                                '<label class="form-label">Должность</label>' +
-                                '<input class="form-control" name="workExperienceInfo[' + index + '].position" required>' +
-                            '</div>' +
-                            '<div class="col-12 col-md-4">' +
-                                '<label class="form-label">Лет опыта</label>' +
-                                '<input class="form-control" type="number" min="0" max="70" name="workExperienceInfo[' + index + '].years" required>' +
-                            '</div>' +
-                            '<div class="col-12">' +
-                                '<label class="form-label">Обязанности</label>' +
-                                '<textarea class="form-control" rows="3" name="workExperienceInfo[' + index + '].responsibilities" required></textarea>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>';
-
-            workContainer.insertAdjacentHTML('beforeend', html);
-        });
-
-        document.getElementById('addEducation').addEventListener('click', () => {
-            const index = educationContainer.querySelectorAll('.education-item').length;
-
-            const html =
-                '<div class="card border education-item">' +
-                    '<div class="card-body">' +
-                        '<div class="d-flex justify-content-between align-items-center mb-3">' +
-                            '<strong>Образование</strong>' +
-                            '<button class="btn btn-outline-danger btn-sm remove-item" type="button">Удалить</button>' +
-                        '</div>' +
-                        '<div class="row g-3">' +
-                            '<div class="col-12 col-md-6">' +
-                                '<label class="form-label">Учебное заведение</label>' +
-                                '<input class="form-control" name="educationInfo[' + index + '].institution" required>' +
-                            '</div>' +
-                            '<div class="col-12 col-md-6">' +
-                                '<label class="form-label">Программа</label>' +
-                                '<input class="form-control" name="educationInfo[' + index + '].program" required>' +
-                            '</div>' +
-                            '<div class="col-12 col-md-4">' +
-                                '<label class="form-label">Дата начала</label>' +
-                                '<input class="form-control" type="date" name="educationInfo[' + index + '].startDate" required>' +
-                            '</div>' +
-                            '<div class="col-12 col-md-4">' +
-                                '<label class="form-label">Дата окончания</label>' +
-                                '<input class="form-control" type="date" name="educationInfo[' + index + '].endDate">' +
-                            '</div>' +
-                            '<div class="col-12 col-md-4">' +
-                                '<label class="form-label">Степень / сертификат</label>' +
-                                '<input class="form-control" name="educationInfo[' + index + '].degree" required>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>';
-
-            educationContainer.insertAdjacentHTML('beforeend', html);
-        });
-
-        document.addEventListener('click', event => {
-            if (!event.target.classList.contains('remove-item')) {
-                return;
-            }
-
-            const item = event.target.closest('.work-experience-item, .education-item');
-            item.remove();
-
-            renumber(workContainer, '.work-experience-item', 'workExperienceInfo');
-            renumber(educationContainer, '.education-item', 'educationInfo');
-        });
-
-        function renumber(container, selector, property) {
-            container.querySelectorAll(selector).forEach((item, index) => {
-                item.querySelectorAll('[name]').forEach(field => {
-                    field.name = field.name.replace(
-                        new RegExp(property + '\\[\\d+\\]'),
-                        property + '[' + index + ']'
-                    );
-                });
-            });
-        }
-    </script>
 
 </@layout.layout>

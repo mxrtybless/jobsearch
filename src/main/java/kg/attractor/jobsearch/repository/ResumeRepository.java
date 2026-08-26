@@ -39,6 +39,19 @@ public interface ResumeRepository extends JpaRepository<Resume, Integer> {
                     select r
                     from Resume r
                     left join r.responses response
+                    where r.isActive = true
+                    group by r
+                    order by count(response) asc, r.updateTime desc
+                    """,
+            countQuery = "select count(r) from Resume r where r.isActive = true"
+    )
+    Page<Resume> findActiveOrderByResponsesAsc(Pageable pageable);
+
+    @Query(
+            value = """
+                    select r
+                    from Resume r
+                    left join r.responses response
                     where r.applicant.id = :applicantId
                     group by r
                     order by count(response) desc, r.updateTime desc
@@ -46,6 +59,22 @@ public interface ResumeRepository extends JpaRepository<Resume, Integer> {
             countQuery = "select count(r) from Resume r where r.applicant.id = :applicantId"
     )
     Page<Resume> findByApplicantOrderByResponses(
+            @Param("applicantId") Integer applicantId,
+            Pageable pageable
+    );
+
+    @Query(
+            value = """
+                    select r
+                    from Resume r
+                    left join r.responses response
+                    where r.applicant.id = :applicantId
+                    group by r
+                    order by count(response) asc, r.updateTime desc
+                    """,
+            countQuery = "select count(r) from Resume r where r.applicant.id = :applicantId"
+    )
+    Page<Resume> findByApplicantOrderByResponsesAsc(
             @Param("applicantId") Integer applicantId,
             Pageable pageable
     );

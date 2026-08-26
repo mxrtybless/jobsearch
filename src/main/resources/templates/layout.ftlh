@@ -77,7 +77,7 @@
 </html>
 </#macro>
 
-<#macro pagination currentPage totalPages baseUrl sort="date">
+<#macro pagination currentPage totalPages baseUrl sort="dateDesc">
     <#if totalPages?? && totalPages gt 1>
         <nav class="mt-4">
             <ul class="pagination justify-content-center">

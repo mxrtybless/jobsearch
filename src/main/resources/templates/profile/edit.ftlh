@@ -57,7 +57,7 @@
 
                                 <@spring.formInput
                                         "profileUpdateDto.surname"
-                                        'id="surname" class="form-control"'/>
+                                        'id="surname" class="form-control" required'/>
 
                                 <@spring.showErrors
                                         "<br>"

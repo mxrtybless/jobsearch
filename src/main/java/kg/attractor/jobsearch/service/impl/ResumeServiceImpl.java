@@ -268,9 +268,19 @@ public class ResumeServiceImpl
             String sort
     ) {
         Pageable pageable = createPageable(page, size, sort);
-        Page<Resume> resumes = "responses".equalsIgnoreCase(sort)
-                ? resumeRepository.findActiveOrderByResponses(pageable)
-                : resumeRepository.findAllByIsActiveTrue(pageable);
+        Page<Resume> resumes;
+
+        if ("responsesAsc".equalsIgnoreCase(sort)) {
+            resumes = resumeRepository
+                    .findActiveOrderByResponsesAsc(pageable);
+        } else if ("responsesDesc".equalsIgnoreCase(sort)
+                || "responses".equalsIgnoreCase(sort)) {
+            resumes = resumeRepository
+                    .findActiveOrderByResponses(pageable);
+        } else {
+            resumes = resumeRepository
+                    .findAllByIsActiveTrue(pageable);
+        }
         return resumes.map(this::convertToDto);
     }
 
@@ -284,9 +294,28 @@ public class ResumeServiceImpl
     ) {
         validateApplicantById(applicantId);
         Pageable pageable = createPageable(page, size, sort);
-        Page<Resume> resumes = "responses".equalsIgnoreCase(sort)
-                ? resumeRepository.findByApplicantOrderByResponses(applicantId, pageable)
-                : resumeRepository.findByApplicant_Id(applicantId, pageable);
+        Page<Resume> resumes;
+
+        if ("responsesAsc".equalsIgnoreCase(sort)) {
+            resumes = resumeRepository
+                    .findByApplicantOrderByResponsesAsc(
+                            applicantId,
+                            pageable
+                    );
+        } else if ("responsesDesc".equalsIgnoreCase(sort)
+                || "responses".equalsIgnoreCase(sort)) {
+            resumes = resumeRepository
+                    .findByApplicantOrderByResponses(
+                            applicantId,
+                            pageable
+                    );
+        } else {
+            resumes = resumeRepository
+                    .findByApplicant_Id(
+                            applicantId,
+                            pageable
+                    );
+        }
         return resumes.map(this::convertToDto);
     }
 
@@ -439,13 +468,20 @@ public class ResumeServiceImpl
     ) {
         int safePage = Math.max(page, 1) - 1;
         int safeSize = Math.max(1, Math.min(size, 50));
-        if ("responses".equalsIgnoreCase(sort)) {
+        if (sort != null
+                && sort.toLowerCase().startsWith("responses")) {
             return PageRequest.of(safePage, safeSize);
         }
+
+        Sort.Direction direction =
+                "dateAsc".equalsIgnoreCase(sort)
+                        ? Sort.Direction.ASC
+                        : Sort.Direction.DESC;
+
         return PageRequest.of(
                 safePage,
                 safeSize,
-                Sort.by(Sort.Direction.DESC, "updateTime")
+                Sort.by(direction, "updateTime")
         );
     }
 

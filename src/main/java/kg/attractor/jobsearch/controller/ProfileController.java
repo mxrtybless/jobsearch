@@ -35,7 +35,7 @@ public class ProfileController {
     @GetMapping
     public String profile(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "date") String sort,
+            @RequestParam(defaultValue = "dateDesc") String sort,
             Authentication authentication,
             Model model
     ) {
@@ -78,6 +78,17 @@ public class ProfileController {
     ) {
         User user = findCurrentUser(authentication);
         addUserToModel(user, model);
+
+        if (user.isApplicant()
+                && (profileUpdateDto.getSurname() == null
+                || profileUpdateDto.getSurname().isBlank())) {
+            bindingResult.rejectValue(
+                    "surname",
+                    "surname.required",
+                    "Surname must not be blank"
+            );
+        }
+
         if (bindingResult.hasErrors()) {
             return "profile/edit";
         }

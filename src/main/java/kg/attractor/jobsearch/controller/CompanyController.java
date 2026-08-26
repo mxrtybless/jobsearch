@@ -46,7 +46,7 @@ public class CompanyController {
     public String companyDetails(
             @PathVariable Integer id,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "date") String sort,
+            @RequestParam(defaultValue = "dateDesc") String sort,
             Model model
     ) {
         User company = userService.findProfileById(id);

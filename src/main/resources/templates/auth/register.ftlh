@@ -303,6 +303,9 @@
 
                 surnameInput.value =
                     "";
+
+                surnameInput.required =
+                    false;
             } else {
                 nameLabel.textContent =
                     "Имя пользователя";
@@ -312,6 +315,9 @@
 
                 surnameBlock.style.display =
                     "block";
+
+                surnameInput.required =
+                    true;
             }
         }
 

@@ -72,10 +72,20 @@ public class ResumeDto {
     private LocalDateTime updateTime;
 
     @Valid
+    @Size(
+            min = 1,
+            max = 1,
+            message = "Resume must contain exactly one education record"
+    )
     private List<EducationInfoDto> educationInfo =
             new ArrayList<>();
 
     @Valid
+    @Size(
+            min = 1,
+            max = 1,
+            message = "Resume must contain exactly one work experience record"
+    )
     private List<WorkExperienceInfoDto>
             workExperienceInfo =
             new ArrayList<>();

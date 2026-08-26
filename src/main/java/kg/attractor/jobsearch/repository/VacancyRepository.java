@@ -43,6 +43,19 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
                     select v
                     from Vacancy v
                     left join v.responses r
+                    where v.isActive = true
+                    group by v
+                    order by count(r) asc, v.updateTime desc
+                    """,
+            countQuery = "select count(v) from Vacancy v where v.isActive = true"
+    )
+    Page<Vacancy> findActiveOrderByResponsesAsc(Pageable pageable);
+
+    @Query(
+            value = """
+                    select v
+                    from Vacancy v
+                    left join v.responses r
                     where v.author.id = :authorId
                     group by v
                     order by count(r) desc, v.updateTime desc
@@ -60,6 +73,22 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
                     from Vacancy v
                     left join v.responses r
                     where v.author.id = :authorId
+                    group by v
+                    order by count(r) asc, v.updateTime desc
+                    """,
+            countQuery = "select count(v) from Vacancy v where v.author.id = :authorId"
+    )
+    Page<Vacancy> findByAuthorOrderByResponsesAsc(
+            @Param("authorId") Integer authorId,
+            Pageable pageable
+    );
+
+    @Query(
+            value = """
+                    select v
+                    from Vacancy v
+                    left join v.responses r
+                    where v.author.id = :authorId
                       and v.isActive = true
                     group by v
                     order by count(r) desc, v.updateTime desc
@@ -67,6 +96,23 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
             countQuery = "select count(v) from Vacancy v where v.author.id = :authorId and v.isActive = true"
     )
     Page<Vacancy> findActiveByAuthorOrderByResponses(
+            @Param("authorId") Integer authorId,
+            Pageable pageable
+    );
+
+    @Query(
+            value = """
+                    select v
+                    from Vacancy v
+                    left join v.responses r
+                    where v.author.id = :authorId
+                      and v.isActive = true
+                    group by v
+                    order by count(r) asc, v.updateTime desc
+                    """,
+            countQuery = "select count(v) from Vacancy v where v.author.id = :authorId and v.isActive = true"
+    )
+    Page<Vacancy> findActiveByAuthorOrderByResponsesAsc(
             @Param("authorId") Integer authorId,
             Pageable pageable
     );
