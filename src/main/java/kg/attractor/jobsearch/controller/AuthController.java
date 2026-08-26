@@ -1,10 +1,12 @@
 package kg.attractor.jobsearch.controller;
 
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import kg.attractor.jobsearch.dto.UserCreateDto;
 import kg.attractor.jobsearch.exception.EmailAlreadyExistsException;
 import kg.attractor.jobsearch.model.AccountType;
+import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +25,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.UnsupportedEncodingException;
 
 @Controller
 @RequestMapping("auth")
@@ -122,6 +127,108 @@ public class AuthController {
         }
 
         return "redirect:/vacancies";
+    }
+
+    @GetMapping("forgot_password")
+    public String showForgotPasswordForm() {
+        return "auth/forgot_password_form";
+    }
+
+    @PostMapping("forgot_password")
+    public String processForgotPassword(
+            HttpServletRequest request,
+            Model model
+    ) {
+        try {
+            userService.makeResetPasswdLink(
+                    request
+            );
+
+            model.addAttribute(
+                    "message",
+                    "Ссылка для восстановления пароля отправлена на вашу почту."
+            );
+        } catch (
+                UsernameNotFoundException
+                | UnsupportedEncodingException e
+        ) {
+            model.addAttribute(
+                    "error",
+                    e.getMessage()
+            );
+        } catch (
+                MessagingException e
+        ) {
+            model.addAttribute(
+                    "error",
+                    "Ошибка при отправке письма."
+            );
+        }
+
+        return "auth/forgot_password_form";
+    }
+
+    @GetMapping("reset_password")
+    public String showResetPasswordForm(
+            @RequestParam String token,
+            Model model
+    ) {
+        try {
+            userService.getByResetPasswordToken(
+                    token
+            );
+
+            model.addAttribute(
+                    "token",
+                    token
+            );
+        } catch (
+                UsernameNotFoundException e
+        ) {
+            model.addAttribute(
+                    "error",
+                    "Недействительная ссылка восстановления пароля."
+            );
+        }
+
+        return "auth/reset_password_form";
+    }
+
+    @PostMapping("reset_password")
+    public String processResetPassword(
+            HttpServletRequest request,
+            Model model
+    ) {
+        String token =
+                request.getParameter("token");
+        String password =
+                request.getParameter("password");
+
+        try {
+            User user =
+                    userService.getByResetPasswordToken(
+                            token
+                    );
+
+            userService.updatePassword(
+                    user,
+                    password
+            );
+
+            model.addAttribute(
+                    "message",
+                    "Пароль успешно изменён."
+            );
+        } catch (
+                UsernameNotFoundException e
+        ) {
+            model.addAttribute(
+                    "message",
+                    "Недействительный токен восстановления пароля."
+            );
+        }
+
+        return "message";
     }
 
     private void authenticateRegisteredUser(

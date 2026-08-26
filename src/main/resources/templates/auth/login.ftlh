@@ -69,7 +69,7 @@
 
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
 
                             <label
                                     for="password"
@@ -85,6 +85,12 @@
                                     placeholder="Введите пароль"
                                     required>
 
+                        </div>
+
+                        <div class="mb-4 text-end">
+                            <a href="/auth/forgot_password">
+                                Забыли пароль?
+                            </a>
                         </div>
 
                         <button
