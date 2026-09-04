@@ -1,6 +1,7 @@
 package kg.attractor.jobsearch.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -19,10 +20,12 @@ public class GlobalControllerAdvice {
     )
     private String validationHandler(
             HttpServletRequest request,
+            HttpServletResponse response,
             Model model
     ) {
         return errorPage(
                 request,
+                response,
                 model,
                 HttpStatus.BAD_REQUEST
         );
@@ -33,10 +36,12 @@ public class GlobalControllerAdvice {
     )
     private String notFoundHandler(
             HttpServletRequest request,
+            HttpServletResponse response,
             Model model
     ) {
         return errorPage(
                 request,
+                response,
                 model,
                 HttpStatus.NOT_FOUND
         );
@@ -48,10 +53,12 @@ public class GlobalControllerAdvice {
     })
     private String conflictHandler(
             HttpServletRequest request,
+            HttpServletResponse response,
             Model model
     ) {
         return errorPage(
                 request,
+                response,
                 model,
                 HttpStatus.CONFLICT
         );
@@ -62,10 +69,12 @@ public class GlobalControllerAdvice {
     )
     private String badRequestHandler(
             HttpServletRequest request,
+            HttpServletResponse response,
             Model model
     ) {
         return errorPage(
                 request,
+                response,
                 model,
                 HttpStatus.BAD_REQUEST
         );
@@ -76,10 +85,12 @@ public class GlobalControllerAdvice {
     )
     private String invalidRequestBodyHandler(
             HttpServletRequest request,
+            HttpServletResponse response,
             Model model
     ) {
         return errorPage(
                 request,
+                response,
                 model,
                 HttpStatus.BAD_REQUEST
         );
@@ -90,10 +101,12 @@ public class GlobalControllerAdvice {
     )
     private String databaseConflictHandler(
             HttpServletRequest request,
+            HttpServletResponse response,
             Model model
     ) {
         return errorPage(
                 request,
+                response,
                 model,
                 HttpStatus.CONFLICT
         );
@@ -101,9 +114,14 @@ public class GlobalControllerAdvice {
 
     private String errorPage(
             HttpServletRequest request,
+            HttpServletResponse response,
             Model model,
             HttpStatus status
     ) {
+        response.setStatus(
+                status.value()
+        );
+
         model.addAttribute(
                 "status",
                 status.value()
@@ -115,10 +133,10 @@ public class GlobalControllerAdvice {
         );
 
         model.addAttribute(
-                "details",
-                request
+                "path",
+                request.getRequestURI()
         );
 
-        return "errors/error";
+        return "error";
     }
 }

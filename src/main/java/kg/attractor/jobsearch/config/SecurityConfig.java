@@ -109,18 +109,8 @@ public class SecurityConfig {
                                 .permitAll()
                 )
 
-                .csrf(csrf ->
-                        csrf.ignoringRequestMatchers(
-                                "/users/**",
-                                "/images/**",
-                                "/responses/**",
-                                "/resumes/create",
-                                "/resumes/edit/**",
-                                "/resumes/delete/**",
-                                "/vacancies/create",
-                                "/vacancies/edit/**",
-                                "/vacancies/delete/**"
-                        )
+                .csrf(
+                        Customizer.withDefaults()
                 )
 
                 .authorizeHttpRequests(authorize ->
