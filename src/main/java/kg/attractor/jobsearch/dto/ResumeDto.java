@@ -31,33 +31,33 @@ public class ResumeDto {
     private Integer applicantId;
 
     @NotBlank(
-            message = "Resume name must not be blank"
+            message = "{validation.resume.name.notBlank}"
     )
     @Size(
             min = 2,
             max = 150,
-            message = "Resume name length must be between 2 and 150 characters"
+            message = "{validation.resume.name.size}"
     )
     private String name;
 
     @NotNull(
-            message = "Category id must be specified"
+            message = "{validation.resume.category.notNull}"
     )
     @Positive(
-            message = "Category id must be positive"
+            message = "{validation.resume.category.positive}"
     )
     private Integer categoryId;
 
     @NotNull(
-            message = "Salary must be specified"
+            message = "{validation.resume.salary.notNull}"
     )
     @Positive(
-            message = "Salary must be positive"
+            message = "{validation.resume.salary.positive}"
     )
     private BigDecimal salary;
 
     @NotNull(
-            message = "Active status must be specified"
+            message = "{validation.resume.active.notNull}"
     )
     private Boolean isActive;
 
@@ -75,7 +75,7 @@ public class ResumeDto {
     @Size(
             min = 1,
             max = 1,
-            message = "Resume must contain exactly one education record"
+            message = "{validation.resume.education.size}"
     )
     private List<EducationInfoDto> educationInfo =
             new ArrayList<>();
@@ -84,7 +84,7 @@ public class ResumeDto {
     @Size(
             min = 1,
             max = 1,
-            message = "Resume must contain exactly one work experience record"
+            message = "{validation.resume.work.size}"
     )
     private List<WorkExperienceInfoDto>
             workExperienceInfo =

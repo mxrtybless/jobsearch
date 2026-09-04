@@ -2,6 +2,9 @@ package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.exception.ErrorResponseBody;
 import kg.attractor.jobsearch.service.ErrorService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
@@ -11,8 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class ErrorServiceImpl
         implements ErrorService {
+
+    private final MessageSource messageSource;
 
     @Override
     public ErrorResponseBody makeResponse(
@@ -56,7 +62,11 @@ public class ErrorServiceImpl
                 );
 
         return ErrorResponseBody.builder()
-                .title("Validation error")
+                .title(
+                        getMessage(
+                                "api.error.validation"
+                        )
+                )
                 .reasons(reasons)
                 .build();
     }
@@ -70,7 +80,11 @@ public class ErrorServiceImpl
 
         if (message == null
                 || message.isBlank()) {
-            message = "Request processing error";
+
+            message =
+                    getMessage(
+                            "api.error.request"
+                    );
         }
 
         return ErrorResponseBody.builder()
@@ -82,5 +96,15 @@ public class ErrorServiceImpl
                         )
                 )
                 .build();
+    }
+
+    private String getMessage(
+            String key
+    ) {
+        return messageSource.getMessage(
+                key,
+                null,
+                LocaleContextHolder.getLocale()
+        );
     }
 }

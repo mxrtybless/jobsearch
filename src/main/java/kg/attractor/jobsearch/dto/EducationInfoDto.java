@@ -27,45 +27,45 @@ public class EducationInfoDto {
     private Integer resumeId;
 
     @NotBlank(
-            message = "Institution must not be blank"
+            message = "{validation.education.institution.notBlank}"
     )
     @Size(
             min = 2,
             max = 255,
-            message = "Institution length must be between 2 and 255 characters"
+            message = "{validation.education.institution.size}"
     )
     private String institution;
 
     @NotBlank(
-            message = "Program must not be blank"
+            message = "{validation.education.program.notBlank}"
     )
     @Size(
             min = 2,
             max = 255,
-            message = "Program length must be between 2 and 255 characters"
+            message = "{validation.education.program.size}"
     )
     private String program;
 
     @NotNull(
-            message = "Education start date must be specified"
+            message = "{validation.education.startDate.notNull}"
     )
     @PastOrPresent(
-            message = "Education start date must not be in the future"
+            message = "{validation.education.startDate.pastOrPresent}"
     )
     private LocalDate startDate;
 
     @PastOrPresent(
-            message = "Education end date must not be in the future"
+            message = "{validation.education.endDate.pastOrPresent}"
     )
     private LocalDate endDate;
 
     @NotBlank(
-            message = "Degree must not be blank"
+            message = "{validation.education.degree.notBlank}"
     )
     @Size(
             min = 2,
             max = 100,
-            message = "Degree length must be between 2 and 100 characters"
+            message = "{validation.education.degree.size}"
     )
     private String degree;
 }

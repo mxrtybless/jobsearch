@@ -25,67 +25,67 @@ public class VacancyDto {
     private Integer id;
 
     @NotBlank(
-            message = "Vacancy name must not be blank"
+            message = "{validation.vacancy.name.notBlank}"
     )
     @Size(
             min = 2,
             max = 150,
-            message = "Vacancy name length must be between 2 and 150 characters"
+            message = "{validation.vacancy.name.size}"
     )
     private String name;
 
     @NotBlank(
-            message = "Vacancy description must not be blank"
+            message = "{validation.vacancy.description.notBlank}"
     )
     @Size(
             min = 10,
             max = 2000,
-            message = "Vacancy description length must be between 10 and 2000 characters"
+            message = "{validation.vacancy.description.size}"
     )
     private String description;
 
     @NotNull(
-            message = "Category id must be specified"
+            message = "{validation.vacancy.category.notNull}"
     )
     @Positive(
-            message = "Category id must be positive"
+            message = "{validation.vacancy.category.positive}"
     )
     private Integer categoryId;
 
     @NotNull(
-            message = "Salary must be specified"
+            message = "{validation.vacancy.salary.notNull}"
     )
     @Positive(
-            message = "Salary must be positive"
+            message = "{validation.vacancy.salary.positive}"
     )
     private BigDecimal salary;
 
     @NotNull(
-            message = "Minimum experience must be specified"
+            message = "{validation.vacancy.expFrom.notNull}"
     )
     @PositiveOrZero(
-            message = "Minimum experience must not be negative"
+            message = "{validation.vacancy.expFrom.positiveOrZero}"
     )
     @Max(
             value = 70,
-            message = "Minimum experience must not be greater than 70"
+            message = "{validation.vacancy.expFrom.max}"
     )
     private Integer expFrom;
 
     @NotNull(
-            message = "Maximum experience must be specified"
+            message = "{validation.vacancy.expTo.notNull}"
     )
     @PositiveOrZero(
-            message = "Maximum experience must not be negative"
+            message = "{validation.vacancy.expTo.positiveOrZero}"
     )
     @Max(
             value = 70,
-            message = "Maximum experience must not be greater than 70"
+            message = "{validation.vacancy.expTo.max}"
     )
     private Integer expTo;
 
     @NotNull(
-            message = "Active status must be specified"
+            message = "{validation.vacancy.active.notNull}"
     )
     private Boolean isActive;
 

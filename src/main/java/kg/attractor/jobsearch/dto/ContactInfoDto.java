@@ -24,16 +24,16 @@ public class ContactInfoDto {
     private Integer resumeId;
 
     @NotNull(
-            message = "Contact type id must be specified"
+            message = "{validation.contact.type.notNull}"
     )
     @Positive(
-            message = "Contact type id must be positive"
+            message = "{validation.contact.type.positive}"
     )
     private Integer typeId;
 
     @Size(
             max = 255,
-            message = "Contact value must not be longer than 255 characters"
+            message = "{validation.contact.value.size}"
     )
     private String value;
 }

@@ -12,31 +12,31 @@ public class ProfileUpdateDto {
     @Size(
             min = 2,
             max = 100,
-            message = "Name length must be between 2 and 100 characters"
+            message = "{validation.profile.name.size}"
     )
     @Pattern(
             regexp = "^[\\p{L}][\\p{L}\\s'-]*$",
-            message = "Name must contain only letters, spaces, apostrophes and hyphens"
+            message = "{validation.profile.name.pattern}"
     )
     private String name;
 
     @Size(
             max = 100,
-            message = "Surname must not be longer than 100 characters"
+            message = "{validation.profile.surname.size}"
     )
     @Pattern(
             regexp = "^$|^[\\p{L}][\\p{L}\\s'-]{1,99}$",
-            message = "Surname must contain only letters, spaces, apostrophes and hyphens"
+            message = "{validation.profile.surname.pattern}"
     )
     private String surname;
 
     @Min(
             value = 18,
-            message = "Age must be at least 18"
+            message = "{validation.profile.age.min}"
     )
     @Max(
             value = 100,
-            message = "Age must not be greater than 100"
+            message = "{validation.profile.age.max}"
     )
     private Integer age;
 }

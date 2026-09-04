@@ -18,18 +18,18 @@ public class RespondedApplicantDto {
     private Integer id;
 
     @NotNull(
-            message = "Resume id must be specified"
+            message = "{validation.response.resumeId.notNull}"
     )
     @Positive(
-            message = "Resume id must be positive"
+            message = "{validation.response.resumeId.positive}"
     )
     private Integer resumeId;
 
     @NotNull(
-            message = "Vacancy id must be specified"
+            message = "{validation.response.vacancyId.notNull}"
     )
     @Positive(
-            message = "Vacancy id must be positive"
+            message = "{validation.response.vacancyId.positive}"
     )
     private Integer vacancyId;
 

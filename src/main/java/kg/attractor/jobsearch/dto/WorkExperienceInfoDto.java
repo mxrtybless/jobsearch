@@ -26,44 +26,44 @@ public class WorkExperienceInfoDto {
     private Integer resumeId;
 
     @NotNull(
-            message = "Years of experience must be specified"
+            message = "{validation.work.years.notNull}"
     )
     @Min(
             value = 0,
-            message = "Years of experience must not be negative"
+            message = "{validation.work.years.min}"
     )
     @Max(
             value = 70,
-            message = "Years of experience must not be greater than 70"
+            message = "{validation.work.years.max}"
     )
     private Integer years;
 
     @NotBlank(
-            message = "Company name must not be blank"
+            message = "{validation.work.company.notBlank}"
     )
     @Size(
             min = 2,
             max = 255,
-            message = "Company name length must be between 2 and 255 characters"
+            message = "{validation.work.company.size}"
     )
     private String companyName;
 
     @NotBlank(
-            message = "Position must not be blank"
+            message = "{validation.work.position.notBlank}"
     )
     @Size(
             min = 2,
             max = 255,
-            message = "Position length must be between 2 and 255 characters"
+            message = "{validation.work.position.size}"
     )
     private String position;
 
     @NotBlank(
-            message = "Responsibilities must not be blank"
+            message = "{validation.work.responsibilities.notBlank}"
     )
     @Size(
             max = 2000,
-            message = "Responsibilities must not be longer than 2000 characters"
+            message = "{validation.work.responsibilities.size}"
     )
     private String responsibilities;
 }

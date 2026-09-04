@@ -14,79 +14,79 @@ import lombok.Data;
 public class UserCreateDto {
 
     @NotBlank(
-            message = "Name must not be blank"
+            message = "{validation.user.name.notBlank}"
     )
     @Size(
             min = 2,
             max = 100,
-            message = "Name length must be between 2 and 100 characters"
+            message = "{validation.user.name.size}"
     )
     @Pattern(
             regexp = "^[\\p{L}][\\p{L}\\s'-]*$",
-            message = "Name must contain only letters, spaces, apostrophes and hyphens"
+            message = "{validation.user.name.pattern}"
     )
     private String name;
 
     @Size(
             max = 100,
-            message = "Surname must not be longer than 100 characters"
+            message = "{validation.user.surname.size}"
     )
     @Pattern(
             regexp = "^$|^[\\p{L}][\\p{L}\\s'-]{1,99}$",
-            message = "Surname must contain only letters, spaces, apostrophes and hyphens"
+            message = "{validation.user.surname.pattern}"
     )
     private String surname;
 
     @NotNull(
-            message = "Age must be specified"
+            message = "{validation.user.age.notNull}"
     )
     @Min(
             value = 18,
-            message = "Age must be at least 18"
+            message = "{validation.user.age.min}"
     )
     @Max(
             value = 100,
-            message = "Age must not be greater than 100"
+            message = "{validation.user.age.max}"
     )
     private Integer age;
 
     @NotBlank(
-            message = "Email must not be blank"
+            message = "{validation.user.email.notBlank}"
     )
     @Email(
-            message = "Email must have a valid format"
+            message = "{validation.user.email.format}"
     )
     @Size(
             max = 255,
-            message = "Email must not be longer than 255 characters"
+            message = "{validation.user.email.size}"
     )
     private String email;
 
     @NotBlank(
-            message = "Password must not be blank"
+            message = "{validation.user.password.notBlank}"
     )
     @Size(
             min = 8,
             max = 32,
-            message = "Password length must be between 8 and 32 characters"
+            message = "{validation.user.password.size}"
     )
     @Pattern(
             regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])\\S+$",
-            message = "Password must contain uppercase and lowercase letters, a number and no spaces"
+            message = "{validation.user.password.pattern}"
     )
     private String password;
 
     @NotBlank(
-            message = "Phone number must not be blank"
+            message = "{validation.user.phone.notBlank}"
     )
     @Pattern(
             regexp = "^\\+996\\d{9}$",
-            message = "Phone number must have format +996XXXXXXXXX"
+            message = "{validation.user.phone.pattern}"
     )
     private String phoneNumber;
 
     @NotNull(
-            message = "Account type must be specified"
+            message = "{validation.user.accountType.notNull}"
     )
     private AccountType accountType;
 }
