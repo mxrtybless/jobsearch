@@ -1,6 +1,16 @@
 <#import "../layout.ftlh" as layout>
+<#import "/spring.ftl" as spring>
 
-<@layout.layout title="Новый пароль | JobSearch">
+<#assign pageTitle>
+    <@spring.message 'auth.reset.title'/>
+</#assign>
+
+<#assign passwordPlaceholder>
+    <@spring.message 'auth.reset.password.placeholder'/>
+</#assign>
+
+
+<@layout.layout title=pageTitle + " | JobSearch">
 
     <div class="row justify-content-center">
 
@@ -11,20 +21,24 @@
                 <div class="card-body p-4 p-md-5">
 
                     <h1 class="h3 mb-4 text-center">
-                        Новый пароль
+                        <@spring.message 'auth.reset.heading'/>
                     </h1>
 
-                    <#if error??>
+
+                    <#if errorKey??>
 
                         <div class="alert alert-danger">
-                            ${error}
+                            <@spring.message errorKey/>
                         </div>
 
                         <p class="text-center mb-0">
+
                             <a href="/auth/forgot_password">
-                                Запросить новую ссылку
+                                <@spring.message 'auth.reset.newLink'/>
                             </a>
+
                         </p>
+
 
                     <#else>
 
@@ -39,12 +53,16 @@
                                     name="token"
                                     value="${token!}">
 
+
                             <div class="mb-4">
 
                                 <label
                                         for="password"
                                         class="form-label">
-                                    Новый пароль
+
+                                    <@spring.message
+                                            'auth.reset.password'/>
+
                                 </label>
 
                                 <input
@@ -52,16 +70,19 @@
                                         class="form-control"
                                         type="password"
                                         name="password"
-                                        placeholder="Введите новый пароль"
+                                        placeholder="${passwordPlaceholder?trim}"
                                         required
                                         autofocus>
 
                             </div>
 
+
                             <button
                                     class="btn btn-primary w-100"
                                     type="submit">
-                                Изменить пароль
+
+                                <@spring.message 'auth.reset.submit'/>
+
                             </button>
 
                         </form>

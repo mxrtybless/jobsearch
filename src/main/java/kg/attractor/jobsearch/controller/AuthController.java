@@ -79,10 +79,10 @@ public class AuthController {
                 == AccountType.APPLICANT
                 && (userCreateDto.getSurname() == null
                 || userCreateDto.getSurname().isBlank())) {
+
             bindingResult.rejectValue(
                     "surname",
-                    "surname.required",
-                    "Surname must not be blank"
+                    "auth.register.validation.surname.required"
             );
         }
 
@@ -100,8 +100,7 @@ public class AuthController {
         ) {
             bindingResult.rejectValue(
                     "email",
-                    "email.exists",
-                    e.getMessage()
+                    "auth.register.validation.email.exists"
             );
 
             return "auth/register";
@@ -109,8 +108,8 @@ public class AuthController {
                 IllegalArgumentException e
         ) {
             model.addAttribute(
-                    "avatarError",
-                    e.getMessage()
+                    "avatarErrorKey",
+                    "auth.register.avatar.error"
             );
 
             return "auth/register";
@@ -123,6 +122,7 @@ public class AuthController {
 
         if (userCreateDto.getAccountType()
                 == AccountType.EMPLOYER) {
+
             return "redirect:/resumes";
         }
 
@@ -145,23 +145,29 @@ public class AuthController {
             );
 
             model.addAttribute(
-                    "message",
-                    "Ссылка для восстановления пароля отправлена на вашу почту."
+                    "messageKey",
+                    "auth.forgot.success"
             );
         } catch (
-                UsernameNotFoundException
-                | UnsupportedEncodingException e
+                UsernameNotFoundException e
         ) {
             model.addAttribute(
-                    "error",
-                    e.getMessage()
+                    "errorKey",
+                    "auth.forgot.error.userNotFound"
+            );
+        } catch (
+                UnsupportedEncodingException e
+        ) {
+            model.addAttribute(
+                    "errorKey",
+                    "auth.forgot.error.processing"
             );
         } catch (
                 MessagingException e
         ) {
             model.addAttribute(
-                    "error",
-                    "Ошибка при отправке письма."
+                    "errorKey",
+                    "auth.forgot.error.email"
             );
         }
 
@@ -186,8 +192,8 @@ public class AuthController {
                 UsernameNotFoundException e
         ) {
             model.addAttribute(
-                    "error",
-                    "Недействительная ссылка восстановления пароля."
+                    "errorKey",
+                    "auth.reset.error.invalidLink"
             );
         }
 
@@ -200,15 +206,21 @@ public class AuthController {
             Model model
     ) {
         String token =
-                request.getParameter("token");
+                request.getParameter(
+                        "token"
+                );
+
         String password =
-                request.getParameter("password");
+                request.getParameter(
+                        "password"
+                );
 
         try {
             User user =
-                    userService.getByResetPasswordToken(
-                            token
-                    );
+                    userService
+                            .getByResetPasswordToken(
+                                    token
+                            );
 
             userService.updatePassword(
                     user,
@@ -216,15 +228,15 @@ public class AuthController {
             );
 
             model.addAttribute(
-                    "message",
-                    "Пароль успешно изменён."
+                    "messageKey",
+                    "auth.reset.success"
             );
         } catch (
                 UsernameNotFoundException e
         ) {
             model.addAttribute(
-                    "message",
-                    "Недействительный токен восстановления пароля."
+                    "messageKey",
+                    "auth.reset.error.invalidToken"
             );
         }
 
@@ -243,9 +255,10 @@ public class AuthController {
                 );
 
         Authentication authentication =
-                authenticationManager.authenticate(
-                        authenticationRequest
-                );
+                authenticationManager
+                        .authenticate(
+                                authenticationRequest
+                        );
 
         SecurityContext securityContext =
                 SecurityContextHolder

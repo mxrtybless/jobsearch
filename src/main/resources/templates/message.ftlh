@@ -1,6 +1,12 @@
 <#import "layout.ftlh" as layout>
+<#import "/spring.ftl" as spring>
 
-<@layout.layout title="Восстановление пароля | JobSearch">
+<#assign pageTitle>
+    <@spring.message 'auth.message.title'/>
+</#assign>
+
+
+<@layout.layout title=pageTitle + " | JobSearch">
 
     <div class="row justify-content-center">
 
@@ -9,17 +15,25 @@
             <div class="alert alert-info text-center">
 
                 <h1 class="h4 mb-3">
-                    Восстановление пароля
+                    <@spring.message 'auth.message.heading'/>
                 </h1>
 
-                <p class="mb-3">
-                    ${message}
-                </p>
+
+                <#if messageKey??>
+
+                    <p class="mb-3">
+                        <@spring.message messageKey/>
+                    </p>
+
+                </#if>
+
 
                 <a
                         class="btn btn-primary"
                         href="/auth/login">
-                    Перейти ко входу
+
+                    <@spring.message 'auth.message.login'/>
+
                 </a>
 
             </div>

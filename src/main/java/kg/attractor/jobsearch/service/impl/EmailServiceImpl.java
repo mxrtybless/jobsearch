@@ -3,28 +3,35 @@ package kg.attractor.jobsearch.service.impl;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import kg.attractor.jobsearch.service.EmailService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
 
 @Service
 public class EmailServiceImpl
         implements EmailService {
 
     private final JavaMailSender mailSender;
+    private final MessageSource messageSource;
 
     @Value("${spring.mail.username}")
     private String emailFrom;
 
-    @Autowired
     public EmailServiceImpl(
-            JavaMailSender mailSender
+            JavaMailSender mailSender,
+            MessageSource messageSource
     ) {
-        this.mailSender = mailSender;
+        this.mailSender =
+                mailSender;
+
+        this.messageSource =
+                messageSource;
     }
 
     @Override
@@ -33,33 +40,93 @@ public class EmailServiceImpl
             String link
     ) throws MessagingException,
             UnsupportedEncodingException {
+
+        Locale locale =
+                LocaleContextHolder.getLocale();
+
         MimeMessage message =
                 mailSender.createMimeMessage();
+
         MimeMessageHelper helper =
-                new MimeMessageHelper(message);
+                new MimeMessageHelper(
+                        message
+                );
 
         helper.setFrom(
                 emailFrom,
-                "JobSearch Support"
+                getMessage(
+                        "mail.reset.fromName",
+                        locale
+                )
         );
-        helper.setTo(to);
+
+        helper.setTo(
+                to
+        );
 
         String subject =
-                "Here's the link to reset your password";
+                getMessage(
+                        "mail.reset.subject",
+                        locale
+                );
+
         String content =
-                "<p>Hello,</p>"
-                        + "<p>You have requested to reset your password.</p>"
-                        + "<p>Click the link below to change your password:</p>"
+                "<p>"
+                        + getMessage(
+                        "mail.reset.hello",
+                        locale
+                )
+                        + "</p>"
+                        + "<p>"
+                        + getMessage(
+                        "mail.reset.request",
+                        locale
+                )
+                        + "</p>"
+                        + "<p>"
+                        + getMessage(
+                        "mail.reset.instruction",
+                        locale
+                )
+                        + "</p>"
                         + "<p><a href=\""
                         + link
-                        + "\">Change my password</a></p>"
+                        + "\">"
+                        + getMessage(
+                        "mail.reset.button",
+                        locale
+                )
+                        + "</a></p>"
                         + "<br>"
-                        + "<p>Ignore this email if you do remember your password, "
-                        + "or you have not made the request.</p>";
+                        + "<p>"
+                        + getMessage(
+                        "mail.reset.ignore",
+                        locale
+                )
+                        + "</p>";
 
-        helper.setSubject(subject);
-        helper.setText(content, true);
+        helper.setSubject(
+                subject
+        );
 
-        mailSender.send(message);
+        helper.setText(
+                content,
+                true
+        );
+
+        mailSender.send(
+                message
+        );
+    }
+
+    private String getMessage(
+            String key,
+            Locale locale
+    ) {
+        return messageSource.getMessage(
+                key,
+                null,
+                locale
+        );
     }
 }

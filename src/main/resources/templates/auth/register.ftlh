@@ -1,7 +1,28 @@
 <#import "../layout.ftlh" as layout>
 <#import "/spring.ftl" as spring>
 
-<@layout.layout title="Регистрация | JobSearch">
+<#assign pageTitle>
+    <@spring.message 'auth.register.title'/>
+</#assign>
+
+<#assign userNameLabel>
+    <@spring.message 'auth.register.name.user'/>
+</#assign>
+
+<#assign companyNameLabel>
+    <@spring.message 'auth.register.name.company'/>
+</#assign>
+
+<#assign applicantAgeLabel>
+    <@spring.message 'auth.register.age'/>
+</#assign>
+
+<#assign employerAgeLabel>
+    <@spring.message 'auth.register.age.employer'/>
+</#assign>
+
+
+<@layout.layout title=pageTitle + " | JobSearch">
 
     <div class="row justify-content-center">
 
@@ -12,21 +33,22 @@
                 <div class="card-body p-4 p-md-5">
 
                     <h1 class="h3 mb-2">
-                        Регистрация
+                        <@spring.message 'auth.register.heading'/>
                     </h1>
 
                     <p class="text-secondary mb-4">
-                        Выберите тип учётной записи
-                        и заполните данные
+                        <@spring.message 'auth.register.description'/>
                     </p>
 
-                    <#if avatarError??>
+
+                    <#if avatarErrorKey??>
 
                         <div class="alert alert-danger">
-                            ${avatarError}
+                            <@spring.message avatarErrorKey/>
                         </div>
 
                     </#if>
+
 
                     <form
                             action="/auth/register"
@@ -35,10 +57,11 @@
 
                         <@layout.csrfInput/>
 
+
                         <div class="mb-4">
 
                             <label class="form-label fw-semibold">
-                                Тип учётной записи
+                                <@spring.message 'auth.register.accountType'/>
                             </label>
 
                             <@spring.bind "userCreateDto.accountType"/>
@@ -61,10 +84,14 @@
                                     <label
                                             class="form-check-label"
                                             for="applicant">
-                                        Соискатель
+
+                                        <@spring.message
+                                                'auth.register.accountType.applicant'/>
+
                                     </label>
 
                                 </div>
+
 
                                 <div class="form-check">
 
@@ -82,14 +109,19 @@
                                     <label
                                             class="form-check-label"
                                             for="employer">
-                                        Компания
+
+                                        <@spring.message
+                                                'auth.register.accountType.employer'/>
+
                                     </label>
 
                                 </div>
 
                             </div>
 
-                            <@spring.showErrors "<br>" "text-danger small"/>
+                            <@spring.showErrors
+                                    "<br>"
+                                    "text-danger small"/>
 
                         </div>
 
@@ -100,7 +132,9 @@
                                     id="nameLabel"
                                     class="form-label"
                                     for="name">
-                                Имя пользователя
+
+                                <@spring.message 'auth.register.name.user'/>
+
                             </label>
 
                             <@spring.formInput
@@ -121,7 +155,9 @@
                             <label
                                     class="form-label"
                                     for="surname">
-                                Фамилия
+
+                                <@spring.message 'auth.register.surname'/>
+
                             </label>
 
                             <@spring.formInput
@@ -141,7 +177,9 @@
                                     id="ageLabel"
                                     class="form-label"
                                     for="age">
-                                Возраст
+
+                                <@spring.message 'auth.register.age'/>
+
                             </label>
 
                             <@spring.formInput
@@ -161,7 +199,9 @@
                             <label
                                     class="form-label"
                                     for="email">
-                                Email
+
+                                <@spring.message 'auth.register.email'/>
+
                             </label>
 
                             <@spring.formInput
@@ -181,7 +221,9 @@
                             <label
                                     class="form-label"
                                     for="phoneNumber">
-                                Номер телефона
+
+                                <@spring.message 'auth.register.phone'/>
+
                             </label>
 
                             <@spring.formInput
@@ -200,7 +242,9 @@
                             <label
                                     class="form-label"
                                     for="password">
-                                Пароль
+
+                                <@spring.message 'auth.register.password'/>
+
                             </label>
 
                             <@spring.formInput
@@ -209,8 +253,8 @@
                                     "password"/>
 
                             <div class="form-text">
-                                8–32 символа, заглавная и строчная
-                                буква и хотя бы одна цифра.
+                                <@spring.message
+                                        'auth.register.password.hint'/>
                             </div>
 
                             <@spring.showErrors
@@ -225,7 +269,9 @@
                             <label
                                     class="form-label"
                                     for="avatar">
-                                Фото профиля
+
+                                <@spring.message 'auth.register.avatar'/>
+
                             </label>
 
                             <input
@@ -236,8 +282,8 @@
                                     accept="image/*">
 
                             <div class="form-text">
-                                Необязательно. Если фото не выбрать,
-                                будет использовано изображение по умолчанию.
+                                <@spring.message
+                                        'auth.register.avatar.hint'/>
                             </div>
 
                         </div>
@@ -246,7 +292,9 @@
                         <button
                                 class="btn btn-primary w-100"
                                 type="submit">
-                            Зарегистрироваться
+
+                            <@spring.message 'auth.register.submit'/>
+
                         </button>
 
                     </form>
@@ -254,10 +302,11 @@
 
                     <p class="text-center mt-4 mb-0">
 
-                        Уже есть аккаунт?
+                        <@spring.message
+                                'auth.register.haveAccount'/>
 
                         <a href="/auth/login">
-                            Войти
+                            <@spring.message 'auth.register.login'/>
                         </a>
 
                     </p>
@@ -290,13 +339,28 @@
         const ageLabel =
             document.getElementById("ageLabel");
 
+        const userNameLabel =
+            "${userNameLabel?trim?js_string}";
+
+        const companyNameLabel =
+            "${companyNameLabel?trim?js_string}";
+
+        const applicantAgeLabel =
+            "${applicantAgeLabel?trim?js_string}";
+
+        const employerAgeLabel =
+            "${employerAgeLabel?trim?js_string}";
+
+
         function updateRegistrationForm() {
+
             if (employerRadio.checked) {
+
                 nameLabel.textContent =
-                    "Имя компании";
+                    companyNameLabel;
 
                 ageLabel.textContent =
-                    "Возраст представителя";
+                    employerAgeLabel;
 
                 surnameBlock.style.display =
                     "none";
@@ -306,12 +370,14 @@
 
                 surnameInput.required =
                     false;
+
             } else {
+
                 nameLabel.textContent =
-                    "Имя пользователя";
+                    userNameLabel;
 
                 ageLabel.textContent =
-                    "Возраст";
+                    applicantAgeLabel;
 
                 surnameBlock.style.display =
                     "block";
@@ -320,6 +386,7 @@
                     true;
             }
         }
+
 
         applicantRadio.addEventListener(
             "change",
