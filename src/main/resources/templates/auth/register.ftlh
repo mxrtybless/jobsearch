@@ -1,25 +1,30 @@
 <#import "../layout.ftlh" as layout>
 <#import "/spring.ftl" as spring>
 
-<#assign pageTitle>
-    <@spring.message 'auth.register.title'/>
-</#assign>
+<#assign pageTitle =
+        springMacroRequestContext.getMessage(
+                "auth.register.title"
+        )>
 
-<#assign userNameLabel>
-    <@spring.message 'auth.register.name.user'/>
-</#assign>
+<#assign userNameLabel =
+        springMacroRequestContext.getMessage(
+                "auth.register.name.user"
+        )>
 
-<#assign companyNameLabel>
-    <@spring.message 'auth.register.name.company'/>
-</#assign>
+<#assign companyNameLabel =
+        springMacroRequestContext.getMessage(
+                "auth.register.name.company"
+        )>
 
-<#assign applicantAgeLabel>
-    <@spring.message 'auth.register.age'/>
-</#assign>
+<#assign applicantAgeLabel =
+        springMacroRequestContext.getMessage(
+                "auth.register.age"
+        )>
 
-<#assign employerAgeLabel>
-    <@spring.message 'auth.register.age.employer'/>
-</#assign>
+<#assign employerAgeLabel =
+        springMacroRequestContext.getMessage(
+                "auth.register.age.employer"
+        )>
 
 
 <@layout.layout title=pageTitle + " | JobSearch">
@@ -340,16 +345,16 @@
             document.getElementById("ageLabel");
 
         const userNameLabel =
-            "${userNameLabel?trim?js_string}";
+            "${userNameLabel?js_string}";
 
         const companyNameLabel =
-            "${companyNameLabel?trim?js_string}";
+            "${companyNameLabel?js_string}";
 
         const applicantAgeLabel =
-            "${applicantAgeLabel?trim?js_string}";
+            "${applicantAgeLabel?js_string}";
 
         const employerAgeLabel =
-            "${employerAgeLabel?trim?js_string}";
+            "${employerAgeLabel?js_string}";
 
 
         function updateRegistrationForm() {

@@ -1,13 +1,15 @@
 <#import "../layout.ftlh" as layout>
 <#import "/spring.ftl" as spring>
 
-<#assign pageTitle>
-    <@spring.message 'auth.reset.title'/>
-</#assign>
+<#assign pageTitle =
+        springMacroRequestContext.getMessage(
+                "auth.reset.title"
+        )>
 
-<#assign passwordPlaceholder>
-    <@spring.message 'auth.reset.password.placeholder'/>
-</#assign>
+<#assign passwordPlaceholder =
+        springMacroRequestContext.getMessage(
+                "auth.reset.password.placeholder"
+        )>
 
 
 <@layout.layout title=pageTitle + " | JobSearch">
@@ -70,7 +72,7 @@
                                         class="form-control"
                                         type="password"
                                         name="password"
-                                        placeholder="${passwordPlaceholder?trim}"
+                                        placeholder="${passwordPlaceholder}"
                                         required
                                         autofocus>
 

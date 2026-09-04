@@ -1,7 +1,12 @@
 <#import "../layout.ftlh" as layout>
 <#import "/spring.ftl" as spring>
 
-<@layout.layout title="Редактирование профиля | JobSearch">
+<#assign pageTitle =
+        springMacroRequestContext.getMessage(
+                "profile.edit.title"
+        )>
+
+<@layout.layout title=pageTitle + " | JobSearch">
 
     <div class="row justify-content-center">
 
@@ -12,7 +17,7 @@
                 <div class="card-body p-4 p-md-5">
 
                     <h1 class="h3 mb-4">
-                        Редактирование профиля
+                        <@spring.message 'profile.edit.heading'/>
                     </h1>
 
                     <form
@@ -28,9 +33,9 @@
                                     for="name">
 
                                 <#if isApplicant>
-                                    Имя
+                                    <@spring.message 'profile.name'/>
                                 <#else>
-                                    Имя компании
+                                    <@spring.message 'profile.companyName'/>
                                 </#if>
 
                             </label>
@@ -45,6 +50,7 @@
 
                         </div>
 
+
                         <#if isApplicant>
 
                             <div class="mb-3">
@@ -52,7 +58,9 @@
                                 <label
                                         class="form-label"
                                         for="surname">
-                                    Фамилия
+
+                                    <@spring.message 'profile.surname'/>
+
                                 </label>
 
                                 <@spring.formInput
@@ -67,12 +75,15 @@
 
                         </#if>
 
+
                         <div class="mb-4">
 
                             <label
                                     class="form-label"
                                     for="age">
-                                Возраст
+
+                                <@spring.message 'profile.age'/>
+
                             </label>
 
                             <@spring.formInput
@@ -86,22 +97,28 @@
 
                         </div>
 
+
                         <div class="alert alert-secondary small">
-                            Email и номер телефона в этой форме не изменяются.
+                            <@spring.message 'profile.edit.note'/>
                         </div>
+
 
                         <div class="d-flex gap-2">
 
                             <button
                                     class="btn btn-primary"
                                     type="submit">
-                                Сохранить
+
+                                <@spring.message 'profile.edit.save'/>
+
                             </button>
 
                             <a
                                     class="btn btn-outline-secondary"
                                     href="/profile">
-                                Отмена
+
+                                <@spring.message 'profile.edit.cancel'/>
+
                             </a>
 
                         </div>

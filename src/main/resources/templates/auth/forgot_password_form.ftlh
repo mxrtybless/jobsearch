@@ -1,9 +1,10 @@
 <#import "../layout.ftlh" as layout>
 <#import "/spring.ftl" as spring>
 
-<#assign pageTitle>
-    <@spring.message 'auth.forgot.title'/>
-</#assign>
+<#assign pageTitle =
+        springMacroRequestContext.getMessage(
+                "auth.forgot.title"
+        )>
 
 
 <@layout.layout title=pageTitle + " | JobSearch">

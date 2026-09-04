@@ -1,9 +1,15 @@
 <#import "../layout.ftlh" as layout>
+<#import "/spring.ftl" as spring>
 
-<@layout.layout title="Компании | JobSearch">
+<#assign pageTitle =
+        springMacroRequestContext.getMessage(
+                "company.list.title"
+        )>
+
+<@layout.layout title=pageTitle + " | JobSearch">
 
     <h1 class="h2 mb-4">
-        Компании
+        <@spring.message 'company.list.heading'/>
     </h1>
 
     <#if companies?? && companies?size gt 0>
@@ -30,8 +36,10 @@
 
                         <a
                                 class="btn btn-outline-primary"
-                                href="/companies/${company.id}">
-                            Подробнее
+                                href="/companies/${company.id?c}">
+
+                            <@spring.message 'company.list.details'/>
+
                         </a>
 
                     </div>
@@ -45,10 +53,11 @@
     <#else>
 
         <div class="alert alert-light">
-            Компании пока не найдены.
+            <@spring.message 'company.list.empty'/>
         </div>
 
     </#if>
+
 
     <@layout.pagination
             currentPage=currentPage!1

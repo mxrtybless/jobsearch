@@ -1,13 +1,16 @@
 <#import "../layout.ftlh" as layout>
 <#import "/spring.ftl" as spring>
 
-<#assign pageTitle>
-    <@spring.message 'auth.login.title'/>
-</#assign>
+<#assign pageTitle =
+        springMacroRequestContext.getMessage(
+                "auth.login.title"
+        )>
 
-<#assign passwordPlaceholder>
-    <@spring.message 'auth.login.password.placeholder'/>
-</#assign>
+<#assign passwordPlaceholder =
+        springMacroRequestContext.getMessage(
+                "auth.login.password.placeholder"
+        )>
+
 
 <@layout.layout title=pageTitle + " | JobSearch">
 
@@ -98,7 +101,7 @@
                                     class="form-control"
                                     type="password"
                                     name="password"
-                                    placeholder="${passwordPlaceholder?trim}"
+                                    placeholder="${passwordPlaceholder}"
                                     required>
 
                         </div>
