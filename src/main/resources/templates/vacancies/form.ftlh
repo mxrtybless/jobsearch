@@ -2,14 +2,28 @@
 <#import "/spring.ftl" as spring>
 
 <#if formMode == "create">
-    <#assign pageTitle = "Создание вакансии | JobSearch">
+
+    <#assign pageTitle =
+            springMacroRequestContext.getMessage(
+                    "vacancy.form.create.title"
+            )>
+
     <#assign formAction = "/vacancies/form/create">
+
 <#else>
-    <#assign pageTitle = "Редактирование вакансии | JobSearch">
-    <#assign formAction = "/vacancies/form/edit/" + vacancyId?c>
+
+    <#assign pageTitle =
+            springMacroRequestContext.getMessage(
+                    "vacancy.form.edit.title"
+            )>
+
+    <#assign formAction =
+            "/vacancies/form/edit/" + vacancyId?c>
+
 </#if>
 
-<@layout.layout title=pageTitle>
+
+<@layout.layout title=pageTitle + " | JobSearch">
 
     <div class="row justify-content-center">
 
@@ -20,16 +34,26 @@
                 <div class="card-body p-4 p-md-5">
 
                     <h1 class="h3 mb-2">
+
                         <#if formMode == "create">
-                            Создание вакансии
+
+                            <@spring.message
+                                    'vacancy.form.create.heading'/>
+
                         <#else>
-                            Редактирование вакансии
+
+                            <@spring.message
+                                    'vacancy.form.edit.heading'/>
+
                         </#if>
+
                     </h1>
 
+
                     <p class="text-secondary mb-4">
-                        Заполните данные вакансии.
+                        <@spring.message 'vacancy.form.description'/>
                     </p>
+
 
                     <@spring.bind "vacancyDto.*"/>
 
@@ -45,23 +69,27 @@
 
                     </#if>
 
+
                     <form
                             action="${formAction}"
                             method="post">
 
                         <@layout.csrfInput/>
 
+
                         <div class="mb-3">
 
                             <label
                                     class="form-label"
                                     for="name">
-                                Название вакансии
+
+                                <@spring.message 'vacancy.form.name'/>
+
                             </label>
 
                             <@spring.formInput
                                     "vacancyDto.name"
-                                    'id="name" class="form-control" placeholder="Junior Java Developer" required'/>
+                                    'id="name" class="form-control" required'/>
 
                             <@spring.showErrors
                                     "<br>"
@@ -69,12 +97,15 @@
 
                         </div>
 
+
                         <div class="mb-3">
 
                             <label
                                     class="form-label"
                                     for="categoryId">
-                                Категория
+
+                                <@spring.message 'vacancy.form.category'/>
+
                             </label>
 
                             <@spring.bind "vacancyDto.categoryId"/>
@@ -86,7 +117,8 @@
                                     required>
 
                                 <option value="">
-                                    Выберите категорию
+                                    <@spring.message
+                                            'vacancy.form.category.select'/>
                                 </option>
 
                                 <#list categories as category>
@@ -97,7 +129,9 @@
                                             && vacancyDto.categoryId == category.id>
                                                 selected
                                             </#if>>
+
                                         ${category.name}
+
                                     </option>
 
                                 </#list>
@@ -110,12 +144,15 @@
 
                         </div>
 
+
                         <div class="mb-3">
 
                             <label
                                     class="form-label"
                                     for="salary">
-                                Заработная плата
+
+                                <@spring.message 'vacancy.form.salary'/>
+
                             </label>
 
                             <@spring.formInput
@@ -129,23 +166,27 @@
 
                         </div>
 
+
                         <div class="mb-3">
 
                             <label
                                     class="form-label"
                                     for="description">
-                                Описание и требования
+
+                                <@spring.message 'vacancy.form.details'/>
+
                             </label>
 
                             <@spring.formTextarea
                                     "vacancyDto.description"
-                                    'id="description" class="form-control" rows="7" placeholder="Опишите обязанности и требования к соискателю" required'/>
+                                    'id="description" class="form-control" rows="7" required'/>
 
                             <@spring.showErrors
                                     "<br>"
                                     "text-danger small"/>
 
                         </div>
+
 
                         <div class="row g-3 mb-3">
 
@@ -154,7 +195,10 @@
                                 <label
                                         class="form-label"
                                         for="expFrom">
-                                    Опыт от, лет
+
+                                    <@spring.message
+                                            'vacancy.form.experienceFrom'/>
+
                                 </label>
 
                                 <@spring.formInput
@@ -168,12 +212,16 @@
 
                             </div>
 
+
                             <div class="col-12 col-md-6">
 
                                 <label
                                         class="form-label"
                                         for="expTo">
-                                    Опыт до, лет
+
+                                    <@spring.message
+                                            'vacancy.form.experienceTo'/>
+
                                 </label>
 
                                 <@spring.formInput
@@ -189,6 +237,7 @@
 
                         </div>
 
+
                         <div class="form-check form-switch mb-4">
 
                             <@spring.formCheckbox
@@ -198,7 +247,9 @@
                             <label
                                     class="form-check-label"
                                     for="isActive">
-                                Опубликовать вакансию
+
+                                <@spring.message 'vacancy.form.publish'/>
+
                             </label>
 
                             <@spring.showErrors
@@ -207,6 +258,7 @@
 
                         </div>
 
+
                         <div class="d-flex gap-2">
 
                             <button
@@ -214,17 +266,26 @@
                                     type="submit">
 
                                 <#if formMode == "create">
-                                    Создать вакансию
+
+                                    <@spring.message
+                                            'vacancy.form.create.submit'/>
+
                                 <#else>
-                                    Сохранить изменения
+
+                                    <@spring.message
+                                            'vacancy.form.edit.submit'/>
+
                                 </#if>
 
                             </button>
 
+
                             <a
                                     class="btn btn-outline-secondary"
                                     href="/profile">
-                                Отмена
+
+                                <@spring.message 'vacancy.form.cancel'/>
+
                             </a>
 
                         </div>
