@@ -1,6 +1,7 @@
 package kg.attractor.jobsearch.service;
 
 import kg.attractor.jobsearch.dto.WorkExperienceInfoDto;
+import kg.attractor.jobsearch.model.Resume;
 
 import java.util.List;
 
@@ -12,13 +13,13 @@ public interface WorkExperienceInfoService {
     );
 
     void saveAll(
-            Integer resumeId,
+            Resume resume,
             List<WorkExperienceInfoDto>
                     workExperienceInfo
     );
 
     void replaceAll(
-            Integer resumeId,
+            Resume resume,
             List<WorkExperienceInfoDto>
                     workExperienceInfo
     );

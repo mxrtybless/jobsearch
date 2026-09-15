@@ -9,10 +9,10 @@ import kg.attractor.jobsearch.exception.UserNotFoundException;
 import kg.attractor.jobsearch.model.AccountType;
 import kg.attractor.jobsearch.model.Role;
 import kg.attractor.jobsearch.model.User;
-import kg.attractor.jobsearch.repository.RoleRepository;
 import kg.attractor.jobsearch.repository.UserRepository;
 import kg.attractor.jobsearch.service.EmailService;
 import kg.attractor.jobsearch.service.ImageService;
+import kg.attractor.jobsearch.service.RoleService;
 import kg.attractor.jobsearch.service.UserService;
 import kg.attractor.jobsearch.utils.Utility;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ public class UserServiceImpl
             "default-avatar.png";
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
     private final ImageService imageService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
@@ -85,17 +85,9 @@ public class UserServiceImpl
         AccountType accountType =
                 userCreateDto.getAccountType();
 
-        Role role = roleRepository
-                .findByRole(
-                        accountType.name()
-                )
-                .orElseThrow(() ->
-                        new NoSuchElementException(
-                                "Role "
-                                        + accountType.name()
-                                        + " not found"
-                        )
-                );
+        Role role = roleService.findByRole(
+                accountType.name()
+        );
 
         User user = User.builder()
                 .name(
@@ -323,8 +315,10 @@ public class UserServiceImpl
     ) throws UsernameNotFoundException,
             MessagingException,
             UnsupportedEncodingException {
+
         String email =
                 request.getParameter("email");
+
         String token =
                 UUID.randomUUID().toString();
 
@@ -348,14 +342,15 @@ public class UserServiceImpl
             String token,
             String email
     ) {
-        User user = userRepository
-                .findByEmailIgnoreCase(email)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException(
-                                "Could not find any user with the email "
-                                        + email
-                        )
-                );
+        User user =
+                userRepository
+                        .findByEmailIgnoreCase(email)
+                        .orElseThrow(() ->
+                                new UsernameNotFoundException(
+                                        "Could not find any user with the email "
+                                                + email
+                                )
+                        );
 
         user.setResetPasswordToken(token);
         userRepository.saveAndFlush(user);

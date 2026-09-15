@@ -2,12 +2,10 @@ package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dto.ContactInfoDto;
 import kg.attractor.jobsearch.exception.InvalidContactValueException;
-import kg.attractor.jobsearch.exception.ResumeNotFoundException;
 import kg.attractor.jobsearch.model.ContactInfo;
 import kg.attractor.jobsearch.model.ContactType;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.repository.ContactInfoRepository;
-import kg.attractor.jobsearch.repository.ResumeRepository;
 import kg.attractor.jobsearch.service.ContactInfoService;
 import kg.attractor.jobsearch.service.ContactTypeService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +22,6 @@ public class ContactInfoServiceImpl
         implements ContactInfoService {
 
     private final ContactInfoRepository contactInfoRepository;
-    private final ResumeRepository resumeRepository;
     private final ContactTypeService contactTypeService;
 
     @Override
@@ -42,14 +39,12 @@ public class ContactInfoServiceImpl
     @Override
     @Transactional
     public void saveAll(
-            Integer resumeId,
+            Resume resume,
             List<ContactInfoDto> contactInfo
     ) {
         if (contactInfo == null) {
             return;
         }
-
-        Resume resume = findResume(resumeId);
 
         for (ContactInfoDto contactDto
                 : contactInfo) {
@@ -86,22 +81,22 @@ public class ContactInfoServiceImpl
 
         log.info(
                 "Contact information saved for resume id: {}",
-                resumeId
+                resume.getId()
         );
     }
 
     @Override
     @Transactional
     public void replaceAll(
-            Integer resumeId,
+            Resume resume,
             List<ContactInfoDto> contactInfo
     ) {
         contactInfoRepository.deleteByResume_Id(
-                resumeId
+                resume.getId()
         );
 
         saveAll(
-                resumeId,
+                resume,
                 contactInfo
         );
     }
@@ -114,16 +109,6 @@ public class ContactInfoServiceImpl
         contactInfoRepository.deleteByResume_Id(
                 resumeId
         );
-    }
-
-    private Resume findResume(Integer resumeId) {
-        return resumeRepository
-                .findById(resumeId)
-                .orElseThrow(() ->
-                        new ResumeNotFoundException(
-                                resumeId
-                        )
-                );
     }
 
     private void validateContactValue(

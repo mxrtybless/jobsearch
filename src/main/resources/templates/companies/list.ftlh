@@ -3,156 +3,44 @@
 
 <#assign pageTitle =
         springMacroRequestContext.getMessage(
-                "vacancy.list.title"
+                "company.list.title"
         )>
 
 <@layout.layout title=pageTitle + " | JobSearch">
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+    <h1 class="h2 mb-4">
+        <@spring.message 'company.list.heading'/>
+    </h1>
 
-        <div>
+    <#if companies?? && companies?size gt 0>
 
-            <h1 class="h2 mb-2">
-                <@spring.message 'vacancy.list.heading'/>
-            </h1>
+        <div class="d-grid gap-3">
 
-            <p class="text-secondary mb-0">
-                <@spring.message 'vacancy.list.description'/>
-            </p>
-
-        </div>
-
-
-        <form
-                method="get"
-                action="/vacancies"
-                class="d-flex gap-2">
-
-            <select
-                    class="form-select"
-                    name="sort"
-                    onchange="this.form.submit()">
-
-                <option
-                        value="dateDesc"
-                        <#if (sort!"dateDesc") == "dateDesc">
-                            selected
-                        </#if>>
-                    <@spring.message 'vacancy.sort.dateDesc'/>
-                </option>
-
-                <option
-                        value="dateAsc"
-                        <#if (sort!"dateDesc") == "dateAsc">
-                            selected
-                        </#if>>
-                    <@spring.message 'vacancy.sort.dateAsc'/>
-                </option>
-
-                <option
-                        value="responsesDesc"
-                        <#if (sort!"dateDesc") == "responsesDesc">
-                            selected
-                        </#if>>
-                    <@spring.message 'vacancy.sort.responsesDesc'/>
-                </option>
-
-                <option
-                        value="responsesAsc"
-                        <#if (sort!"dateDesc") == "responsesAsc">
-                            selected
-                        </#if>>
-                    <@spring.message 'vacancy.sort.responsesAsc'/>
-                </option>
-
-            </select>
-
-            <input
-                    type="hidden"
-                    name="page"
-                    value="1">
-
-        </form>
-
-    </div>
-
-
-    <#if vacancies?? && vacancies?size gt 0>
-
-        <div class="d-flex flex-column gap-3">
-
-            <#list vacancies as vacancy>
+            <#list companies as company>
 
                 <div class="card border-0 shadow-sm">
 
-                    <div class="card-body p-4">
+                    <div class="card-body">
 
-                        <div class="d-flex justify-content-between gap-3">
+                        <h2 class="h5">
+                            ${company.name!}
+                        </h2>
 
-                            <div>
+                        <p class="mb-1">
+                            ${company.email!}
+                        </p>
 
-                                <h2 class="h4">
+                        <p class="text-secondary">
+                            ${company.phoneNumber!}
+                        </p>
 
-                                    <a
-                                            class="text-decoration-none"
-                                            href="/vacancies/${vacancy.id?c}">
-                                        ${vacancy.name!}
-                                    </a>
+                        <a
+                                class="btn btn-outline-primary"
+                                href="/companies/${company.id?c}">
 
-                                </h2>
+                            <@spring.message 'company.list.details'/>
 
-                                <p class="mb-2">
-
-                                    <strong>
-                                        <@spring.message 'vacancy.salary'/>:
-                                    </strong>
-
-                                    ${vacancy.salary!}
-
-                                </p>
-
-                                <p class="mb-2">
-
-                                    <strong>
-                                        <@spring.message 'vacancy.experience'/>:
-                                    </strong>
-
-                                    ${vacancy.expFrom!0}
-                                    —
-                                    ${vacancy.expTo!0}
-
-                                    <@spring.message 'vacancy.years'/>
-
-                                </p>
-
-                                <p class="mb-0 text-secondary">
-                                    ${vacancy.description!}
-                                </p>
-
-                            </div>
-
-
-                            <div class="text-secondary small text-end">
-
-                                <@spring.message 'vacancy.updated'/>
-
-                                <br>
-
-                                <strong class="text-dark">
-
-                                    <#if vacancy.updateTime??>
-                                        ${vacancy.updateTime}
-                                    <#elseif vacancy.createdDate??>
-                                        ${vacancy.createdDate}
-                                    <#else>
-                                        —
-                                    </#if>
-
-                                </strong>
-
-                            </div>
-
-                        </div>
+                        </a>
 
                     </div>
 
@@ -162,11 +50,10 @@
 
         </div>
 
-
     <#else>
 
         <div class="alert alert-light">
-            <@spring.message 'vacancy.list.empty'/>
+            <@spring.message 'company.list.empty'/>
         </div>
 
     </#if>
@@ -175,7 +62,8 @@
     <@layout.pagination
             currentPage=currentPage!1
             totalPages=totalPages!0
-            baseUrl="/vacancies"
-            sort=sort!"dateDesc"/>
+            baseUrl="/companies"
+            sort="date"
+            hasContent=(companies?? && companies?size gt 0)/>
 
 </@layout.layout>

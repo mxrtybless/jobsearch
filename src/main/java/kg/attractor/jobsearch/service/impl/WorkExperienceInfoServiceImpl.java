@@ -1,10 +1,8 @@
 package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dto.WorkExperienceInfoDto;
-import kg.attractor.jobsearch.exception.ResumeNotFoundException;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.WorkExperienceInfo;
-import kg.attractor.jobsearch.repository.ResumeRepository;
 import kg.attractor.jobsearch.repository.WorkExperienceInfoRepository;
 import kg.attractor.jobsearch.service.WorkExperienceInfoService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +19,6 @@ public class WorkExperienceInfoServiceImpl
         implements WorkExperienceInfoService {
 
     private final WorkExperienceInfoRepository workExperienceInfoRepository;
-    private final ResumeRepository resumeRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -39,11 +36,11 @@ public class WorkExperienceInfoServiceImpl
     @Override
     @Transactional
     public void saveAll(
-            Integer resumeId,
+            Resume resume,
             List<WorkExperienceInfoDto> workExperienceInfo
     ) {
         saveRecords(
-                resumeId,
+                resume,
                 workExperienceInfo
         );
     }
@@ -51,16 +48,16 @@ public class WorkExperienceInfoServiceImpl
     @Override
     @Transactional
     public void replaceAll(
-            Integer resumeId,
+            Resume resume,
             List<WorkExperienceInfoDto> workExperienceInfo
     ) {
         workExperienceInfoRepository
                 .deleteByResume_Id(
-                        resumeId
+                        resume.getId()
                 );
 
         saveRecords(
-                resumeId,
+                resume,
                 workExperienceInfo
         );
     }
@@ -77,14 +74,12 @@ public class WorkExperienceInfoServiceImpl
     }
 
     private void saveRecords(
-            Integer resumeId,
+            Resume resume,
             List<WorkExperienceInfoDto> workExperienceInfo
     ) {
         if (workExperienceInfo == null) {
             return;
         }
-
-        Resume resume = findResume(resumeId);
 
         for (WorkExperienceInfoDto workDto
                 : workExperienceInfo) {
@@ -120,18 +115,8 @@ public class WorkExperienceInfoServiceImpl
 
         log.info(
                 "Work experience records saved for resume id: {}",
-                resumeId
+                resume.getId()
         );
-    }
-
-    private Resume findResume(Integer resumeId) {
-        return resumeRepository
-                .findById(resumeId)
-                .orElseThrow(() ->
-                        new ResumeNotFoundException(
-                                resumeId
-                        )
-                );
     }
 
     private WorkExperienceInfoDto convertToDto(

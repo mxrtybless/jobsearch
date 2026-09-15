@@ -312,15 +312,15 @@
 </#macro>
 
 
-
 <#macro
         pagination
         currentPage
         totalPages
         baseUrl
-        sort="dateDesc">
+        sort="dateDesc"
+        hasContent=true>
 
-    <#if totalPages?? && totalPages gt 1>
+    <#if hasContent && totalPages?? && totalPages gt 1>
 
         <nav class="mt-4">
 

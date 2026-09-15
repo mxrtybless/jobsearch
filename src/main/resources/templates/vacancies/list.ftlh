@@ -3,9 +3,8 @@
 
 <#assign pageTitle =
         springMacroRequestContext.getMessage(
-                "resume.list.title"
+                "vacancy.list.title"
         )>
-
 
 <@layout.layout title=pageTitle + " | JobSearch">
 
@@ -14,11 +13,11 @@
         <div>
 
             <h1 class="h2 mb-2">
-                <@spring.message 'resume.list.heading'/>
+                <@spring.message 'vacancy.list.heading'/>
             </h1>
 
             <p class="text-secondary mb-0">
-                <@spring.message 'resume.list.description'/>
+                <@spring.message 'vacancy.list.description'/>
             </p>
 
         </div>
@@ -26,7 +25,7 @@
 
         <form
                 method="get"
-                action="/resumes"
+                action="/vacancies"
                 class="d-flex gap-2">
 
             <select
@@ -39,7 +38,7 @@
                         <#if (sort!"dateDesc") == "dateDesc">
                             selected
                         </#if>>
-                    <@spring.message 'resume.sort.dateDesc'/>
+                    <@spring.message 'vacancy.sort.dateDesc'/>
                 </option>
 
                 <option
@@ -47,7 +46,7 @@
                         <#if (sort!"dateDesc") == "dateAsc">
                             selected
                         </#if>>
-                    <@spring.message 'resume.sort.dateAsc'/>
+                    <@spring.message 'vacancy.sort.dateAsc'/>
                 </option>
 
                 <option
@@ -55,7 +54,7 @@
                         <#if (sort!"dateDesc") == "responsesDesc">
                             selected
                         </#if>>
-                    <@spring.message 'resume.sort.responsesDesc'/>
+                    <@spring.message 'vacancy.sort.responsesDesc'/>
                 </option>
 
                 <option
@@ -63,7 +62,7 @@
                         <#if (sort!"dateDesc") == "responsesAsc">
                             selected
                         </#if>>
-                    <@spring.message 'resume.sort.responsesAsc'/>
+                    <@spring.message 'vacancy.sort.responsesAsc'/>
                 </option>
 
             </select>
@@ -78,56 +77,82 @@
     </div>
 
 
-    <#if resumes?? && resumes?size gt 0>
+    <#if vacancies?? && vacancies?size gt 0>
 
         <div class="d-flex flex-column gap-3">
 
-            <#list resumes as resume>
+            <#list vacancies as vacancy>
 
                 <div class="card border-0 shadow-sm">
 
                     <div class="card-body p-4">
 
-                        <h2 class="h4">
-                            ${resume.name!}
-                        </h2>
+                        <div class="d-flex justify-content-between gap-3">
+
+                            <div>
+
+                                <h2 class="h4">
+
+                                    <a
+                                            class="text-decoration-none"
+                                            href="/vacancies/${vacancy.id?c}">
+                                        ${vacancy.name!}
+                                    </a>
+
+                                </h2>
+
+                                <p class="mb-2">
+
+                                    <strong>
+                                        <@spring.message 'vacancy.salary'/>:
+                                    </strong>
+
+                                    ${vacancy.salary!}
+
+                                </p>
+
+                                <p class="mb-2">
+
+                                    <strong>
+                                        <@spring.message 'vacancy.experience'/>:
+                                    </strong>
+
+                                    ${vacancy.expFrom!0}
+                                    —
+                                    ${vacancy.expTo!0}
+
+                                    <@spring.message 'vacancy.years'/>
+
+                                </p>
+
+                                <p class="mb-0 text-secondary">
+                                    ${vacancy.description!}
+                                </p>
+
+                            </div>
 
 
-                        <p class="mb-2">
+                            <div class="text-secondary small text-end">
 
-                            <strong>
-                                <@spring.message 'resume.salary'/>:
-                            </strong>
+                                <@spring.message 'vacancy.updated'/>
 
-                            ${resume.salary!}
+                                <br>
 
-                        </p>
+                                <strong class="text-dark">
 
+                                    <#if vacancy.updateTime??>
+                                        ${vacancy.updateTime}
+                                    <#elseif vacancy.createdDate??>
+                                        ${vacancy.createdDate}
+                                    <#else>
+                                        —
+                                    </#if>
 
-                        <p class="mb-2">
+                                </strong>
 
-                            <strong>
-                                <@spring.message 'resume.category'/>:
-                            </strong>
+                            </div>
 
-                            ${resume.categoryId!}
-
-                        </p>
-
-
-                        <p class="mb-0 text-secondary small">
-
-                            <@spring.message 'resume.updated'/>:
-
-                            <#if resume.updateTime??>
-                                ${resume.updateTime}
-                            <#elseif resume.createdDate??>
-                                ${resume.createdDate}
-                            <#else>
-                                —
-                            </#if>
-
-                        </p>
+                        </div>
 
                     </div>
 
@@ -141,7 +166,7 @@
     <#else>
 
         <div class="alert alert-light">
-            <@spring.message 'resume.list.empty'/>
+            <@spring.message 'vacancy.list.empty'/>
         </div>
 
     </#if>
@@ -150,7 +175,8 @@
     <@layout.pagination
             currentPage=currentPage!1
             totalPages=totalPages!0
-            baseUrl="/resumes"
-            sort=sort!"dateDesc"/>
+            baseUrl="/vacancies"
+            sort=sort!"dateDesc"
+            hasContent=(vacancies?? && vacancies?size gt 0)/>
 
 </@layout.layout>

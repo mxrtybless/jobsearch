@@ -1,6 +1,7 @@
 package kg.attractor.jobsearch.service;
 
 import kg.attractor.jobsearch.dto.ContactInfoDto;
+import kg.attractor.jobsearch.model.Resume;
 
 import java.util.List;
 
@@ -11,12 +12,12 @@ public interface ContactInfoService {
     );
 
     void saveAll(
-            Integer resumeId,
+            Resume resume,
             List<ContactInfoDto> contactInfo
     );
 
     void replaceAll(
-            Integer resumeId,
+            Resume resume,
             List<ContactInfoDto> contactInfo
     );
 

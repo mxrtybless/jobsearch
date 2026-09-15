@@ -2,11 +2,9 @@ package kg.attractor.jobsearch.service.impl;
 
 import kg.attractor.jobsearch.dto.EducationInfoDto;
 import kg.attractor.jobsearch.exception.InvalidEducationPeriodException;
-import kg.attractor.jobsearch.exception.ResumeNotFoundException;
 import kg.attractor.jobsearch.model.EducationInfo;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.repository.EducationInfoRepository;
-import kg.attractor.jobsearch.repository.ResumeRepository;
 import kg.attractor.jobsearch.service.EducationInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +20,6 @@ public class EducationInfoServiceImpl
         implements EducationInfoService {
 
     private final EducationInfoRepository educationInfoRepository;
-    private final ResumeRepository resumeRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -39,12 +36,13 @@ public class EducationInfoServiceImpl
     @Override
     @Transactional
     public void saveAll(
-            Integer resumeId,
+            Resume resume,
             List<EducationInfoDto> educationInfo
     ) {
         validatePeriods(educationInfo);
+
         saveRecords(
-                resumeId,
+                resume,
                 educationInfo
         );
     }
@@ -52,17 +50,17 @@ public class EducationInfoServiceImpl
     @Override
     @Transactional
     public void replaceAll(
-            Integer resumeId,
+            Resume resume,
             List<EducationInfoDto> educationInfo
     ) {
         validatePeriods(educationInfo);
 
         educationInfoRepository.deleteByResume_Id(
-                resumeId
+                resume.getId()
         );
 
         saveRecords(
-                resumeId,
+                resume,
                 educationInfo
         );
     }
@@ -78,14 +76,12 @@ public class EducationInfoServiceImpl
     }
 
     private void saveRecords(
-            Integer resumeId,
+            Resume resume,
             List<EducationInfoDto> educationInfo
     ) {
         if (educationInfo == null) {
             return;
         }
-
-        Resume resume = findResume(resumeId);
 
         for (EducationInfoDto educationDto
                 : educationInfo) {
@@ -126,18 +122,8 @@ public class EducationInfoServiceImpl
 
         log.info(
                 "Education records saved for resume id: {}",
-                resumeId
+                resume.getId()
         );
-    }
-
-    private Resume findResume(Integer resumeId) {
-        return resumeRepository
-                .findById(resumeId)
-                .orElseThrow(() ->
-                        new ResumeNotFoundException(
-                                resumeId
-                        )
-                );
     }
 
     private void validatePeriods(

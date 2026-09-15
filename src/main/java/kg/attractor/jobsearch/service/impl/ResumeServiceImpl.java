@@ -76,17 +76,17 @@ public class ResumeServiceImpl
                 savedResume.getId();
 
         contactInfoService.saveAll(
-                resumeId,
+                savedResume,
                 resumeDto.getContactInfo()
         );
 
         educationInfoService.saveAll(
-                resumeId,
+                savedResume,
                 resumeDto.getEducationInfo()
         );
 
         workExperienceInfoService.saveAll(
-                resumeId,
+                savedResume,
                 resumeDto.getWorkExperienceInfo()
         );
 
@@ -142,17 +142,17 @@ public class ResumeServiceImpl
         resumeRepository.save(savedResume);
 
         contactInfoService.replaceAll(
-                id,
+                savedResume,
                 resumeDto.getContactInfo()
         );
 
         educationInfoService.replaceAll(
-                id,
+                savedResume,
                 resumeDto.getEducationInfo()
         );
 
         workExperienceInfoService.replaceAll(
-                id,
+                savedResume,
                 resumeDto.getWorkExperienceInfo()
         );
 
@@ -230,6 +230,12 @@ public class ResumeServiceImpl
 
     @Override
     @Transactional(readOnly = true)
+    public Resume findEntityById(Integer id) {
+        return findResume(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ResumeDto findOwnedById(
             Integer id,
             String userEmail
@@ -267,21 +273,36 @@ public class ResumeServiceImpl
             int size,
             String sort
     ) {
-        Pageable pageable = createPageable(page, size, sort);
+        Pageable pageable =
+                createPageable(
+                        page,
+                        size,
+                        sort
+                );
+
         Page<Resume> resumes;
 
         if ("responsesAsc".equalsIgnoreCase(sort)) {
             resumes = resumeRepository
-                    .findActiveOrderByResponsesAsc(pageable);
+                    .findActiveOrderByResponsesAsc(
+                            pageable
+                    );
         } else if ("responsesDesc".equalsIgnoreCase(sort)
                 || "responses".equalsIgnoreCase(sort)) {
             resumes = resumeRepository
-                    .findActiveOrderByResponses(pageable);
+                    .findActiveOrderByResponses(
+                            pageable
+                    );
         } else {
             resumes = resumeRepository
-                    .findAllByIsActiveTrue(pageable);
+                    .findAllByIsActiveTrue(
+                            pageable
+                    );
         }
-        return resumes.map(this::convertToDto);
+
+        return resumes.map(
+                this::convertToDto
+        );
     }
 
     @Override
@@ -292,8 +313,17 @@ public class ResumeServiceImpl
             int size,
             String sort
     ) {
-        validateApplicantById(applicantId);
-        Pageable pageable = createPageable(page, size, sort);
+        validateApplicantById(
+                applicantId
+        );
+
+        Pageable pageable =
+                createPageable(
+                        page,
+                        size,
+                        sort
+                );
+
         Page<Resume> resumes;
 
         if ("responsesAsc".equalsIgnoreCase(sort)) {
@@ -316,7 +346,10 @@ public class ResumeServiceImpl
                             pageable
                     );
         }
-        return resumes.map(this::convertToDto);
+
+        return resumes.map(
+                this::convertToDto
+        );
     }
 
     @Override
@@ -324,7 +357,9 @@ public class ResumeServiceImpl
     public List<ResumeDto> findByCategoryId(
             Integer categoryId
     ) {
-        categoryService.findById(categoryId);
+        categoryService.findById(
+                categoryId
+        );
 
         return resumeRepository
                 .findByCategory_IdOrderByUpdateTimeDesc(
@@ -466,11 +501,23 @@ public class ResumeServiceImpl
             int size,
             String sort
     ) {
-        int safePage = Math.max(page, 1) - 1;
-        int safeSize = Math.max(1, Math.min(size, 50));
+        int safePage =
+                Math.max(page, 1) - 1;
+
+        int safeSize =
+                Math.max(
+                        1,
+                        Math.min(size, 50)
+                );
+
         if (sort != null
-                && sort.toLowerCase().startsWith("responses")) {
-            return PageRequest.of(safePage, safeSize);
+                && sort.toLowerCase()
+                .startsWith("responses")) {
+
+            return PageRequest.of(
+                    safePage,
+                    safeSize
+            );
         }
 
         Sort.Direction direction =
@@ -481,7 +528,10 @@ public class ResumeServiceImpl
         return PageRequest.of(
                 safePage,
                 safeSize,
-                Sort.by(direction, "updateTime")
+                Sort.by(
+                        direction,
+                        "updateTime"
+                )
         );
     }
 

@@ -129,24 +129,31 @@ public class VacancyServiceImpl
         savedVacancy.setName(
                 vacancyDto.getName()
         );
+
         savedVacancy.setDescription(
                 vacancyDto.getDescription()
         );
+
         savedVacancy.setCategory(
                 category
         );
+
         savedVacancy.setSalary(
                 vacancyDto.getSalary()
         );
+
         savedVacancy.setExpFrom(
                 vacancyDto.getExpFrom()
         );
+
         savedVacancy.setExpTo(
                 vacancyDto.getExpTo()
         );
+
         savedVacancy.setIsActive(
                 vacancyDto.getIsActive()
         );
+
         savedVacancy.setUpdateTime(
                 LocalDateTime.now()
         );
@@ -233,6 +240,12 @@ public class VacancyServiceImpl
 
     @Override
     @Transactional(readOnly = true)
+    public Vacancy findEntityById(Integer id) {
+        return findVacancy(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public VacancyDto findOwnedById(
             Integer id,
             String userEmail
@@ -282,21 +295,37 @@ public class VacancyServiceImpl
             int size,
             String sort
     ) {
-        Pageable pageable = createPageable(page, size, sort);
+        Pageable pageable =
+                createPageable(
+                        page,
+                        size,
+                        sort
+                );
+
         Page<Vacancy> vacancies;
 
         if ("responsesAsc".equalsIgnoreCase(sort)) {
             vacancies = vacancyRepository
-                    .findActiveOrderByResponsesAsc(pageable);
+                    .findActiveOrderByResponsesAsc(
+                            pageable
+                    );
         } else if ("responsesDesc".equalsIgnoreCase(sort)
                 || "responses".equalsIgnoreCase(sort)) {
+
             vacancies = vacancyRepository
-                    .findActiveOrderByResponses(pageable);
+                    .findActiveOrderByResponses(
+                            pageable
+                    );
         } else {
             vacancies = vacancyRepository
-                    .findAllByIsActiveTrue(pageable);
+                    .findAllByIsActiveTrue(
+                            pageable
+                    );
         }
-        return vacancies.map(this::convertToDto);
+
+        return vacancies.map(
+                this::convertToDto
+        );
     }
 
     @Override
@@ -307,8 +336,17 @@ public class VacancyServiceImpl
             int size,
             String sort
     ) {
-        validateEmployerById(authorId);
-        Pageable pageable = createPageable(page, size, sort);
+        validateEmployerById(
+                authorId
+        );
+
+        Pageable pageable =
+                createPageable(
+                        page,
+                        size,
+                        sort
+                );
+
         Page<Vacancy> vacancies;
 
         if ("responsesAsc".equalsIgnoreCase(sort)) {
@@ -319,6 +357,7 @@ public class VacancyServiceImpl
                     );
         } else if ("responsesDesc".equalsIgnoreCase(sort)
                 || "responses".equalsIgnoreCase(sort)) {
+
             vacancies = vacancyRepository
                     .findByAuthorOrderByResponses(
                             authorId,
@@ -331,7 +370,10 @@ public class VacancyServiceImpl
                             pageable
                     );
         }
-        return vacancies.map(this::convertToDto);
+
+        return vacancies.map(
+                this::convertToDto
+        );
     }
 
     @Override
@@ -342,8 +384,17 @@ public class VacancyServiceImpl
             int size,
             String sort
     ) {
-        validateEmployerById(authorId);
-        Pageable pageable = createPageable(page, size, sort);
+        validateEmployerById(
+                authorId
+        );
+
+        Pageable pageable =
+                createPageable(
+                        page,
+                        size,
+                        sort
+                );
+
         Page<Vacancy> vacancies;
 
         if ("responsesAsc".equalsIgnoreCase(sort)) {
@@ -354,6 +405,7 @@ public class VacancyServiceImpl
                     );
         } else if ("responsesDesc".equalsIgnoreCase(sort)
                 || "responses".equalsIgnoreCase(sort)) {
+
             vacancies = vacancyRepository
                     .findActiveByAuthorOrderByResponses(
                             authorId,
@@ -366,7 +418,10 @@ public class VacancyServiceImpl
                             pageable
                     );
         }
-        return vacancies.map(this::convertToDto);
+
+        return vacancies.map(
+                this::convertToDto
+        );
     }
 
     @Override
@@ -471,7 +526,6 @@ public class VacancyServiceImpl
 
         if (user.getAccountType()
                 != AccountType.EMPLOYER) {
-
             throw new InvalidAccountTypeException(
                     user.getId(),
                     AccountType.EMPLOYER
@@ -491,7 +545,6 @@ public class VacancyServiceImpl
 
         if (employer.getAccountType()
                 != AccountType.EMPLOYER) {
-
             throw new InvalidAccountTypeException(
                     employerId,
                     AccountType.EMPLOYER
@@ -509,7 +562,6 @@ public class VacancyServiceImpl
 
         if (applicant.getAccountType()
                 != AccountType.APPLICANT) {
-
             throw new InvalidAccountTypeException(
                     applicantId,
                     AccountType.APPLICANT
@@ -524,7 +576,6 @@ public class VacancyServiceImpl
         if (!vacancy.getAuthor()
                 .getId()
                 .equals(employer.getId())) {
-
             throw new IllegalArgumentException(
                     "You can only change your own vacancy"
             );
@@ -536,11 +587,23 @@ public class VacancyServiceImpl
             int size,
             String sort
     ) {
-        int safePage = Math.max(page, 1) - 1;
-        int safeSize = Math.max(1, Math.min(size, 50));
+        int safePage =
+                Math.max(page, 1) - 1;
+
+        int safeSize =
+                Math.max(
+                        1,
+                        Math.min(size, 50)
+                );
+
         if (sort != null
-                && sort.toLowerCase().startsWith("responses")) {
-            return PageRequest.of(safePage, safeSize);
+                && sort.toLowerCase()
+                .startsWith("responses")) {
+
+            return PageRequest.of(
+                    safePage,
+                    safeSize
+            );
         }
 
         Sort.Direction direction =
@@ -551,7 +614,10 @@ public class VacancyServiceImpl
         return PageRequest.of(
                 safePage,
                 safeSize,
-                Sort.by(direction, "updateTime")
+                Sort.by(
+                        direction,
+                        "updateTime"
+                )
         );
     }
 

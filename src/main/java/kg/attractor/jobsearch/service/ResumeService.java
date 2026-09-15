@@ -1,6 +1,7 @@
 package kg.attractor.jobsearch.service;
 
 import kg.attractor.jobsearch.dto.ResumeDto;
+import kg.attractor.jobsearch.model.Resume;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -30,6 +31,8 @@ public interface ResumeService {
 
     ResumeDto findById(Integer id);
 
+    Resume findEntityById(Integer id);
+
     ResumeDto findOwnedById(
             Integer id,
             String userEmail
@@ -37,9 +40,18 @@ public interface ResumeService {
 
     List<ResumeDto> findAllActive();
 
-    Page<ResumeDto> findAllActive(int page, int size, String sort);
+    Page<ResumeDto> findAllActive(
+            int page,
+            int size,
+            String sort
+    );
 
-    Page<ResumeDto> findByApplicantId(Integer applicantId, int page, int size, String sort);
+    Page<ResumeDto> findByApplicantId(
+            Integer applicantId,
+            int page,
+            int size,
+            String sort
+    );
 
     List<ResumeDto> findByCategoryId(
             Integer categoryId

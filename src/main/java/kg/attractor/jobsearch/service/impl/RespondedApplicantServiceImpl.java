@@ -3,18 +3,16 @@ package kg.attractor.jobsearch.service.impl;
 import kg.attractor.jobsearch.dto.RespondedApplicantDto;
 import kg.attractor.jobsearch.exception.InvalidAccountTypeException;
 import kg.attractor.jobsearch.exception.ResponseAlreadyExistsException;
-import kg.attractor.jobsearch.exception.ResumeNotFoundException;
-import kg.attractor.jobsearch.exception.VacancyNotFoundException;
 import kg.attractor.jobsearch.model.AccountType;
 import kg.attractor.jobsearch.model.RespondedApplicant;
 import kg.attractor.jobsearch.model.Resume;
 import kg.attractor.jobsearch.model.User;
 import kg.attractor.jobsearch.model.Vacancy;
 import kg.attractor.jobsearch.repository.RespondedApplicantRepository;
-import kg.attractor.jobsearch.repository.ResumeRepository;
-import kg.attractor.jobsearch.repository.VacancyRepository;
 import kg.attractor.jobsearch.service.RespondedApplicantService;
+import kg.attractor.jobsearch.service.ResumeService;
 import kg.attractor.jobsearch.service.UserService;
+import kg.attractor.jobsearch.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,8 +29,8 @@ public class RespondedApplicantServiceImpl
 
     private final RespondedApplicantRepository
             respondedApplicantRepository;
-    private final ResumeRepository resumeRepository;
-    private final VacancyRepository vacancyRepository;
+    private final ResumeService resumeService;
+    private final VacancyService vacancyService;
     private final UserService userService;
 
     @Override
@@ -56,22 +54,14 @@ public class RespondedApplicantServiceImpl
                         .getVacancyId();
 
         Resume resume =
-                resumeRepository
-                        .findById(resumeId)
-                        .orElseThrow(() ->
-                                new ResumeNotFoundException(
-                                        resumeId
-                                )
-                        );
+                resumeService.findEntityById(
+                        resumeId
+                );
 
         Vacancy vacancy =
-                vacancyRepository
-                        .findById(vacancyId)
-                        .orElseThrow(() ->
-                                new VacancyNotFoundException(
-                                        vacancyId
-                                )
-                        );
+                vacancyService.findEntityById(
+                        vacancyId
+                );
 
         if (!resume.getApplicant()
                 .getId()
@@ -140,13 +130,9 @@ public class RespondedApplicantServiceImpl
                 );
 
         Vacancy vacancy =
-                vacancyRepository
-                        .findById(vacancyId)
-                        .orElseThrow(() ->
-                                new VacancyNotFoundException(
-                                        vacancyId
-                                )
-                        );
+                vacancyService.findEntityById(
+                        vacancyId
+                );
 
         if (!vacancy.getAuthor()
                 .getId()
