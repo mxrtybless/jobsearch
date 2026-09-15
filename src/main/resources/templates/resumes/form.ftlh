@@ -216,65 +216,57 @@
                         </h2>
 
 
-                        <div class="card border mb-4">
+                        <div id="experience-container">
 
-                            <div class="card-body">
+                            <div class="card border mb-4 experience-item">
 
-                                <div class="row g-3">
+                                <div class="card-body">
 
-                                    <div class="col-12 col-md-6">
+                                    <div class="row g-3">
 
-                                        <label class="form-label">
-                                            <@spring.message
-                                                    'resume.form.work.company'/>
-                                        </label>
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label">
+                                                <@spring.message 'resume.form.work.company'/>
+                                            </label>
 
-                                        <@spring.formInput
-                                                "resumeDto.workExperienceInfo[0].companyName"
-                                                'class="form-control" required'/>
-
-                                    </div>
-
-
-                                    <div class="col-12 col-md-6">
-
-                                        <label class="form-label">
-                                            <@spring.message
-                                                    'resume.form.work.position'/>
-                                        </label>
-
-                                        <@spring.formInput
-                                                "resumeDto.workExperienceInfo[0].position"
-                                                'class="form-control" required'/>
-
-                                    </div>
+                                            <@spring.formInput
+                                                    "resumeDto.workExperienceInfo[0].companyName"
+                                                    'class="form-control" required'/>
+                                        </div>
 
 
-                                    <div class="col-12 col-md-4">
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label">
+                                                <@spring.message 'resume.form.work.position'/>
+                                            </label>
 
-                                        <label class="form-label">
-                                            <@spring.message
-                                                    'resume.form.work.years'/>
-                                        </label>
-
-                                        <@spring.formInput
-                                                "resumeDto.workExperienceInfo[0].years"
-                                                'class="form-control" min="0" max="70" required'
-                                                "number"/>
-
-                                    </div>
+                                            <@spring.formInput
+                                                    "resumeDto.workExperienceInfo[0].position"
+                                                    'class="form-control" required'/>
+                                        </div>
 
 
-                                    <div class="col-12">
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label">
+                                                <@spring.message 'resume.form.work.years'/>
+                                            </label>
 
-                                        <label class="form-label">
-                                            <@spring.message
-                                                    'resume.form.work.responsibilities'/>
-                                        </label>
+                                            <@spring.formInput
+                                                    "resumeDto.workExperienceInfo[0].years"
+                                                    'class="form-control" min="0" max="70" required'
+                                                    "number"/>
+                                        </div>
 
-                                        <@spring.formTextarea
-                                                "resumeDto.workExperienceInfo[0].responsibilities"
-                                                'class="form-control" rows="3" required'/>
+
+                                        <div class="col-12">
+                                            <label class="form-label">
+                                                <@spring.message 'resume.form.work.responsibilities'/>
+                                            </label>
+
+                                            <@spring.formTextarea
+                                                    "resumeDto.workExperienceInfo[0].responsibilities"
+                                                    'class="form-control" rows="3" required'/>
+                                        </div>
 
                                     </div>
 
@@ -283,6 +275,13 @@
                             </div>
 
                         </div>
+
+
+                        <button type="button"
+                                id="add-experience"
+                                class="btn btn-outline-primary mb-4">
+                            + Добавить опыт работы
+                        </button>
 
 
                         <hr class="my-4">
@@ -294,80 +293,69 @@
                         </h2>
 
 
-                        <div class="card border mb-4">
+                        <div id="education-container">
 
-                            <div class="card-body">
+                            <div class="card border mb-4 education-item">
 
-                                <div class="row g-3">
+                                <div class="card-body">
 
-                                    <div class="col-12 col-md-6">
+                                    <div class="row g-3">
 
-                                        <label class="form-label">
-                                            <@spring.message
-                                                    'resume.form.education.institution'/>
-                                        </label>
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label">
+                                                <@spring.message 'resume.form.education.institution'/>
+                                            </label>
 
-                                        <@spring.formInput
-                                                "resumeDto.educationInfo[0].institution"
-                                                'class="form-control" required'/>
-
-                                    </div>
-
-
-                                    <div class="col-12 col-md-6">
-
-                                        <label class="form-label">
-                                            <@spring.message
-                                                    'resume.form.education.program'/>
-                                        </label>
-
-                                        <@spring.formInput
-                                                "resumeDto.educationInfo[0].program"
-                                                'class="form-control" required'/>
-
-                                    </div>
+                                            <@spring.formInput
+                                                    "resumeDto.educationInfo[0].institution"
+                                                    'class="form-control" required'/>
+                                        </div>
 
 
-                                    <div class="col-12 col-md-4">
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label">
+                                                <@spring.message 'resume.form.education.program'/>
+                                            </label>
 
-                                        <label class="form-label">
-                                            <@spring.message
-                                                    'resume.form.education.startDate'/>
-                                        </label>
-
-                                        <@spring.formInput
-                                                "resumeDto.educationInfo[0].startDate"
-                                                'class="form-control" required'
-                                                "date"/>
-
-                                    </div>
+                                            <@spring.formInput
+                                                    "resumeDto.educationInfo[0].program"
+                                                    'class="form-control" required'/>
+                                        </div>
 
 
-                                    <div class="col-12 col-md-4">
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label">
+                                                <@spring.message 'resume.form.education.startDate'/>
+                                            </label>
 
-                                        <label class="form-label">
-                                            <@spring.message
-                                                    'resume.form.education.endDate'/>
-                                        </label>
-
-                                        <@spring.formInput
-                                                "resumeDto.educationInfo[0].endDate"
-                                                'class="form-control"'
-                                                "date"/>
-
-                                    </div>
+                                            <@spring.formInput
+                                                    "resumeDto.educationInfo[0].startDate"
+                                                    'class="form-control" required'
+                                                    "date"/>
+                                        </div>
 
 
-                                    <div class="col-12 col-md-4">
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label">
+                                                <@spring.message 'resume.form.education.endDate'/>
+                                            </label>
 
-                                        <label class="form-label">
-                                            <@spring.message
-                                                    'resume.form.education.degree'/>
-                                        </label>
+                                            <@spring.formInput
+                                                    "resumeDto.educationInfo[0].endDate"
+                                                    'class="form-control"'
+                                                    "date"/>
+                                        </div>
 
-                                        <@spring.formInput
-                                                "resumeDto.educationInfo[0].degree"
-                                                'class="form-control" required'/>
+
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label">
+                                                <@spring.message 'resume.form.education.degree'/>
+                                            </label>
+
+                                            <@spring.formInput
+                                                    "resumeDto.educationInfo[0].degree"
+                                                    'class="form-control" required'/>
+                                        </div>
 
                                     </div>
 
@@ -376,6 +364,13 @@
                             </div>
 
                         </div>
+
+
+                        <button type="button"
+                                id="add-education"
+                                class="btn btn-outline-primary mb-4">
+                            + Добавить образование
+                        </button>
 
 
                         <div class="form-check form-switch mb-4">
@@ -439,5 +434,8 @@
         </div>
 
     </div>
+
+
+    <script src="/js/resume-form.js"></script>
 
 </@layout.layout>

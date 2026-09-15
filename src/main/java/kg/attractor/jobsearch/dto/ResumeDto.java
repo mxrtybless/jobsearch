@@ -74,7 +74,6 @@ public class ResumeDto {
     @Valid
     @Size(
             min = 1,
-            max = 1,
             message = "{validation.resume.education.size}"
     )
     private List<EducationInfoDto> educationInfo =
@@ -83,7 +82,6 @@ public class ResumeDto {
     @Valid
     @Size(
             min = 1,
-            max = 1,
             message = "{validation.resume.work.size}"
     )
     private List<WorkExperienceInfoDto>
