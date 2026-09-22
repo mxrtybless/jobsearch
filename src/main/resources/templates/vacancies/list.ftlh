@@ -8,7 +8,161 @@
 
 <@layout.layout title=pageTitle + " | JobSearch">
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+    <section
+            id="vacancy-filter-panel"
+            class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="mb-3">
+
+                <h2 class="h5 mb-1">
+                    Фильтр вакансий
+                </h2>
+
+                <p class="text-secondary mb-0">
+                    Настройки фильтра сохраняются в браузере.
+                </p>
+
+            </div>
+
+            <form id="vacancy-filter-form">
+
+                <div class="row g-3">
+
+                    <div class="col-12 col-md-6">
+
+                        <label
+                                for="vacancy-name-filter"
+                                class="form-label">
+
+                            Название вакансии
+
+                        </label>
+
+                        <input
+                                id="vacancy-name-filter"
+                                class="form-control"
+                                type="search"
+                                autocomplete="off"
+                                placeholder="Например, Java-разработчик">
+
+                    </div>
+
+                    <div class="col-12 col-md-6">
+
+                        <label
+                                for="vacancy-category-filter"
+                                class="form-label">
+
+                            Категория
+
+                        </label>
+
+                        <select
+                                id="vacancy-category-filter"
+                                class="form-select">
+
+                            <option value="">
+                                Все категории
+                            </option>
+
+                            <#if categories??>
+
+                                <#list categories as category>
+
+                                    <option value="${category.id?c}">
+                                        ${category.name!}
+                                    </option>
+
+                                </#list>
+
+                            </#if>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-12 col-md-6">
+
+                        <label
+                                for="vacancy-salary-filter"
+                                class="form-label">
+
+                            Минимальная зарплата
+
+                        </label>
+
+                        <input
+                                id="vacancy-salary-filter"
+                                class="form-control"
+                                type="number"
+                                min="0"
+                                step="1"
+                                placeholder="Например, 50000">
+
+                    </div>
+
+                    <div class="col-12 col-md-6">
+
+                        <label
+                                for="vacancy-experience-filter"
+                                class="form-label">
+
+                            Опыт кандидата, лет
+
+                        </label>
+
+                        <input
+                                id="vacancy-experience-filter"
+                                class="form-control"
+                                type="number"
+                                min="0"
+                                max="70"
+                                step="1"
+                                placeholder="Например, 2">
+
+                    </div>
+
+                </div>
+
+                <div
+                        class="d-flex flex-wrap align-items-center gap-2 mt-4">
+
+                    <button
+                            class="btn btn-primary"
+                            type="submit">
+
+                        Применить
+
+                    </button>
+
+                    <button
+                            id="vacancy-filter-reset"
+                            class="btn btn-outline-secondary"
+                            type="button">
+
+                        Очистить
+
+                    </button>
+
+                    <span
+                            id="vacancy-filter-result-count"
+                            class="text-secondary small"
+                            aria-live="polite">
+                    </span>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
 
         <div>
 
@@ -38,7 +192,9 @@
                         <#if (sort!"dateDesc") == "dateDesc">
                             selected
                         </#if>>
+
                     <@spring.message 'vacancy.sort.dateDesc'/>
+
                 </option>
 
                 <option
@@ -46,7 +202,9 @@
                         <#if (sort!"dateDesc") == "dateAsc">
                             selected
                         </#if>>
+
                     <@spring.message 'vacancy.sort.dateAsc'/>
+
                 </option>
 
                 <option
@@ -54,7 +212,9 @@
                         <#if (sort!"dateDesc") == "responsesDesc">
                             selected
                         </#if>>
+
                     <@spring.message 'vacancy.sort.responsesDesc'/>
+
                 </option>
 
                 <option
@@ -62,7 +222,9 @@
                         <#if (sort!"dateDesc") == "responsesAsc">
                             selected
                         </#if>>
+
                     <@spring.message 'vacancy.sort.responsesAsc'/>
+
                 </option>
 
             </select>
@@ -83,7 +245,13 @@
 
             <#list vacancies as vacancy>
 
-                <div class="card border-0 shadow-sm">
+                <div
+                        class="card border-0 shadow-sm list-card vacancy-card"
+                        data-vacancy-name="${((vacancy.name!'')?lower_case)?html}"
+                        data-vacancy-category="${(vacancy.categoryId!0)?c}"
+                        data-vacancy-salary="${(vacancy.salary!0)?c}"
+                        data-vacancy-exp-from="${(vacancy.expFrom!0)?c}"
+                        data-vacancy-exp-to="${(vacancy.expTo!70)?c}">
 
                     <div class="card-body p-4">
 
@@ -96,7 +264,9 @@
                                     <a
                                             class="text-decoration-none"
                                             href="/vacancies/${vacancy.id?c}">
+
                                         ${vacancy.name!}
+
                                     </a>
 
                                 </h2>
@@ -162,6 +332,13 @@
 
         </div>
 
+        <div
+                id="vacancy-filter-empty"
+                class="alert alert-light d-none mt-3">
+
+            Подходящих вакансий нет.
+
+        </div>
 
     <#else>
 
@@ -178,5 +355,11 @@
             baseUrl="/vacancies"
             sort=sort!"dateDesc"
             hasContent=(vacancies?? && vacancies?size gt 0)/>
+
+
+    <script
+            src="/js/vacancy-filter.js"
+            defer>
+    </script>
 
 </@layout.layout>

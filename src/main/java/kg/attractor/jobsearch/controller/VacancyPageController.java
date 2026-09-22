@@ -35,11 +35,15 @@ public class VacancyPageController {
             @RequestParam(defaultValue = "dateDesc") String sort,
             Model model
     ) {
-        Page<VacancyDto> vacancyPage = vacancyService.findAllActive(page, 6, sort);
+        Page<VacancyDto> vacancyPage =
+                vacancyService.findAllActive(page, 6, sort);
+
         model.addAttribute("vacancies", vacancyPage.getContent());
+        model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("currentPage", vacancyPage.getNumber() + 1);
         model.addAttribute("totalPages", vacancyPage.getTotalPages());
         model.addAttribute("sort", sort);
+
         return "vacancies/list";
     }
 
@@ -49,8 +53,13 @@ public class VacancyPageController {
             Model model
     ) {
         VacancyDto vacancy = vacancyService.findById(id);
+
         model.addAttribute("vacancy", vacancy);
-        model.addAttribute("author", userService.findProfileById(vacancy.getAuthorId()));
+        model.addAttribute(
+                "author",
+                userService.findProfileById(vacancy.getAuthorId())
+        );
+
         return "vacancies/details";
     }
 
@@ -58,7 +67,9 @@ public class VacancyPageController {
     public String createVacancy(Model model) {
         VacancyDto vacancyDto = new VacancyDto();
         vacancyDto.setIsActive(true);
+
         addFormData(model, vacancyDto, "create", null);
+
         return "vacancies/form";
     }
 
@@ -73,17 +84,32 @@ public class VacancyPageController {
             addFormData(model, vacancyDto, "create", null);
             return "vacancies/form";
         }
+
         try {
-            vacancyService.createVacancy(vacancyDto, authentication.getName());
+            vacancyService.createVacancy(
+                    vacancyDto,
+                    authentication.getName()
+            );
         } catch (InvalidExperienceRangeException e) {
-            bindingResult.rejectValue("expTo", "experience.range", e.getMessage());
+            bindingResult.rejectValue(
+                    "expTo",
+                    "experience.range",
+                    e.getMessage()
+            );
+
             addFormData(model, vacancyDto, "create", null);
             return "vacancies/form";
         } catch (CategoryNotFoundException e) {
-            bindingResult.rejectValue("categoryId", "category.notFound", e.getMessage());
+            bindingResult.rejectValue(
+                    "categoryId",
+                    "category.notFound",
+                    e.getMessage()
+            );
+
             addFormData(model, vacancyDto, "create", null);
             return "vacancies/form";
         }
+
         return "redirect:/profile?vacancyCreated=true";
     }
 
@@ -93,8 +119,11 @@ public class VacancyPageController {
             Authentication authentication,
             Model model
     ) {
-        VacancyDto vacancyDto = vacancyService.findOwnedById(id, authentication.getName());
+        VacancyDto vacancyDto =
+                vacancyService.findOwnedById(id, authentication.getName());
+
         addFormData(model, vacancyDto, "edit", id);
+
         return "vacancies/form";
     }
 
@@ -110,17 +139,33 @@ public class VacancyPageController {
             addFormData(model, vacancyDto, "edit", id);
             return "vacancies/form";
         }
+
         try {
-            vacancyService.editVacancy(id, vacancyDto, authentication.getName());
+            vacancyService.editVacancy(
+                    id,
+                    vacancyDto,
+                    authentication.getName()
+            );
         } catch (InvalidExperienceRangeException e) {
-            bindingResult.rejectValue("expTo", "experience.range", e.getMessage());
+            bindingResult.rejectValue(
+                    "expTo",
+                    "experience.range",
+                    e.getMessage()
+            );
+
             addFormData(model, vacancyDto, "edit", id);
             return "vacancies/form";
         } catch (CategoryNotFoundException e) {
-            bindingResult.rejectValue("categoryId", "category.notFound", e.getMessage());
+            bindingResult.rejectValue(
+                    "categoryId",
+                    "category.notFound",
+                    e.getMessage()
+            );
+
             addFormData(model, vacancyDto, "edit", id);
             return "vacancies/form";
         }
+
         return "redirect:/profile?vacancyUpdated=true";
     }
 
@@ -129,7 +174,11 @@ public class VacancyPageController {
             @PathVariable Integer id,
             Authentication authentication
     ) {
-        vacancyService.updateVacancyDate(id, authentication.getName());
+        vacancyService.updateVacancyDate(
+                id,
+                authentication.getName()
+        );
+
         return "redirect:/profile?vacancyRefreshed=true";
     }
 
@@ -142,6 +191,7 @@ public class VacancyPageController {
         model.addAttribute("vacancyDto", vacancyDto);
         model.addAttribute("categories", categoryService.findAll());
         model.addAttribute("formMode", formMode);
+
         if (vacancyId != null) {
             model.addAttribute("vacancyId", vacancyId);
         }
