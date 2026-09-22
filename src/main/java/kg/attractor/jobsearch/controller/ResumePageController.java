@@ -5,6 +5,7 @@ import kg.attractor.jobsearch.dto.ContactInfoDto;
 import kg.attractor.jobsearch.dto.EducationInfoDto;
 import kg.attractor.jobsearch.dto.ResumeDto;
 import kg.attractor.jobsearch.dto.WorkExperienceInfoDto;
+import kg.attractor.jobsearch.exception.CategoryNotFoundException;
 import kg.attractor.jobsearch.exception.InvalidContactValueException;
 import kg.attractor.jobsearch.exception.InvalidEducationPeriodException;
 import kg.attractor.jobsearch.model.ContactType;
@@ -44,56 +45,36 @@ public class ResumePageController {
             @RequestParam(defaultValue = "dateDesc") String sort,
             Model model
     ) {
-        Page<ResumeDto> resumePage = resumeService.findAllActive(page, 6, sort);
+        Page<ResumeDto> resumePage =
+                resumeService.findAllActive(page, 6, sort);
+
         model.addAttribute("resumes", resumePage.getContent());
         model.addAttribute("currentPage", resumePage.getNumber() + 1);
         model.addAttribute("totalPages", resumePage.getTotalPages());
         model.addAttribute("sort", sort);
+
         return "resumes/list";
     }
 
     @GetMapping("form/create")
-    public String createResume(
-            Model model
-    ) {
-        ResumeDto resumeDto =
-                new ResumeDto();
-
+    public String createResume(Model model) {
+        ResumeDto resumeDto = new ResumeDto();
         resumeDto.setIsActive(true);
 
-        prepareContactInfo(resumeDto);
-        prepareSingleResumeDetails(resumeDto);
-
-        addFormData(
-                model,
-                resumeDto,
-                "create",
-                null
-        );
+        addFormData(model, resumeDto, "create", null);
 
         return "resumes/form";
     }
 
     @PostMapping("form/create")
     public String createResume(
-            @Valid
-            @ModelAttribute("resumeDto")
-            ResumeDto resumeDto,
+            @Valid @ModelAttribute("resumeDto") ResumeDto resumeDto,
             BindingResult bindingResult,
             Authentication authentication,
             Model model
     ) {
-        prepareContactInfo(resumeDto);
-        prepareSingleResumeDetails(resumeDto);
-
         if (bindingResult.hasErrors()) {
-            addFormData(
-                    model,
-                    resumeDto,
-                    "create",
-                    null
-            );
-
+            addFormData(model, resumeDto, "create", null);
             return "resumes/form";
         }
 
@@ -102,22 +83,22 @@ public class ResumePageController {
                     resumeDto,
                     authentication.getName()
             );
-        } catch (
-                InvalidContactValueException
-                | InvalidEducationPeriodException e
-        ) {
+        } catch (InvalidContactValueException
+                 | InvalidEducationPeriodException exception) {
             bindingResult.reject(
                     "resume.invalid",
-                    e.getMessage()
+                    exception.getMessage()
             );
 
-            addFormData(
-                    model,
-                    resumeDto,
-                    "create",
-                    null
+            addFormData(model, resumeDto, "create", null);
+            return "resumes/form";
+        } catch (CategoryNotFoundException exception) {
+            bindingResult.rejectValue(
+                    "categoryId",
+                    "category.notFound"
             );
 
+            addFormData(model, resumeDto, "create", null);
             return "resumes/form";
         }
 
@@ -130,21 +111,12 @@ public class ResumePageController {
             Authentication authentication,
             Model model
     ) {
-        ResumeDto resumeDto =
-                resumeService.findOwnedById(
-                        id,
-                        authentication.getName()
-                );
-
-        prepareContactInfo(resumeDto);
-        prepareSingleResumeDetails(resumeDto);
-
-        addFormData(
-                model,
-                resumeDto,
-                "edit",
-                id
+        ResumeDto resumeDto = resumeService.findOwnedById(
+                id,
+                authentication.getName()
         );
+
+        addFormData(model, resumeDto, "edit", id);
 
         return "resumes/form";
     }
@@ -152,24 +124,13 @@ public class ResumePageController {
     @PostMapping("form/edit/{id}")
     public String editResume(
             @PathVariable Integer id,
-            @Valid
-            @ModelAttribute("resumeDto")
-            ResumeDto resumeDto,
+            @Valid @ModelAttribute("resumeDto") ResumeDto resumeDto,
             BindingResult bindingResult,
             Authentication authentication,
             Model model
     ) {
-        prepareContactInfo(resumeDto);
-        prepareSingleResumeDetails(resumeDto);
-
         if (bindingResult.hasErrors()) {
-            addFormData(
-                    model,
-                    resumeDto,
-                    "edit",
-                    id
-            );
-
+            addFormData(model, resumeDto, "edit", id);
             return "resumes/form";
         }
 
@@ -179,22 +140,22 @@ public class ResumePageController {
                     resumeDto,
                     authentication.getName()
             );
-        } catch (
-                InvalidContactValueException
-                | InvalidEducationPeriodException e
-        ) {
+        } catch (InvalidContactValueException
+                 | InvalidEducationPeriodException exception) {
             bindingResult.reject(
                     "resume.invalid",
-                    e.getMessage()
+                    exception.getMessage()
             );
 
-            addFormData(
-                    model,
-                    resumeDto,
-                    "edit",
-                    id
+            addFormData(model, resumeDto, "edit", id);
+            return "resumes/form";
+        } catch (CategoryNotFoundException exception) {
+            bindingResult.rejectValue(
+                    "categoryId",
+                    "category.notFound"
             );
 
+            addFormData(model, resumeDto, "edit", id);
             return "resumes/form";
         }
 
@@ -220,125 +181,66 @@ public class ResumePageController {
             String formMode,
             Integer resumeId
     ) {
-        model.addAttribute(
-                "resumeDto",
-                resumeDto
-        );
+        prepareContactInfo(resumeDto);
+        prepareResumeDetails(resumeDto);
 
-        model.addAttribute(
-                "categories",
-                categoryService.findAll()
-        );
-
-        model.addAttribute(
-                "contactTypes",
-                contactTypeService.findAll()
-        );
-
-        model.addAttribute(
-                "formMode",
-                formMode
-        );
+        model.addAttribute("resumeDto", resumeDto);
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("contactTypes", contactTypeService.findAll());
+        model.addAttribute("formMode", formMode);
 
         if (resumeId != null) {
-            model.addAttribute(
-                    "resumeId",
-                    resumeId
-            );
+            model.addAttribute("resumeId", resumeId);
         }
     }
 
-    private void prepareContactInfo(
-            ResumeDto resumeDto
-    ) {
-        List<ContactType> contactTypes =
-                contactTypeService.findAll();
+    private void prepareContactInfo(ResumeDto resumeDto) {
+        List<ContactType> contactTypes = contactTypeService.findAll();
+        Map<Integer, ContactInfoDto> existing = new HashMap<>();
 
-        Map<Integer, ContactInfoDto> existing =
-                new HashMap<>();
-
-        if (resumeDto.getContactInfo()
-                != null) {
-
-            for (ContactInfoDto contactInfoDto
-                    : resumeDto.getContactInfo()) {
-
-                if (contactInfoDto != null
-                        && contactInfoDto.getTypeId()
-                        != null) {
-
-                    existing.put(
-                            contactInfoDto.getTypeId(),
-                            contactInfoDto
-                    );
+        if (resumeDto.getContactInfo() != null) {
+            for (ContactInfoDto contact : resumeDto.getContactInfo()) {
+                if (contact != null && contact.getTypeId() != null) {
+                    existing.put(contact.getTypeId(), contact);
                 }
             }
         }
 
-        List<ContactInfoDto> normalized =
-                new ArrayList<>();
+        List<ContactInfoDto> normalized = new ArrayList<>();
 
-        for (ContactType contactType
-                : contactTypes) {
+        for (ContactType contactType : contactTypes) {
+            ContactInfoDto contact = existing.get(contactType.getId());
 
-            ContactInfoDto contactInfoDto =
-                    existing.get(
-                            contactType.getId()
-                    );
-
-            if (contactInfoDto == null) {
-                contactInfoDto =
-                        new ContactInfoDto();
-
-                contactInfoDto.setTypeId(
-                        contactType.getId()
-                );
+            if (contact == null) {
+                contact = new ContactInfoDto();
+                contact.setTypeId(contactType.getId());
             }
 
-            normalized.add(contactInfoDto);
+            normalized.add(contact);
         }
 
         resumeDto.setContactInfo(normalized);
     }
 
-    private void prepareSingleResumeDetails(
-            ResumeDto resumeDto
-    ) {
-        List<WorkExperienceInfoDto> workExperience =
-                new ArrayList<>();
+    private void prepareResumeDetails(ResumeDto resumeDto) {
+        if (resumeDto.getWorkExperienceInfo() == null) {
+            resumeDto.setWorkExperienceInfo(new ArrayList<>());
+        }
 
-        if (resumeDto.getWorkExperienceInfo() != null
-                && !resumeDto.getWorkExperienceInfo().isEmpty()) {
-            workExperience.add(
-                    resumeDto.getWorkExperienceInfo().get(0)
-            );
-        } else {
-            workExperience.add(
+        if (resumeDto.getWorkExperienceInfo().isEmpty()) {
+            resumeDto.getWorkExperienceInfo().add(
                     new WorkExperienceInfoDto()
             );
         }
 
-        resumeDto.setWorkExperienceInfo(
-                workExperience
-        );
+        if (resumeDto.getEducationInfo() == null) {
+            resumeDto.setEducationInfo(new ArrayList<>());
+        }
 
-        List<EducationInfoDto> education =
-                new ArrayList<>();
-
-        if (resumeDto.getEducationInfo() != null
-                && !resumeDto.getEducationInfo().isEmpty()) {
-            education.add(
-                    resumeDto.getEducationInfo().get(0)
-            );
-        } else {
-            education.add(
+        if (resumeDto.getEducationInfo().isEmpty()) {
+            resumeDto.getEducationInfo().add(
                     new EducationInfoDto()
             );
         }
-
-        resumeDto.setEducationInfo(
-                education
-        );
     }
-
 }

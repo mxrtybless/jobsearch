@@ -1,84 +1,97 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("resume-form");
 
-    const educationContainer = document.getElementById("education-container");
-    const experienceContainer = document.getElementById("experience-container");
+    if (!form) {
+        return;
+    }
 
-    let educationIndex = educationContainer
-        ? educationContainer.querySelectorAll(".education-item").length
-        : 0;
+    function setupDetails(containerId, addButtonId, fieldName) {
+        const container = document.getElementById(containerId);
+        const addButton = document.getElementById(addButtonId);
 
-    let experienceIndex = experienceContainer
-        ? experienceContainer.querySelectorAll(".experience-item").length
-        : 0;
+        if (!container || !addButton) {
+            return;
+        }
 
-    const addEducation = document.getElementById("add-education");
-    const addExperience = document.getElementById("add-experience");
+        function getItems() {
+            return Array.from(
+                container.querySelectorAll(".resume-detail-item")
+            );
+        }
 
-    addEducation?.addEventListener("click", () => {
-        const index = educationIndex++;
+        function updateIndexes() {
+            const items = getItems();
 
-        educationContainer.insertAdjacentHTML("beforeend", `
-        <div class="card border mb-4 education-item">
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <input class="form-control"
-                               name="educationInfo[${index}].institution"
-                               placeholder="Учебное заведение" required>
-                    </div>
-                    <div class="col-md-6">
-                        <input class="form-control"
-                               name="educationInfo[${index}].program"
-                               placeholder="Программа" required>
-                    </div>
-                    <div class="col-md-4">
-                        <input type="date" class="form-control"
-                               name="educationInfo[${index}].startDate" required>
-                    </div>
-                    <div class="col-md-4">
-                        <input type="date" class="form-control"
-                               name="educationInfo[${index}].endDate">
-                    </div>
-                    <div class="col-md-4">
-                        <input class="form-control"
-                               name="educationInfo[${index}].degree"
-                               placeholder="Степень" required>
-                    </div>
-                </div>
-            </div>
-        </div>`);
-    });
+            items.forEach((item, index) => {
+                item.querySelectorAll("[name]").forEach(field => {
+                    const property = field.name.substring(
+                        field.name.indexOf("].") + 2
+                    );
 
-    addExperience?.addEventListener("click", () => {
-        const index = experienceIndex++;
+                    field.name = `${fieldName}[${index}].${property}`;
+                    field.id = `${fieldName}-${index}-${property}`;
+                });
 
-        experienceContainer.insertAdjacentHTML("beforeend", `
-        <div class="card border mb-4 experience-item">
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <input class="form-control"
-                               name="workExperienceInfo[${index}].companyName"
-                               placeholder="Компания" required>
-                    </div>
-                    <div class="col-md-6">
-                        <input class="form-control"
-                               name="workExperienceInfo[${index}].position"
-                               placeholder="Должность" required>
-                    </div>
-                    <div class="col-md-4">
-                        <input type="number" class="form-control"
-                               name="workExperienceInfo[${index}].years"
-                               placeholder="Годы" required>
-                    </div>
-                    <div class="col-12">
-                        <textarea class="form-control"
-                                  name="workExperienceInfo[${index}].responsibilities"
-                                  placeholder="Обязанности"
-                                  rows="3" required></textarea>
-                    </div>
-                </div>
-            </div>
-        </div>`);
-    });
+                const removeButton = item.querySelector(
+                    "[data-remove-detail]"
+                );
+
+                removeButton.disabled = items.length === 1;
+            });
+        }
+
+        addButton.addEventListener("click", () => {
+            const firstItem = getItems()[0];
+
+            if (!firstItem) {
+                return;
+            }
+
+            const newItem = firstItem.cloneNode(true);
+
+            newItem.querySelectorAll("input, textarea").forEach(field => {
+                field.value = "";
+                field.defaultValue = "";
+                field.classList.remove("is-invalid");
+            });
+
+            newItem.querySelectorAll(".field-errors").forEach(errors => {
+                errors.textContent = "";
+            });
+
+            container.appendChild(newItem);
+            updateIndexes();
+
+            newItem.querySelector("input, textarea")?.focus();
+        });
+
+        container.addEventListener("click", event => {
+            const removeButton = event.target.closest(
+                "[data-remove-detail]"
+            );
+
+            if (!removeButton || getItems().length <= 1) {
+                return;
+            }
+
+            removeButton.closest(".resume-detail-item").remove();
+            updateIndexes();
+        });
+
+        form.addEventListener("submit", updateIndexes);
+
+        updateIndexes();
+    }
+
+    setupDetails(
+        "experience-container",
+        "add-experience",
+        "workExperienceInfo"
+    );
+
+    setupDetails(
+        "education-container",
+        "add-education",
+        "educationInfo"
+    );
 });

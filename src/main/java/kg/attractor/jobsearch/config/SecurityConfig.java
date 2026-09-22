@@ -20,28 +20,21 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    public DaoAuthenticationProvider
-    authenticationProvider(
+    public DaoAuthenticationProvider authenticationProvider(
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder
     ) {
         DaoAuthenticationProvider provider =
-                new DaoAuthenticationProvider(
-                        userDetailsService
-                );
+                new DaoAuthenticationProvider(userDetailsService);
 
-        provider.setPasswordEncoder(
-                passwordEncoder
-        );
+        provider.setPasswordEncoder(passwordEncoder);
 
         return provider;
     }
 
     @Bean
-    public AuthenticationManager
-    authenticationManager(
-            DaoAuthenticationProvider
-                    authenticationProvider
+    public AuthenticationManager authenticationManager(
+            DaoAuthenticationProvider authenticationProvider
     ) {
         return new ProviderManager(
                 List.of(authenticationProvider)
@@ -51,14 +44,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(
             HttpSecurity http,
-            DaoAuthenticationProvider
-                    authenticationProvider
+            DaoAuthenticationProvider authenticationProvider
     ) throws Exception {
-
         http
-                .authenticationProvider(
-                        authenticationProvider
-                )
+                .authenticationProvider(authenticationProvider)
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
@@ -66,56 +55,35 @@ public class SecurityConfig {
                         )
                 )
 
-                .httpBasic(
-                        Customizer.withDefaults()
-                )
+                .httpBasic(Customizer.withDefaults())
 
                 .formLogin(login ->
                         login
-                                .loginPage(
-                                        "/auth/login"
-                                )
-                                .loginProcessingUrl(
-                                        "/auth/login"
-                                )
+                                .loginPage("/auth/login")
+                                .loginProcessingUrl("/auth/login")
                                 .successHandler(
-                                        (
-                                                request,
-                                                response,
-                                                authentication
-                                        ) ->
+                                        (request, response, authentication) ->
                                                 response.sendRedirect(
-                                                        successUrl(
-                                                                authentication
-                                                        )
+                                                        successUrl(authentication)
                                                 )
                                 )
-                                .failureUrl(
-                                        "/auth/login?error=true"
-                                )
+                                .failureUrl("/auth/login?error=true")
                                 .permitAll()
                 )
 
                 .logout(logout ->
                         logout
-                                .logoutUrl(
-                                        "/auth/logout"
-                                )
-                                .logoutSuccessUrl(
-                                        "/auth/login?logout=true"
-                                )
+                                .logoutUrl("/auth/logout")
+                                .logoutSuccessUrl("/auth/login?logout=true")
                                 .clearAuthentication(true)
                                 .invalidateHttpSession(true)
                                 .permitAll()
                 )
 
-                .csrf(
-                        Customizer.withDefaults()
-                )
+                .csrf(Customizer.withDefaults())
 
                 .authorizeHttpRequests(authorize ->
                         authorize
-
                                 .requestMatchers(
                                         "/auth/login",
                                         "/auth/register",
@@ -123,6 +91,7 @@ public class SecurityConfig {
                                         "/auth/reset_password",
                                         "/",
                                         "/css/**",
+                                        "/js/**",
                                         "/images/**",
                                         "/error"
                                 )
@@ -141,17 +110,13 @@ public class SecurityConfig {
                                 )
                                 .permitAll()
 
-                                .requestMatchers(
-                                        "/resumes/form/**"
-                                )
+                                .requestMatchers("/resumes/form/**")
                                 .hasAnyAuthority(
                                         "APPLICANT",
                                         "ROLE_APPLICANT"
                                 )
 
-                                .requestMatchers(
-                                        "/vacancies/form/**"
-                                )
+                                .requestMatchers("/vacancies/form/**")
                                 .hasAnyAuthority(
                                         "EMPLOYER",
                                         "ROLE_EMPLOYER"
@@ -260,24 +225,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private String successUrl(
-            Authentication authentication
-    ) {
-        boolean employer =
-                authentication
-                        .getAuthorities()
-                        .stream()
-                        .anyMatch(authority ->
-                                authority.getAuthority()
-                                        .equals("EMPLOYER")
-                                        || authority.getAuthority()
-                                        .equals("ROLE_EMPLOYER")
-                        );
+    private String successUrl(Authentication authentication) {
+        boolean employer = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("EMPLOYER")
+                                || authority.getAuthority()
+                                .equals("ROLE_EMPLOYER")
+                );
 
-        if (employer) {
-            return "/resumes";
-        }
-
-        return "/vacancies";
+        return employer ? "/resumes" : "/vacancies";
     }
 }

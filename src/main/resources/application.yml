@@ -26,6 +26,12 @@ spring:
     console:
       enabled: true
 
+  freemarker:
+    suffix: .ftlh
+    charset: UTF-8
+    expose-request-attributes: true
+    expose-session-attributes: true
+
   messages:
     basename: messages
     encoding: UTF-8
