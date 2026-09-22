@@ -20,7 +20,7 @@
         <meta name="_csrf_parameter" content="${_csrf.parameterName}">
         <meta name="_csrf_header" content="${_csrf.headerName}">
 
-        <title>${title}</title>
+        <title>${title} | JobSearch</title>
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
               rel="stylesheet">

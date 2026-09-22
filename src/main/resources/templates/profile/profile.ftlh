@@ -12,7 +12,7 @@
         )>
 
 
-<@layout.layout title=pageTitle + " | JobSearch">
+<@layout.layout title=pageTitle>
 
     <div class="card border-0 shadow-sm mb-4">
 

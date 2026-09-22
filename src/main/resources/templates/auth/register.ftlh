@@ -27,7 +27,7 @@
         )>
 
 
-<@layout.layout title=pageTitle + " | JobSearch">
+<@layout.layout title=pageTitle>
 
     <div class="row justify-content-center">
 
@@ -345,16 +345,16 @@
             document.getElementById("ageLabel");
 
         const userNameLabel =
-            "${userNameLabel?js_string}";
+            "${userNameLabel?markup_string?js_string}";
 
         const companyNameLabel =
-            "${companyNameLabel?js_string}";
+            "${companyNameLabel?markup_string?js_string}";
 
         const applicantAgeLabel =
-            "${applicantAgeLabel?js_string}";
+            "${applicantAgeLabel?markup_string?js_string}";
 
         const employerAgeLabel =
-            "${employerAgeLabel?js_string}";
+            "${employerAgeLabel?markup_string?js_string}";
 
 
         function updateRegistrationForm() {

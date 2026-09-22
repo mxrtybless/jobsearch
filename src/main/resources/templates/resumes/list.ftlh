@@ -6,7 +6,7 @@
                 "resume.list.title"
         )>
 
-<@layout.layout title=pageTitle + " | JobSearch">
+<@layout.layout title=pageTitle>
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
 

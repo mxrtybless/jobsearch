@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             localStorage.setItem(languageKey, language);
         } catch (error) {
-            // Если хранилище недоступно, остаётся серверная cookie.
         }
     }
 

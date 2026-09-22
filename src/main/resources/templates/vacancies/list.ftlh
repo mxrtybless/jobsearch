@@ -6,7 +6,7 @@
                 "vacancy.list.title"
         )>
 
-<@layout.layout title=pageTitle + " | JobSearch">
+<@layout.layout title=pageTitle>
 
     <section
             id="vacancy-filter-panel"

@@ -9,10 +9,10 @@
 <#assign passwordPlaceholder =
         springMacroRequestContext.getMessage(
                 "auth.login.password.placeholder"
-        )>
+        )?markup_string>
 
 
-<@layout.layout title=pageTitle + " | JobSearch">
+<@layout.layout title=pageTitle>
 
     <div class="row justify-content-center">
 

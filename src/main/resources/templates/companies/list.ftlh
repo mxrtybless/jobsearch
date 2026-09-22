@@ -6,7 +6,7 @@
                 "company.list.title"
         )>
 
-<@layout.layout title=pageTitle + " | JobSearch">
+<@layout.layout title=pageTitle>
 
     <h1 class="h2 mb-4">
         <@spring.message 'company.list.heading'/>

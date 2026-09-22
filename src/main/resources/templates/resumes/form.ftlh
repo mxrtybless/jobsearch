@@ -16,7 +16,7 @@
     <#assign formAction = "/resumes/form/edit/" + resumeId?c>
 </#if>
 
-<@layout.layout title=pageTitle + " | JobSearch">
+<@layout.layout title=pageTitle>
     <div class="row justify-content-center">
         <div class="col-12 col-xl-9">
             <div class="card border-0 shadow-sm">

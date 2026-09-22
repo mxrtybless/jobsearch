@@ -41,7 +41,7 @@
         )>
 
 
-<@layout.layout title=errorStatus?string + " | " + pageTitle + " | JobSearch">
+<@layout.layout title=pageTitle>
 
     <div class="row justify-content-center">
 
