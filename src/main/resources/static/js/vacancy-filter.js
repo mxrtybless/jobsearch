@@ -87,7 +87,7 @@
 
     function vacancyMatches(card, state) {
         const vacancyName =
-            (card.dataset.vacancyName || "").toLowerCase();
+                (card.dataset.vacancyName || "").toLowerCase();
 
         if (
                 state.name
@@ -103,11 +103,12 @@
             return false;
         }
 
-        const minimumSalary = parseNumber(state.salary);
+        const minimumSalary =
+                parseNumber(state.salary);
 
         if (minimumSalary !== null) {
             const vacancySalary =
-                parseNumber(card.dataset.vacancySalary);
+                    parseNumber(card.dataset.vacancySalary);
 
             if (
                     vacancySalary === null
@@ -140,11 +141,13 @@
         return true;
     }
 
-    function applyFilter() {
+    function applyFilter(saveCurrentState) {
         const state = getStateFromForm();
         const cards = document.querySelectorAll(".vacancy-card");
 
-        saveState(state);
+        if (saveCurrentState) {
+            saveState(state);
+        }
 
         let visibleCount = 0;
 
@@ -152,6 +155,10 @@
             const matches = vacancyMatches(card, state);
 
             card.classList.toggle("d-none", !matches);
+            card.classList.toggle(
+                    "vacancy-card-hidden",
+                    !matches
+            );
 
             if (matches) {
                 visibleCount += 1;
@@ -171,12 +178,21 @@
         }
     }
 
-    form.addEventListener("input", applyFilter);
-    form.addEventListener("change", applyFilter);
+    function saveCurrentFilter() {
+        saveState(getStateFromForm());
+    }
+
+    form.addEventListener("input", function () {
+        applyFilter(true);
+    });
+
+    form.addEventListener("change", function () {
+        applyFilter(true);
+    });
 
     form.addEventListener("submit", function (event) {
         event.preventDefault();
-        applyFilter();
+        applyFilter(true);
     });
 
     if (resetButton) {
@@ -186,13 +202,56 @@
             try {
                 localStorage.removeItem(STORAGE_KEY);
             } catch (error) {
-                // Локальное хранилище может быть недоступно
             }
 
-            applyFilter();
+            applyFilter(true);
         });
     }
 
+    document
+            .querySelectorAll('form[action="/vacancies"]')
+            .forEach(function (sortForm) {
+                sortForm.addEventListener(
+                        "submit",
+                        saveCurrentFilter
+                );
+            });
+
+    document
+            .querySelectorAll('a[href^="/vacancies?"]')
+            .forEach(function (link) {
+                link.addEventListener(
+                        "click",
+                        saveCurrentFilter
+                );
+            });
+
+    window.addEventListener(
+            "pagehide",
+            saveCurrentFilter
+    );
+
+    window.addEventListener(
+            "pageshow",
+            function () {
+                restoreState();
+                applyFilter(false);
+            }
+    );
+
+    window.addEventListener(
+            "storage",
+            function (event) {
+                if (
+                        event.key === STORAGE_KEY
+                        || event.key === null
+                ) {
+                    restoreState();
+                    applyFilter(false);
+                }
+            }
+    );
+
     restoreState();
-    applyFilter();
+    applyFilter(false);
 })();
