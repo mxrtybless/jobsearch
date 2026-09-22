@@ -92,6 +92,37 @@ body {
     border-radius: 14px;
 }
 
+#vacancy-filter-panel {
+    background-color: #ffffff;
+}
+
+#vacancy-filter-panel h2 {
+    color: #212529;
+}
+
+#vacancy-filter-result-count {
+    min-width: 70px;
+}
+
+.vacancy-card-hidden {
+    display: none !important;
+}
+
+.vacancy-card {
+    transition:
+            opacity 0.15s ease,
+            transform 0.15s ease,
+            box-shadow 0.15s ease;
+}
+
+.vacancy-card:hover {
+    transform: translateY(-2px);
+}
+
+#vacancy-filter-empty {
+    border: 1px dashed #ced4da;
+}
+
 @media (max-width: 767px) {
 
     .profile-avatar,
@@ -102,5 +133,9 @@ body {
 
     .vacancy-date {
         min-width: 0;
+    }
+
+    #vacancy-filter-panel .btn {
+        flex: 1 1 auto;
     }
 }
