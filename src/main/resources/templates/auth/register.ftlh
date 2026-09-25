@@ -345,16 +345,16 @@
             document.getElementById("ageLabel");
 
         const userNameLabel =
-            "${userNameLabel?markup_string?js_string}";
+            "${userNameLabel?js_string?no_esc}";
 
         const companyNameLabel =
-            "${companyNameLabel?markup_string?js_string}";
+            "${companyNameLabel?js_string?no_esc}";
 
         const applicantAgeLabel =
-            "${applicantAgeLabel?markup_string?js_string}";
+            "${applicantAgeLabel?js_string?no_esc}";
 
         const employerAgeLabel =
-            "${employerAgeLabel?markup_string?js_string}";
+            "${employerAgeLabel?js_string?no_esc}";
 
 
         function updateRegistrationForm() {

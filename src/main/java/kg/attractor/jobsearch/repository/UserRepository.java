@@ -63,4 +63,15 @@ public interface UserRepository
             @Param("query")
             String query
     );
+
+    @org.springframework.data.jpa.repository.Modifying(clearAutomatically = true)
+    @org.springframework.data.jpa.repository.Query("""
+            update User u set u.password = :password,
+                u.resetPasswordToken = null, u.resetPasswordExpiresAt = null
+            where u.resetPasswordToken = :token and u.resetPasswordExpiresAt > :now
+            """)
+    int consumeResetToken(@org.springframework.data.repository.query.Param("token") String token,
+                          @org.springframework.data.repository.query.Param("password") String password,
+                          @org.springframework.data.repository.query.Param("now") java.time.LocalDateTime now);
+
 }

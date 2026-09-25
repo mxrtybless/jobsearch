@@ -72,13 +72,21 @@ public class User implements UserDetails {
             nullable = false,
             length = 255
     )
+    @ToString.Exclude
     private String password;
 
     @Column(
             name = "reset_password_token",
             length = 255
     )
+    @JsonIgnore
+    @ToString.Exclude
     private String resetPasswordToken;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @Column(name = "reset_password_expires_at")
+    private java.time.LocalDateTime resetPasswordExpiresAt;
 
     @Column(
             name = "phone_number",

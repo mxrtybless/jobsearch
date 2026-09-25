@@ -129,117 +129,67 @@ public class AuthController {
         return "redirect:/vacancies";
     }
 
+    private final kg.attractor.jobsearch.service.PasswordRecoveryService recoveryService;
+
+    @org.springframework.beans.factory.annotation.Value("${jobsearch.recovery.demo:false}")
+    private boolean recoveryDemo;
+
     @GetMapping("forgot_password")
-    public String showForgotPasswordForm() {
+    public String showForgotPasswordForm(Model model) {
+        model.addAttribute("recovery", new kg.attractor.jobsearch.dto.PasswordRecoveryDto());
+        model.addAttribute("demo", recoveryDemo);
         return "auth/forgot_password_form";
     }
 
     @PostMapping("forgot_password")
     public String processForgotPassword(
-            HttpServletRequest request,
-            Model model
-    ) {
-        try {
-            userService.makeResetPasswdLink(
-                    request
-            );
-
-            model.addAttribute(
-                    "messageKey",
-                    "auth.forgot.success"
-            );
-        } catch (
-                UsernameNotFoundException e
-        ) {
-            model.addAttribute(
-                    "errorKey",
-                    "auth.forgot.error.userNotFound"
-            );
-        } catch (
-                UnsupportedEncodingException e
-        ) {
-            model.addAttribute(
-                    "errorKey",
-                    "auth.forgot.error.processing"
-            );
-        } catch (
-                MessagingException e
-        ) {
-            model.addAttribute(
-                    "errorKey",
-                    "auth.forgot.error.email"
-            );
+            @Valid @ModelAttribute("recovery") kg.attractor.jobsearch.dto.PasswordRecoveryDto form,
+            BindingResult errors, HttpServletRequest request, Model model) {
+        model.addAttribute("demo", recoveryDemo);
+        if (errors.hasErrors()) {
+            model.addAttribute("invalidEmail", true);
+            return "auth/forgot_password_form";
         }
-
+        if (recoveryDemo) {
+            String token = recoveryService.issue(form.getEmail());
+            if (token != null) model.addAttribute("demoToken", token);
+            else model.addAttribute("errorKey", "auth.forgot.error.userNotFound");
+            return "auth/forgot_password_form";
+        }
+        try {
+            userService.makeResetPasswdLink(request);
+            model.addAttribute("messageKey", "auth.forgot.success");
+        } catch (UsernameNotFoundException e) {
+            model.addAttribute("messageKey", "auth.forgot.success");
+        } catch (UnsupportedEncodingException | MessagingException e) {
+            model.addAttribute("errorKey", "auth.forgot.error.email");
+        }
         return "auth/forgot_password_form";
     }
 
     @GetMapping("reset_password")
-    public String showResetPasswordForm(
-            @RequestParam String token,
-            Model model
-    ) {
-        try {
-            userService.getByResetPasswordToken(
-                    token
-            );
-
-            model.addAttribute(
-                    "token",
-                    token
-            );
-        } catch (
-                UsernameNotFoundException e
-        ) {
-            model.addAttribute(
-                    "errorKey",
-                    "auth.reset.error.invalidLink"
-            );
-        }
-
+    public String showResetPasswordForm(@RequestParam(required = false) String token, Model model) {
+        var form = new kg.attractor.jobsearch.dto.PasswordResetDto();
+        form.setToken(token);
+        model.addAttribute("passwordResetDto", form);
+        if (!recoveryService.valid(token)) model.addAttribute("invalidToken", true);
         return "auth/reset_password_form";
     }
 
     @PostMapping("reset_password")
     public String processResetPassword(
-            HttpServletRequest request,
-            Model model
-    ) {
-        String token =
-                request.getParameter(
-                        "token"
-                );
-
-        String password =
-                request.getParameter(
-                        "password"
-                );
-
-        try {
-            User user =
-                    userService
-                            .getByResetPasswordToken(
-                                    token
-                            );
-
-            userService.updatePassword(
-                    user,
-                    password
-            );
-
-            model.addAttribute(
-                    "messageKey",
-                    "auth.reset.success"
-            );
-        } catch (
-                UsernameNotFoundException e
-        ) {
-            model.addAttribute(
-                    "messageKey",
-                    "auth.reset.error.invalidToken"
-            );
+            @Valid @ModelAttribute("passwordResetDto") kg.attractor.jobsearch.dto.PasswordResetDto form,
+            BindingResult errors, Model model) {
+        if (!recoveryService.valid(form.getToken())) {
+            model.addAttribute("invalidToken", true);
+            return "auth/reset_password_form";
         }
-
+        if (errors.hasErrors()) return "auth/reset_password_form";
+        if (!recoveryService.reset(form.getToken(), form.getPassword())) {
+            model.addAttribute("invalidToken", true);
+            return "auth/reset_password_form";
+        }
+        model.addAttribute("messageKey", "auth.reset.success");
         return "message";
     }
 

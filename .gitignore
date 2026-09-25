@@ -18,7 +18,6 @@ target/
 *.iws
 *.iml
 *.ipr
-.gitignore
 *.class
 /db/
 /data/
@@ -35,3 +34,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+.env
+.env.*
+!.env.example

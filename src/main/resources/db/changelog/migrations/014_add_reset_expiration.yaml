@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-add-reset-expiration
+      author: mxrty
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: reset_password_expires_at
+                  type: timestamp

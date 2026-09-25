@@ -9,7 +9,7 @@
 <#assign passwordPlaceholder =
         springMacroRequestContext.getMessage(
                 "auth.login.password.placeholder"
-        )?markup_string>
+        )>
 
 
 <@layout.layout title=pageTitle>

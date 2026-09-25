@@ -305,6 +305,7 @@ public class UserServiceImpl
 
         user.setPassword(encodedPassword);
         user.setResetPasswordToken(null);
+        user.setResetPasswordExpiresAt(null);
         userRepository.saveAndFlush(user);
     }
 
@@ -353,6 +354,7 @@ public class UserServiceImpl
                         );
 
         user.setResetPasswordToken(token);
+        user.setResetPasswordExpiresAt(java.time.LocalDateTime.now().plusMinutes(30));
         userRepository.saveAndFlush(user);
     }
 

@@ -163,6 +163,7 @@
         </nav>
 
         <main class="container pb-5">
+            <#if authenticated><div class="mb-3"><a href="/responses">${.locale?starts_with("en")?then("My responses", "Мои отклики")}</a></div></#if>
             <#nested>
         </main>
     </body>
