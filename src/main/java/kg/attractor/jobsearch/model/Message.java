@@ -53,4 +53,12 @@ public class Message {
             nullable = false
     )
     private LocalDateTime timestamp;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id")
+    private User sender;
+
 }
