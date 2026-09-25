@@ -127,4 +127,92 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
     List<Vacancy> findRespondedByApplicantId(
             @Param("applicantId") Integer applicantId
     );
+
+    @Query(value = """
+select v from Vacancy v
+
+            where v.isActive = true
+              and locate(lower(:name), lower(v.name)) > 0
+              and (:category is null or v.category.id = :category)
+              and (:salary is null or v.salary >= :salary)
+              and (:experience is null or
+                   (v.expFrom <= :experience and v.expTo >= :experience))
+""", countQuery = """
+select count(v) from Vacancy v
+
+            where v.isActive = true
+              and locate(lower(:name), lower(v.name)) > 0
+              and (:category is null or v.category.id = :category)
+              and (:salary is null or v.salary >= :salary)
+              and (:experience is null or
+                   (v.expFrom <= :experience and v.expTo >= :experience))
+""")
+    Page<Vacancy> searchActive(
+            @Param("name") String name,
+            @Param("category") Integer category,
+            @Param("salary") java.math.BigDecimal salary,
+            @Param("experience") Integer experience,
+            Pageable pageable
+    );
+
+    @Query(value = """
+select v from Vacancy v
+left join v.responses r
+
+            where v.isActive = true
+              and locate(lower(:name), lower(v.name)) > 0
+              and (:category is null or v.category.id = :category)
+              and (:salary is null or v.salary >= :salary)
+              and (:experience is null or
+                   (v.expFrom <= :experience and v.expTo >= :experience))
+group by v order by count(r) desc, v.updateTime desc, v.id desc
+""", countQuery = """
+select count(v) from Vacancy v
+
+            where v.isActive = true
+              and locate(lower(:name), lower(v.name)) > 0
+              and (:category is null or v.category.id = :category)
+              and (:salary is null or v.salary >= :salary)
+              and (:experience is null or
+                   (v.expFrom <= :experience and v.expTo >= :experience))
+""")
+    Page<Vacancy> searchActiveResponsesDesc(
+            @Param("name") String name,
+            @Param("category") Integer category,
+            @Param("salary") java.math.BigDecimal salary,
+            @Param("experience") Integer experience,
+            Pageable pageable
+    );
+
+    @Query(value = """
+select v from Vacancy v
+left join v.responses r
+
+            where v.isActive = true
+              and locate(lower(:name), lower(v.name)) > 0
+              and (:category is null or v.category.id = :category)
+              and (:salary is null or v.salary >= :salary)
+              and (:experience is null or
+                   (v.expFrom <= :experience and v.expTo >= :experience))
+group by v order by count(r) asc, v.updateTime desc, v.id desc
+""", countQuery = """
+select count(v) from Vacancy v
+
+            where v.isActive = true
+              and locate(lower(:name), lower(v.name)) > 0
+              and (:category is null or v.category.id = :category)
+              and (:salary is null or v.salary >= :salary)
+              and (:experience is null or
+                   (v.expFrom <= :experience and v.expTo >= :experience))
+""")
+    Page<Vacancy> searchActiveResponsesAsc(
+            @Param("name") String name,
+            @Param("category") Integer category,
+            @Param("salary") java.math.BigDecimal salary,
+            @Param("experience") Integer experience,
+            Pageable pageable
+    );
+
+    java.util.List<Vacancy> findByAuthor_IdAndIsActiveTrueOrderByUpdateTimeDesc(Integer authorId);
+
 }

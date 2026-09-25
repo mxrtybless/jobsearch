@@ -1,257 +1,87 @@
-(function () {
-    "use strict";
-
-    const STORAGE_KEY = "jobsearch.vacancy.filter";
-
+document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("vacancy-filter-form");
+    if (!form) return;
+    const key = "jobsearch.vacancy.filter";
+    const names = ["name", "category", "salary", "experience", "sort"];
+    const results = document.getElementById("vacancy-results");
+    const error = document.getElementById("search-error");
+    let timer;
+    let version = 0;
 
-    if (!form) {
-        return;
+    function state() {
+        const value = {};
+        names.forEach(name => value[name] = form.elements[name].value);
+        return value;
     }
 
-    const fields = {
-        name: document.getElementById("vacancy-name-filter"),
-        category: document.getElementById("vacancy-category-filter"),
-        salary: document.getElementById("vacancy-salary-filter"),
-        experience: document.getElementById("vacancy-experience-filter")
-    };
+    function save() {
+        try { localStorage.setItem(key, JSON.stringify(state())); } catch (e) {}
+    }
 
-    const resetButton =
-        document.getElementById("vacancy-filter-reset");
-
-    const resultCount =
-        document.getElementById("vacancy-filter-result-count");
-
-    const emptyMessage =
-        document.getElementById("vacancy-filter-empty");
-
-    function readState() {
+    async function search(page) {
+        clearTimeout(timer);
+        const requestVersion = ++version;
+        if (!form.reportValidity()) {
+            results.removeAttribute("aria-busy");
+            return;
+        }
+        save();
+        const params = new URLSearchParams(state());
+        params.set("page", String(page));
+        const lang = new URL(window.location.href).searchParams.get("lang");
+        if (lang) params.set("lang", lang);
+        results.setAttribute("aria-busy", "true");
+        error.classList.add("d-none");
         try {
-            const savedState = localStorage.getItem(STORAGE_KEY);
-
-            if (!savedState) {
-                return {};
-            }
-
-            return JSON.parse(savedState) || {};
-        } catch (error) {
-            return {};
+            const response = await fetch("/vacancies/filter?" + params.toString());
+            if (!response.ok) throw new Error("Search failed");
+            const html = await response.text();
+            if (requestVersion !== version) return;
+            results.innerHTML = html;
+            history.replaceState(null, "", "/vacancies?" + params.toString());
+        } catch (e) {
+            if (requestVersion === version) error.classList.remove("d-none");
+        } finally {
+            if (requestVersion === version) results.removeAttribute("aria-busy");
         }
     }
 
-    function saveState(state) {
-        try {
-            localStorage.setItem(
-                STORAGE_KEY,
-                JSON.stringify(state)
-            );
-        } catch (error) {
-        }
-    }
-
-    function getStateFromForm() {
-        return {
-            name: fields.name.value.trim().toLowerCase(),
-            category: fields.category.value,
-            salary: fields.salary.value.trim(),
-            experience: fields.experience.value.trim()
-        };
-    }
-
-    function restoreState() {
-        const state = readState();
-
-        fields.name.value = state.name || "";
-        fields.category.value = state.category || "";
-        fields.salary.value = state.salary || "";
-        fields.experience.value = state.experience || "";
-    }
-
-    function parseNumber(value) {
-        if (value === null || value === undefined) {
-            return null;
-        }
-
-        const normalizedValue = String(value).trim();
-
-        if (!normalizedValue) {
-            return null;
-        }
-
-        const number = Number(normalizedValue);
-
-        return Number.isFinite(number)
-                ? number
-                : null;
-    }
-
-    function vacancyMatches(card, state) {
-        const vacancyName =
-                (card.dataset.vacancyName || "").toLowerCase();
-
-        if (
-                state.name
-                && !vacancyName.includes(state.name)
-        ) {
-            return false;
-        }
-
-        if (
-                state.category
-                && card.dataset.vacancyCategory !== state.category
-        ) {
-            return false;
-        }
-
-        const minimumSalary =
-                parseNumber(state.salary);
-
-        if (minimumSalary !== null) {
-            const vacancySalary =
-                    parseNumber(card.dataset.vacancySalary);
-
-            if (
-                    vacancySalary === null
-                    || vacancySalary < minimumSalary
-            ) {
-                return false;
-            }
-        }
-
-        const candidateExperience =
-                parseNumber(state.experience);
-
-        if (candidateExperience !== null) {
-            const experienceFrom =
-                    parseNumber(card.dataset.vacancyExpFrom);
-
-            const experienceTo =
-                    parseNumber(card.dataset.vacancyExpTo);
-
-            if (
-                    experienceFrom === null
-                    || experienceTo === null
-                    || candidateExperience < experienceFrom
-                    || candidateExperience > experienceTo
-            ) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    function applyFilter(saveCurrentState) {
-        const state = getStateFromForm();
-        const cards = document.querySelectorAll(".vacancy-card");
-
-        if (saveCurrentState) {
-            saveState(state);
-        }
-
-        let visibleCount = 0;
-
-        cards.forEach(function (card) {
-            const matches = vacancyMatches(card, state);
-
-            card.classList.toggle("d-none", !matches);
-            card.classList.toggle(
-                    "vacancy-card-hidden",
-                    !matches
-            );
-
-            if (matches) {
-                visibleCount += 1;
-            }
-        });
-
-        if (resultCount) {
-            resultCount.textContent =
-                    visibleCount + " / " + cards.length;
-        }
-
-        if (emptyMessage) {
-            emptyMessage.classList.toggle(
-                    "d-none",
-                    cards.length === 0 || visibleCount > 0
-            );
-        }
-    }
-
-    function saveCurrentFilter() {
-        saveState(getStateFromForm());
-    }
-
-    form.addEventListener("input", function () {
-        applyFilter(true);
-    });
-
-    form.addEventListener("change", function () {
-        applyFilter(true);
-    });
-
-    form.addEventListener("submit", function (event) {
+    form.addEventListener("submit", event => {
         event.preventDefault();
-        applyFilter(true);
+        search(1);
+    });
+    form.addEventListener("input", () => {
+        ++version;
+        clearTimeout(timer);
+        timer = setTimeout(() => search(1), 300);
+    });
+    form.addEventListener("change", () => search(1));
+    results.addEventListener("click", event => {
+        const link = event.target.closest("a[data-page]");
+        if (!link) return;
+        event.preventDefault();
+        search(Number(link.dataset.page));
+    });
+    document.getElementById("vacancy-filter-reset").addEventListener("click", () => {
+        names.forEach(name => form.elements[name].value = name === "sort" ? "dateDesc" : "");
+        search(1);
     });
 
-    if (resetButton) {
-        resetButton.addEventListener("click", function () {
-            form.reset();
-
-            try {
-                localStorage.removeItem(STORAGE_KEY);
-            } catch (error) {
-            }
-
-            applyFilter(true);
-        });
-    }
-
-    document
-            .querySelectorAll('form[action="/vacancies"]')
-            .forEach(function (sortForm) {
-                sortForm.addEventListener(
-                        "submit",
-                        saveCurrentFilter
-                );
-            });
-
-    document
-            .querySelectorAll('a[href^="/vacancies?"]')
-            .forEach(function (link) {
-                link.addEventListener(
-                        "click",
-                        saveCurrentFilter
-                );
-            });
-
-    window.addEventListener(
-            "pagehide",
-            saveCurrentFilter
-    );
-
-    window.addEventListener(
-            "pageshow",
-            function () {
-                restoreState();
-                applyFilter(false);
-            }
-    );
-
-    window.addEventListener(
-            "storage",
-            function (event) {
-                if (
-                        event.key === STORAGE_KEY
-                        || event.key === null
-                ) {
-                    restoreState();
-                    applyFilter(false);
+    const url = new URL(window.location.href);
+    if (!names.some(name => url.searchParams.has(name))) {
+        try {
+            const saved = JSON.parse(localStorage.getItem(key));
+            if (saved && typeof saved === "object" && !Array.isArray(saved)) {
+                names.forEach(name => {
+                    if (typeof saved[name] === "string") form.elements[name].value = saved[name];
+                });
+                if (!form.elements.sort.value) form.elements.sort.value = "dateDesc";
+                if (form.checkValidity()) search(1);
+                else {
+                    names.forEach(name => form.elements[name].value = name === "sort" ? "dateDesc" : "");
+                    search(1);
                 }
             }
-    );
-
-    restoreState();
-    applyFilter(false);
-})();
+        } catch (e) {}
+    } else save();
+});

@@ -29,22 +29,38 @@ public class VacancyPageController {
     private final CategoryService categoryService;
     private final UserService userService;
 
+    private final kg.attractor.jobsearch.service.VacancySearchService vacancySearchService;
+
     @GetMapping
     public String getVacancyList(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "dateDesc") String sort,
-            Model model
+            @Valid @ModelAttribute("filter") kg.attractor.jobsearch.dto.VacancyFilterDto filter,
+            BindingResult errors, Model model
     ) {
-        Page<VacancyDto> vacancyPage =
-                vacancyService.findAllActive(page, 6, sort);
-
-        model.addAttribute("vacancies", vacancyPage.getContent());
+        addSearchData(filter, errors, model);
         model.addAttribute("categories", categoryService.findAll());
-        model.addAttribute("currentPage", vacancyPage.getNumber() + 1);
-        model.addAttribute("totalPages", vacancyPage.getTotalPages());
-        model.addAttribute("sort", sort);
-
         return "vacancies/list";
+    }
+
+    @GetMapping("filter")
+    public String filterVacancies(
+            @Valid @ModelAttribute("filter") kg.attractor.jobsearch.dto.VacancyFilterDto filter,
+            BindingResult errors, Model model
+    ) {
+        addSearchData(filter, errors, model);
+        return "vacancies/results";
+    }
+
+    private void addSearchData(kg.attractor.jobsearch.dto.VacancyFilterDto filter,
+                               BindingResult errors, Model model) {
+        if (errors.hasErrors()) {
+            model.addAttribute("filterInvalid", true);
+            return;
+        }
+        var result = vacancySearchService.search(filter);
+        model.addAttribute("vacancies", result.getContent());
+        model.addAttribute("currentPage", result.getNumber() + 1);
+        model.addAttribute("totalPages", result.getTotalPages());
+        model.addAttribute("totalElements", result.getTotalElements());
     }
 
     @GetMapping("{id}")
