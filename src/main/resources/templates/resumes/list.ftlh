@@ -1,156 +1,30 @@
 <#import "../layout.ftlh" as layout>
-<#import "/spring.ftl" as spring>
-
-<#assign pageTitle =
-        springMacroRequestContext.getMessage(
-                "resume.list.title"
-        )>
-
-<@layout.layout title=pageTitle>
-
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
-
-        <div>
-
-            <h1 class="h2 mb-2">
-                <@spring.message 'resume.list.heading'/>
-            </h1>
-
-            <p class="text-secondary mb-0">
-                <@spring.message 'resume.list.description'/>
-            </p>
-
-        </div>
-
-
-        <form
-                method="get"
-                action="/resumes"
-                class="d-flex gap-2">
-
-            <select
-                    class="form-select"
-                    name="sort"
-                    onchange="this.form.submit()">
-
-                <option
-                        value="dateDesc"
-                        <#if (sort!"dateDesc") == "dateDesc">
-                            selected
-                        </#if>>
-                    <@spring.message 'resume.sort.dateDesc'/>
-                </option>
-
-                <option
-                        value="dateAsc"
-                        <#if (sort!"dateDesc") == "dateAsc">
-                            selected
-                        </#if>>
-                    <@spring.message 'resume.sort.dateAsc'/>
-                </option>
-
-                <option
-                        value="responsesDesc"
-                        <#if (sort!"dateDesc") == "responsesDesc">
-                            selected
-                        </#if>>
-                    <@spring.message 'resume.sort.responsesDesc'/>
-                </option>
-
-                <option
-                        value="responsesAsc"
-                        <#if (sort!"dateDesc") == "responsesAsc">
-                            selected
-                        </#if>>
-                    <@spring.message 'resume.sort.responsesAsc'/>
-                </option>
-
-            </select>
-
-            <input
-                    type="hidden"
-                    name="page"
-                    value="1">
-
-        </form>
-
-    </div>
-
-
-    <#if resumes?? && resumes?size gt 0>
-
-        <div class="d-flex flex-column gap-3">
-
-            <#list resumes as resume>
-
-                <div class="card border-0 shadow-sm">
-
-                    <div class="card-body p-4">
-
-                        <h2 class="h4">
-                            ${resume.name!}
-                        </h2>
-
-
-                        <p class="mb-2">
-
-                            <strong>
-                                <@spring.message 'resume.salary'/>:
-                            </strong>
-
-                            ${resume.salary!}
-
-                        </p>
-
-
-                        <p class="mb-2">
-
-                            <strong>
-                                <@spring.message 'resume.category'/>:
-                            </strong>
-
-                            ${resume.categoryId!}
-
-                        </p>
-
-
-                        <p class="mb-0 text-secondary small">
-
-                            <@spring.message 'resume.updated'/>:
-
-                            <#if resume.updateTime??>
-                                ${resume.updateTime}
-                            <#elseif resume.createdDate??>
-                                ${resume.createdDate}
-                            <#else>
-                                —
-                            </#if>
-
-                        </p>
-
-                    </div>
-
-                </div>
-
+<#assign en = .locale?starts_with("en")>
+<@layout.layout title=en?then("Resumes", "Резюме")>
+    <h1>${en?then("Resumes", "Резюме")}</h1>
+    <form action="/resumes" class="d-flex gap-2 my-3">
+        <select name="category" class="form-select" aria-label="${en?then('Category', 'Категория')}">
+            <option value="">${en?then("All categories", "Все категории")}</option>
+            <#list categories as item><option value="${item.id?c}" <#if category?? && category == item.id>selected</#if>>${item.name}</option></#list>
+        </select>
+        <select name="sort" class="form-select" aria-label="${en?then('Sort', 'Сортировка')}">
+            <#list ["dateDesc", "dateAsc", "responsesDesc", "responsesAsc"] as order>
+                <option value="${order}" <#if sort == order>selected</#if>>${springMacroRequestContext.getMessage("resume.sort." + order)}</option>
             </#list>
-
-        </div>
-
-
-    <#else>
-
-        <div class="alert alert-light">
-            <@spring.message 'resume.list.empty'/>
-        </div>
-
-    </#if>
-
-
-    <@layout.pagination
-            currentPage=currentPage!1
-            totalPages=totalPages!0
-            baseUrl="/resumes"
-            sort=sort!"dateDesc"
-            hasContent=(resumes?? && resumes?size gt 0)/>
-
+        </select>
+        <button class="btn btn-primary">${en?then("Search", "Найти")}</button>
+    </form>
+    <#list resumes as resume>
+        <article class="card card-body mb-3">
+            <h2 class="h4"><a href="/resumes/${resume.id?c}">${resume.name}</a></h2>
+            <p>${resume.applicant.name} ${resume.applicant.surname!}</p>
+            <p>${resume.category.name} · ${resume.salary!}</p>
+            <small>${resume.updateTime!}</small>
+        </article>
+    <#else><p>${en?then("No resumes found.", "Резюме не найдены.")}</p></#list>
+    <nav class="d-flex gap-3">
+        <#if currentPage gt 1><a href="/resumes?page=${(currentPage-1)?c}&sort=${sort?url('UTF-8')}&category=<#if category??>${category?c}</#if>">${en?then("Previous", "Назад")}</a></#if>
+        <span>${currentPage?c} / ${[1,totalPages]?max?c}</span>
+        <#if currentPage lt totalPages><a href="/resumes?page=${(currentPage+1)?c}&sort=${sort?url('UTF-8')}&category=<#if category??>${category?c}</#if>">${en?then("Next", "Вперёд")}</a></#if>
+    </nav>
 </@layout.layout>

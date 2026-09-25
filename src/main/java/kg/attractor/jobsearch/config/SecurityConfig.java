@@ -218,6 +218,9 @@ public class SecurityConfig {
                                         "ROLE_EMPLOYER"
                                 )
 
+                                .requestMatchers("/applicants/**")
+                                .hasAnyAuthority("EMPLOYER", "ROLE_EMPLOYER")
+
                                 .anyRequest()
                                 .authenticated()
                 );

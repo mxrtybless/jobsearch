@@ -78,4 +78,25 @@ public interface ResumeRepository extends JpaRepository<Resume, Integer> {
             @Param("applicantId") Integer applicantId,
             Pageable pageable
     );
+
+    Page<Resume> findByIsActiveTrueAndCategory_Id(Integer categoryId, Pageable pageable);
+    List<Resume> findByApplicant_IdAndIsActiveTrueOrderByUpdateTimeDesc(Integer applicantId);
+    Page<Resume> findByApplicant_IdAndIsActiveTrue(Integer applicantId, Pageable pageable);
+
+
+    @Query(value = """
+            select r from Resume r left join r.responses response
+            where r.isActive = true and (:category is null or r.category.id = :category)
+            group by r order by count(response) asc, r.updateTime desc, r.id desc
+            """, countQuery = "select count(r) from Resume r where r.isActive = true and (:category is null or r.category.id = :category)")
+    Page<Resume> findFilteredByResponsesAsc(@Param("category") Integer category, Pageable pageable);
+
+
+    @Query(value = """
+            select r from Resume r left join r.responses response
+            where r.isActive = true and (:category is null or r.category.id = :category)
+            group by r order by count(response) desc, r.updateTime desc, r.id desc
+            """, countQuery = "select count(r) from Resume r where r.isActive = true and (:category is null or r.category.id = :category)")
+    Page<Resume> findFilteredByResponsesDesc(@Param("category") Integer category, Pageable pageable);
+
 }

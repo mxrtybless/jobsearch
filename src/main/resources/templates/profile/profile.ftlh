@@ -255,7 +255,7 @@
                                 <div class="d-flex justify-content-between gap-2">
 
                                     <h3 class="h5">
-                                        ${resume.name!}
+                                        <a href="/resumes/${resume.id?c}">${resume.name!}</a>
                                     </h3>
 
 
@@ -371,7 +371,8 @@
                                 <div class="d-flex justify-content-between gap-2">
 
                                     <h3 class="h5">
-                                        ${vacancy.name!}
+                                        <a href="/vacancies/${vacancy.id?c}">${vacancy.name!}</a>
+                                        <a class="small d-block" href="/responses?vacancyId=${vacancy.id?c}">${.locale?starts_with("en")?then("Responses", "Отклики")}</a>
                                     </h3>
 
 

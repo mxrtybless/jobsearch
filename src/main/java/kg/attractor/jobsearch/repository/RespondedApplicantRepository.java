@@ -25,4 +25,16 @@ public interface RespondedApplicantRepository
             @Param("vacancyId")
             Integer vacancyId
     );
+
+    java.util.Optional<RespondedApplicant> findByResume_IdAndVacancy_Id(Integer resumeId, Integer vacancyId);
+
+    @Query("""
+            select r from RespondedApplicant r
+            where (r.resume.applicant.id = :userId or r.vacancy.author.id = :userId)
+              and (:vacancyId is null or r.vacancy.id = :vacancyId)
+            order by r.id desc
+            """)
+    List<RespondedApplicant> findDiscussions(@Param("userId") Integer userId,
+                                             @Param("vacancyId") Integer vacancyId);
+
 }

@@ -39,21 +39,28 @@ public class ResumePageController {
     private final CategoryService categoryService;
     private final ContactTypeService contactTypeService;
 
+    private final kg.attractor.jobsearch.service.DiscussionService discussionService;
+
     @GetMapping
-    public String getResumeList(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "dateDesc") String sort,
-            Model model
-    ) {
-        Page<ResumeDto> resumePage =
-                resumeService.findAllActive(page, 6, sort);
-
-        model.addAttribute("resumes", resumePage.getContent());
-        model.addAttribute("currentPage", resumePage.getNumber() + 1);
-        model.addAttribute("totalPages", resumePage.getTotalPages());
+    public String getResumeList(@RequestParam(defaultValue = "1") int page,
+                                @RequestParam(required = false) Integer category,
+                                @RequestParam(defaultValue = "dateDesc") String sort,
+                                Model model) {
+        var result = discussionService.resumes(category, page, sort);
         model.addAttribute("sort", sort);
-
+        model.addAttribute("resumes", result.getContent());
+        model.addAttribute("currentPage", result.getNumber() + 1);
+        model.addAttribute("totalPages", result.getTotalPages());
+        model.addAttribute("categories", categoryService.findAll());
+        model.addAttribute("category", category);
         return "resumes/list";
+    }
+
+    @GetMapping("{id}")
+    public String details(@PathVariable Integer id, Authentication authentication, Model model) {
+        model.addAttribute("resume", discussionService.resume(id, authentication.getName()));
+        model.addAttribute("ownVacancies", discussionService.ownVacancies(authentication.getName()));
+        return "resumes/details";
     }
 
     @GetMapping("form/create")
